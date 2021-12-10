@@ -4988,6 +4988,12 @@ int gcd(int a,int b){//前提 a大，b小
 }
 ```
 
+```java
+int gcd(int m, int n) {
+    return m % n == 0 ? n : gcd(n, m % n);
+}
+```
+
 
 
 ### 大整数运算
