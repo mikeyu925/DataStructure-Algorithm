@@ -271,3 +271,99 @@ class Solution {
 }
 ```
 
+
+
+
+
+#### 第八剑式：在排序数组中查找数字
+
+> 题目来源：LeetCode 剑指 Offer 53-I
+
+统计一个数字在排序数组中出现的次数。
+
+```
+输入: nums = [5,7,7,8,8,10], target = 8
+输出: 2
+```
+
+采用看到有序+查找，就想到二分法。采用基本二分法套路找到目标值，然后再向两边扩散查找。
+
+```java
+class Solution {
+    public int search(int[] nums, int target) {
+        int left  = 0,right = nums.length-1;
+        int cnt = 0;
+        while(left <= right){
+            int mid = left + ((right - left) >> 1);
+            if(nums[mid] == target){
+                cnt += 1;
+                int tmp = mid-1;
+                while(tmp >= 0 && nums[tmp] == target){
+                    cnt += 1;
+                    tmp -= 1;
+                }
+                tmp = mid + 1;
+                while(tmp < nums.length && nums[tmp] == target){
+                    cnt += 1;
+                    tmp += 1;
+                }
+                return cnt;
+            }else if(nums[mid] < target){
+                left = mid + 1;
+            }else{
+                right = mid - 1;
+            }
+        }
+        return 0;
+    }
+}
+```
+
+
+
+#### 第九剑式：0～n-1中缺失的数字
+
+> 题目来源：LeetCode 剑指 Offer 53-II
+
+一个长度为n-1的递增排序数组中的所有数字都是唯一的，并且每个数字都在范围0～n-1之内。在范围0～n-1内的n个数字中有且只有一个数字不在该数组中，请找出这个数字。
+
+```
+输入: [0,1,2,3,4,5,6,7,9]
+输出: 8
+```
+
+**题目解析：**
+
+看到`有序+查找`先想下能不能 二分查找 的思路，由题知，在缺失数字之前的所有数字与自己对应的索引相等，即`nums[i] == i`，在缺失数字之后的所有数字与自己对应的索引下标不相等，即`nums[i] != i`。
+
+因此我们可以用二分查找算法找到第一个数字与下标对应不等的位置。以示例为例子：
+
+```
+索引:  0 1 2 3 4 5 6 7 8 9
+元素: [0,1,2,3,4,5,6,7,9,10]
+===> 第一个元素与下标不对应的下标即为答案，即 8
+```
+
+**二分查找方法**：
+
+将数组划分为两个区域，左区域的数组与下标相等，右区域的数字与下标不等
+
+当`left <= right`时继续查找`计算mid = (left + right)/2`，如果`nums[mid] == mid`，说明在左区域，使得`left = mid + 1`，如果`nums[mid ] != mid `，说明在右区域，使得`right = mid - 1`。
+
+最终不符合`left <= right`时，left 的值就是结果。
+
+```java
+    public int missingNumber(int[] nums) {
+        int left = 0,right = nums.length-1;
+        while(left <= right){
+            int mid = left + ((right - left) >> 1);
+            if(nums[mid] == mid){
+                left = mid + 1;
+            }else{
+                right = mid - 1;
+            }
+        }
+        return left;
+    }
+```
+
