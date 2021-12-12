@@ -367,3 +367,108 @@ class Solution {
     }
 ```
 
+
+
+
+
+#### 第十剑式：二维数组中的查找
+
+> 题目来源：LeetCode 剑指 Offer 04
+
+在一个 n * m 的二维数组中，每一行都按照从左到右递增的顺序排序，每一列都按照从上到下递增的顺序排序。请完成一个高效的函数，输入这样的一个二维数组和一个整数，判断数组中是否含有该整数。
+
+```
+示例:
+现有矩阵 matrix 如下：
+[
+  [1,   4,  7, 11, 15],
+  [2,   5,  8, 12, 19],
+  [3,   6,  9, 16, 22],
+  [10, 13, 14, 17, 24],
+  [18, 21, 23, 26, 30]
+]
+```
+
+
+
+从二维数组的右上角开始查找。如果当前元素等于目标值，则返回 `true`。如果当前元素大于目标值，则移到左边一列。如果当前元素小于目标值，则移到下边一行。
+
+```java
+class Solution {
+    public boolean findNumberIn2DArray(int[][] matrix, int target) {
+        if(matrix == null || matrix.length == 0) return false;
+        int row = 0,col = matrix[0].length-1;
+        while(row < matrix.length && col >= 0){
+            if(matrix[row][col] == target) return true;
+            else if(matrix[row][col] > target) col -= 1;
+            else row += 1;
+        }
+        return  false;
+    }
+}
+```
+
+
+
+#### 第十一剑式：旋转数组的最小数字
+
+> 题目来源：LeetCode 剑指 Offer 11
+
+把一个数组最开始的若干个元素搬到数组的末尾，我们称之为数组的旋转。
+
+给你一个可能存在 重复 元素值的数组 numbers ，它原来是一个升序排列的数组，并按上述情形进行了一次旋转。请返回旋转数组的最小元素。例如，数组 [3,4,5,1,2] 为 [1,2,3,4,5] 的一次旋转，该数组的最小值为1。  
+
+```java
+class Solution {
+    public int minArray(int[] numbers) {
+        int left = 0, right = numbers.length - 1;
+        while (left < right){
+            int mid = left + ((right - left) >> 1);
+            if(numbers[mid] < numbers[right]){
+                right = mid;
+            }else if(numbers[mid] > numbers[right]){
+                left = mid + 1;
+            }else{
+                right -= 1;
+            }
+        }
+        return numbers[left];
+    }
+}
+```
+
+#### 第十二剑式：第一个只出现一次的字符
+
+> 题目来源：LeetCode 剑指 Offer 50
+
+在字符串 s 中找出第一个只出现一次的字符。如果没有，返回一个单空格。 s 只包含小写字母。
+
+```
+输入：s = "abaccdeff"
+输出：'b'
+```
+
+方法一：哈希表 + 遍历
+
+```java
+class Solution {
+    public char firstUniqChar(String s) {
+        Map<Character,Integer> m = new HashMap<>();
+        for(int i = 0;i < s.length();i++){
+            if(m.get(s.charAt(i)) == null){
+                m.put(s.charAt(i),1);
+            }else{
+                int cnt = m.get(s.charAt(i));
+                m.put(s.charAt(i),cnt+1);
+            }
+        }
+        for(int i = 0; i < s.length();i++){
+            if(m.get(s.charAt(i)) < 2){
+                return s.charAt(i);
+            }
+        }
+        return ' ';
+    }
+}
+```
+
