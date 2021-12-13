@@ -472,3 +472,212 @@ class Solution {
 }
 ```
 
+
+
+#### 第十三剑式： 从上到下打印二叉树
+
+> 题目来源：LeetCode 剑指 Offer 32
+
+从上到下打印出二叉树的每个节点，同一层的节点按照从左到右的顺序打印。
+
+例如:
+
+    给定二叉树: [3,9,20,null,null,15,7],
+    	3
+       / \
+      9  20
+        /  \
+       15   7
+    返回：
+    [3,9,20,15,7]
+就是一个简单的层次遍历，采用BFS解决！
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+class node{
+    public int floor;
+    public TreeNode treenode;
+    public node(){
+        this.floor = 0;
+        this.treenode = null;
+    }
+    public node(int floor,TreeNode treenode){
+        this.floor = floor;
+        this.treenode = treenode;
+    }
+}
+class Solution {
+    public int[] levelOrder(TreeNode root) {
+        ArrayList<Integer> ans = new ArrayList<>();
+        if(root == null) return new int[0];
+        int cnt = 0;
+        Deque<node> dq = new ArrayDeque<>();
+        //初始化队列
+        dq.offerLast(new node(0,root));
+        while(!dq.isEmpty()){
+            int nowfloor = dq.peekFirst().floor;
+            while (!dq.isEmpty() && dq.peekFirst().floor == nowfloor){
+                node now = dq.pollFirst();
+                ans.add(now.treenode.val);
+                if(now.treenode.left != null){
+                    dq.offerLast(new node(nowfloor+1,now.treenode.left));
+                }
+                if(now.treenode.right != null){
+                    dq.offerLast(new node(nowfloor+1,now.treenode.right));
+                }
+            }
+        }
+        return ans.stream().mapToInt(Integer::valueOf).toArray();
+    }
+}
+```
+
+#### 第十四剑式： 从上到下打印二叉树 II
+
+> 题目来源：LeetCode 剑指 Offer 32.II
+
+例如:
+给定二叉树: `[3,9,20,null,null,15,7]`,
+
+```
+    3
+   / \
+  9  20
+    /  \
+   15   7
+```
+
+返回其层次遍历结果：
+
+```
+[
+  [3],
+  [9,20],
+  [15,7]
+]
+```
+
+ 换汤不换药，只是改变了返回结果的形式，直接上一个代码一改 起飞！
+
+```java
+class node{
+    public int floor;
+    public TreeNode treenode;
+    public node(){
+        this.floor = 0;
+        this.treenode = null;
+    }
+    public node(int floor,TreeNode treenode){
+        this.floor = floor;
+        this.treenode = treenode;
+    }
+}
+class Solution {
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        List<List<Integer>> ans = new ArrayList<List<Integer>>();
+        if(root == null) return ans;
+        Deque<node> dq = new ArrayDeque<>();
+        //初始化队列
+        dq.offerLast(new node(0,root));
+        while(!dq.isEmpty()){
+            int nowfloor = dq.peekFirst().floor;
+            List<Integer> vals = new ArrayList<>();
+            while (!dq.isEmpty() && dq.peekFirst().floor == nowfloor){
+                node now = dq.pollFirst();
+                vals.add(now.treenode.val);
+                if(now.treenode.left != null){
+                    dq.offerLast(new node(nowfloor+1,now.treenode.left));
+                }
+                if(now.treenode.right != null){
+                    dq.offerLast(new node(nowfloor+1,now.treenode.right));
+                }
+            }
+            ans.add(vals);
+        }
+        return ans;
+    }
+}
+```
+
+
+
+#### 第十五剑式： 从上到下打印二叉树 III
+
+> 题目来源：LeetCode 剑指 Offer 32.III
+
+请实现一个函数按照之字形顺序打印二叉树，即第一行按照从左到右的顺序打印，第二层按照从右到左的顺序打印，第三行再按照从左到右的顺序打印，其他行以此类推。
+
+例如:
+给定二叉树: `[3,9,20,null,null,15,7]`,
+
+```
+    3
+   / \
+  9  20
+    /  \
+   15   7
+```
+
+返回其层次遍历结果：
+
+```
+[
+  [3],
+  [20,9],
+  [15,7]
+]
+```
+
+```java
+class node{
+    public int floor;
+    public TreeNode treenode;
+    public node(){
+        this.floor = 0;
+        this.treenode = null;
+    }
+    public node(int floor,TreeNode treenode){
+        this.floor = floor;
+        this.treenode = treenode;
+    }
+}
+class Solution {
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        List<List<Integer>> ans = new ArrayList<List<Integer>>();
+        if(root == null) return ans;
+        Deque<node> dq = new ArrayDeque<>();
+        //初始化队列
+        dq.offerLast(new node(0,root));
+        while(!dq.isEmpty()){
+            int nowfloor = dq.peekFirst().floor;
+            LinkedList<Integer> vals = new LinkedList<>();
+            while (!dq.isEmpty() && dq.peekFirst().floor == nowfloor){
+                node now = dq.pollFirst();
+                //这点不一样咯！~~ 根据奇偶层来判断是从前插入结果还是从后插入结果
+                if(nowfloor % 2 == 0){
+                    vals.offerLast(now.treenode.val);
+                }else{
+                    vals.offerFirst(now.treenode.val);
+                }
+                if(now.treenode.left != null){
+                    dq.offerLast(new node(nowfloor+1,now.treenode.left));
+                }
+                if(now.treenode.right != null){
+                    dq.offerLast(new node(nowfloor+1,now.treenode.right));
+                }
+            }
+            ans.add(vals);
+        }
+        return ans;
+    }
+}
+```
+
