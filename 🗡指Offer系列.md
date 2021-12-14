@@ -681,3 +681,178 @@ class Solution {
 }
 ```
 
+
+
+#### 第十六剑式： 树的子结构
+
+> 题目来源：LeetCode 剑指 Offer 26
+
+输入两棵二叉树A和B，判断B是不是A的子结构。(约定空树不是任意一个树的子结构) B是A的子结构， 即 A中有出现和B相同的结构和节点值。
+
+```
+给定的树 A:
+     3
+    / \
+   4   5
+  / \
+ 1   2
+给定的树 B：
+   4 
+  /
+ 1
+返回 true，因为 B 与 A 的一个子树拥有相同的结构和节点值。
+```
+
+题目解析：
+
+首先是找到A中有没有和B根节点值相同的结点，有的话就和B一起递归深度遍历树，判断两个树是否一样。
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    //比较以A和B为根节点的树，B是否是A的子结构
+    public boolean check(TreeNode A,TreeNode B){
+        if(B == null) return true; //B是null true
+        else if(A == null && B != null) return false;//A中结点null，B有值，则false
+        else if(A.val != B.val) return false; //两个结点的值不等 false
+        else return check(A.left,B.left) && check(A.right,B.right); //继续递归比较
+    }
+    //找A中与B根节点相同的子结点
+    public boolean dfs(TreeNode A,TreeNode B){
+        //如果A是空，说明找到了底层没找到，返回false
+        if(A == null) return false;
+       	//如果找到了，开始比较B是否是A中的一个子树，是的话返回错误，不是的话则继续在A中找与B根节点相同的结点
+        if(A.val == B.val && check(A,B)) {
+            return true;
+        }//继续递归A的左右子节点寻找与B根节点相同的结点
+        else return dfs(A.left,B) || dfs(A.right,B);
+    }
+    public boolean isSubStructure(TreeNode A, TreeNode B) {
+        //根据题目要求，空树不是任意一个树的子结构，因此可以作为特殊情况直接判断
+        if (A == null || B == null) return false;
+        //深度优先搜索找A中与B根节点相同的子结点
+        return dfs(A,B);
+    }
+}
+```
+
+#### 第十七剑式： 二叉树的镜像
+
+> 题目来源：LeetCode 剑指 Offer 27
+
+请完成一个函数，输入一个二叉树，该函数输出它的镜像。
+
+```
+例如输入：
+     4
+   /   \
+  2     7
+ / \   / \
+1   3 6   9
+镜像输出：
+     4
+   /   \
+  7     2
+ / \   / \
+9   6 3   1
+输入：root = [4,2,7,1,3,6,9]
+输出：[4,7,2,9,6,3,1]
+```
+
+**题目解析**：
+
+个人感觉就是递归搜索A树的同时，创建B树的结点，将A的左节点作为B的右节点，将A的右节点作为B的左节点。
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    public void dfs(TreeNode A,TreeNode B){
+        //如果A是空结点，直接返回
+        if(A == null) return ;
+        //A 的左子树不空则创建该结点作为B的右节点，然后递归
+        if(A.left != null){
+            B.right = new TreeNode(A.left.val);
+            dfs(A.left,B.right); //注意是递归A的左 和 B的右
+        }
+        //A 的右子树不空则创建该结点作为B的左节点，然后递归
+        if(A.right != null){
+            B.left = new TreeNode(A.right.val);
+            dfs(A.right,B.left); //注意是递归A的右 和 B的左
+        }
+    }
+    public TreeNode mirrorTree(TreeNode root) {
+        //如果root空，直接返回null
+        if(root == null) return null;
+        //先创建一个根结点
+        TreeNode ans = new TreeNode(root.val);
+        dfs(root,ans);
+        return ans;
+    }
+}
+```
+
+#### 第十七剑式：对称的二叉树
+
+> 题目来源：LeetCode 剑指 Offer 28
+
+请实现一个函数，用来判断一棵二叉树是不是对称的。如果一棵二叉树和它的镜像一样，那么它是对称的。
+
+```
+例如，二叉树 [1,2,2,3,4,4,3] 是对称的。
+    1
+   / \
+  2   2
+ / \ / \
+3  4 4  3
+但是下面这个 [1,2,2,null,3,null,3] 则不是镜像对称的:
+    1
+   / \
+  2   2
+   \   \
+   3    3
+```
+
+**题目解析**：
+
+其实就是对照着示例给的这个就可以理解比如当前是结点1，将左子结点2和右子结点对比，然后递归将(1)的左子结点(2)的左子结点(3)和(1)的右子结点(2)的右子节点(3)对比，将(1)的左子结点(2)的右子结点(4)和(1)的右子结点(2)的左子节点(4)对比
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    public boolean dfs(TreeNode A,TreeNode B){
+        if(A == null && B == null) return true;
+        else if ((A == null && B != null) || (A != null && B == null)) return false;
+        else if(A.val == B.val) return dfs(A.left,B.right) && dfs(A.right,B.left);
+        else return false;
+    }
+    public boolean isSymmetric(TreeNode root) {
+        if(root == null) return true;
+        return dfs(root.left,root.right);
+    }
+}
+```
+
