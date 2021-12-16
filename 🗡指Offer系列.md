@@ -807,7 +807,7 @@ class Solution {
 }
 ```
 
-#### 第十七剑式：对称的二叉树
+#### 第十八剑式：对称的二叉树
 
 > 题目来源：LeetCode 剑指 Offer 28
 
@@ -852,6 +852,89 @@ class Solution {
     public boolean isSymmetric(TreeNode root) {
         if(root == null) return true;
         return dfs(root.left,root.right);
+    }
+}
+```
+
+
+
+#### 第十九剑式：连续子数组的最大和
+
+> 题目来源：LeetCode 剑指 Offer 42
+
+输入一个整型数组，数组中的一个或连续多个整数组成一个子数组。求所有子数组的和的最大值。
+
+要求时间复杂度为O(n)。
+
+```
+输入: nums = [-2,1,-3,4,-1,2,1,-5,4]
+输出: 6
+解释: 连续子数组 [4,-1,2,1] 的和最大，为 6。
+```
+
+题目解析：
+
+定义一个dp[]，并规定dp[i]表示以 nums[i]结尾的子数组的最大和是多少。
+
+因此，对于dp[i]，其值取决于dp[i-1]，如果`dp[i-1] + nums[i]`(即，以nums[i-1]结尾的最大和再加上当前值) 小于 `nums[i]`，那么肯定就舍去前面的`dp[i-1]`(以nums[i-1]结尾的那串连续子数组)，将`nums[i]`作为新的连续子数组的头。因此就可以推导出状态转移方程：`dp[i] = Math.max(dp[i-1]+nums[i],nums[i])`
+
+```java
+class Solution {
+    public int maxSubArray(int[] nums) {
+        int n = nums.length;
+        int[] dp = new int[n];
+        dp[0] = nums[0];
+        int ans = nums[0];
+        for(int i = 1;i < n;i++){
+            dp[i] = Math.max(dp[i-1] + nums[i],nums[i]);
+            ans = Math.max(ans,dp[i]);
+        }
+        return ans;
+    }
+}
+```
+
+#### 第二十剑式：礼物的最大价值
+
+> 题目来源：LeetCode 剑指 Offer 47
+
+在一个 m*n 的棋盘的每一格都放有一个礼物，每个礼物都有一定的价值（价值大于 0）。你可以从棋盘的左上角开始拿格子里的礼物，并每次向右或者向下移动一格、直到到达棋盘的右下角。给定一个棋盘及其上面的礼物的价值，请计算你最多能拿到多少价值的礼物？
+
+```
+输入: 
+[
+  [1,3,1],
+  [1,5,1],
+  [4,2,1]
+]
+输出: 12
+解释: 路径 1→3→5→2→1 可以拿到最多价值的礼物
+```
+
+**题目解析**：
+
+就是一个简单的动态规划问题，对于除了第一行和第一列，每个点的状态都可以由左边的点和上边的点转移过来，为了拿到最大价值的礼物，当然是选择上一个状态价值高的点来状态转移。
+
+```java
+class Solution {
+    public int maxValue(int[][] grid) {
+        if(grid == null) return 0;
+        int m = grid.length;
+        int n = grid[0].length;
+        int[][] dp = new int[m][n];
+        dp[0][0] = grid[0][0];
+        for(int i = 1;i < m;i++){
+            dp[i][0] = dp[i-1][0] + grid[i][0];
+        }
+        for(int i = 1;i < n;i++){
+            dp[0][i] = dp[0][i-1] + grid[0][i];
+        }
+        for(int i = 1;i < m;i++){
+            for (int j = 1; j < n;j++){
+                dp[i][j] = Math.max(dp[i-1][j],dp[i][j-1]) + grid[i][j];
+            }
+        }
+        return dp[m-1][n-1];
     }
 }
 ```
