@@ -939,3 +939,135 @@ class Solution {
 }
 ```
 
+
+
+#### 第二十一剑式：把数字翻译成字符串
+
+> 题目来源：LeetCode 剑指 Offer 46
+
+给定一个数字，我们按照如下规则把它翻译为字符串：0 翻译成 “a” ，1 翻译成 “b”，……，11 翻译成 “l”，……，25 翻译成 “z”。一个数字可能有多个翻译。请编程实现一个函数，用来计算一个数字有多少种不同的翻译方法。
+
+```
+输入: 12258
+输出: 5
+解释: 12258有5种不同的翻译，分别是"bccfi", "bwfi", "bczi", "mcfi"和"mzi"
+```
+
+**题目解析**：
+
+我们定义`dp[i]`表示以下标`i`结束的字符串其最多有多少种不同的方案，对于以下标为`i`的字符，其可以单独作为一个字符和前面的字符串连接，获得`dp[i-1]`种方案，同样，它还能和前面一个字符结合称为一个值在`[10,25]`的字符，获得`dp[i-2]`种方案。因此对于`dp[i]`的状态，可以由`dp[i-1]和dp[i-2]`来转移。
+
+```java
+class Solution {
+    public int translateNum(int num) {
+        String strNum = String.valueOf(num);
+        if (strNum.length() == 0) return 0;
+        else if(strNum.length() == 1) return 1;
+        int[] dp = new int[strNum.length()];
+        dp[0] = 1;
+        int tmp = Integer.parseInt(strNum.substring(0,2)) ;
+        if(tmp >= 10 && tmp < 26){
+            dp[1] = dp[0] + 1;
+        }else{
+            dp[1] = dp[0];
+        }
+        for(int i = 2;i < strNum.length();i++){
+            tmp = Integer.parseInt(strNum.substring(i-1,i+1)) ;
+            if(tmp >= 10 && tmp < 26){
+                dp[i] = dp[i-1] + dp[i-2];
+            }else{
+                dp[i] = dp[i-1];
+            }
+        }
+        return dp[strNum.length()-1];
+    }
+}
+```
+
+
+
+#### 第二十一剑式：最长不含重复字符的子字符串
+
+> 题目来源：LeetCode 剑指 Offer 48
+
+请从字符串中找出一个最长的不包含重复字符的子字符串，计算该最长子字符串的长度。
+
+```
+输入: "pwwkew"
+输出: 3
+解释: 因为无重复字符的最长子串是 "wke"，所以其长度为 3
+```
+
+
+
+**题目解析**：
+
+动态规划
+状态定义： 设动态规划列表 dp[j] 代表以字符 s[j] 为结尾的 “最长不重复子字符串” 的长度。
+
+转移方程： 固定右边界 j，设字符 s[j] 左边距离最近的相同字符为 s[i]。
+
+1. 当 `i < 0 `，即 s[j] 左边无相同字符，则` dp[j] = dp[j-1] + 1`
+2. 当 `dp[j - 1] < j - i`，说明字符 s[i] 在子字符串` dp[j−1] `区间之外 ，则 `dp[j]=dp[j−1]+1` 
+3. 当 `dp[j−1]≥j−i` ，说明字符 s[i] 在子字符串 `dp[j−1] `区间之中 ，则` dp[j] `的左边界由` s[i] `决定，即` dp[j]=j−i`
+
+> 当` i<0 `时，由于 `dp[j−1]≤j `恒成立，因而 `dp[j−1]<j−i `恒成立，因此分支 1. 和 2. 可被合并。
+
+- **哈希表统计：** 遍历字符串 s 时，使用哈希表统计 **各字符最后一次出现的索引位置** 。
+
+```java
+class Solution {
+    //动态规划
+    public int lengthOfLongestSubstring(String s) {
+        int n = s.length();
+        if(n == 0) return 0;
+        Map<Character,Integer> m = new HashMap<>();
+        int [] dp = new int[n];
+        dp[0] = 1;
+        m.put(s.charAt(0),0);
+        int maxLen = 1;
+        for(int i = 1;i < n;i++) {
+            int lastIndex = m.get(s.charAt(i)) == null ? -1 : m.get(s.charAt(i));
+            if(dp[i-1] >= i - lastIndex){ //上一个当前元素在dp[i-1]范围内
+                dp[i] = i - lastIndex;
+            }else{ //上一个当前元素不在dp[i-1]范围内 包含 lastIndex == -1
+                dp[i] = dp[i-1] + 1;
+            }
+            maxLen = Math.max(maxLen,dp[i]);
+            m.put(s.charAt(i),i);
+        }
+        return maxLen;
+    }
+}
+```
+
+双指针
+
+哈希表 dic 统计： 指针 j 遍历字符 s ，哈希表统计字符 s[j] 最后一次出现的索引 。
+更新左指针 i ： 根据上轮左指针 i 和 dic[s[j]] ，每轮更新左边界 i ，保证区间`[i+1,j] `内无重复字符且最大。
+`i=max(dic[s[j]],i)`
+
+更新结果 res ： 取上轮 res 和本轮双指针区间 `[i+1,j]` 的宽度（即 j−i ）中的最大值。`res=max(res,j−i)`
+
+```java
+class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        int n = s.length();
+        if (n == 0) return 0;
+        Map<Character,Integer> m = new HashMap<>();
+        int maxLen = 1;
+        int left = -1,right = 0;
+        while(right < n){
+            if(m.get(s.charAt(right)) != null){
+                left = Math.max(left,m.get(s.charAt(right)));//注意是 取两者较大值
+            }
+            m.put(s.charAt(right),right);
+            maxLen = Math.max(maxLen,right-left);
+            
+            right += 1;
+        }
+        return maxLen;
+    }
+}
+```
+
