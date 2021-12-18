@@ -986,7 +986,7 @@ class Solution {
 
 
 
-#### 第二十一剑式：最长不含重复字符的子字符串
+#### 第二十二剑式：最长不含重复字符的子字符串
 
 > 题目来源：LeetCode 剑指 Offer 48
 
@@ -1067,6 +1067,70 @@ class Solution {
             right += 1;
         }
         return maxLen;
+    }
+}
+```
+
+
+
+#### 第二十三剑式：最长不含重复字符的子字符串
+
+> 题目来源：LeetCode 剑指 Offer 18
+
+给定单向链表的头指针和一个要删除的节点的值，定义一个函数删除该节点。
+
+返回删除后的链表的头节点。
+
+题目解析：
+
+很容易的一道链表题，直接ko
+
+```java
+class Solution {
+    public ListNode deleteNode(ListNode head, int val) {
+        if(head == null) return null;
+        ListNode pre = null;
+        ListNode now = head;
+        if(head.val == val) return head.next;
+        while(now != null){
+            if(now.val == val){
+                pre.next = now.next;
+            }
+            pre = now;
+            now = now.next;
+        }
+        return head;
+    }
+}
+```
+
+
+
+#### 第二十四剑式：最长不含重复字符的子字符串
+
+> 题目来源：LeetCode 剑指 Offer 22
+
+输入一个链表，输出该链表中倒数第k个节点。
+
+题目解析：
+
+也是比较容易的链表题，采用倒退的想法，开始时一个标记指向尾结点的下一个null，另外一个指向倒数第k个结点，然后让这两个结点一次向前遍历，当原本指向倒数第k个结点的标记指向了头节点（此时可以理解为一个初始状态），而另外一个指向的正数的第k个结点，那么我们再正向来想，开始的状态就是上述的初始状态，那么逐个向后遍历，就可以在初始状态指向正数第k个结点的指针指向尾部null时，原本指向头结点的指针就指向了倒数第k个结点。
+
+```java
+class Solution {
+    public ListNode getKthFromEnd(ListNode head, int k) {
+        int cnt = 1;
+        ListNode now = head;
+        ListNode ans = head;
+        while(cnt <= k){
+            ans = ans.next;
+            cnt += 1;
+        }
+        while(ans != null){
+            ans = ans.next;
+            now = now.next;
+        }
+        return now;
     }
 }
 ```
