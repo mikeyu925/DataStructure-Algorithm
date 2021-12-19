@@ -1135,3 +1135,108 @@ class Solution {
 }
 ```
 
+
+
+#### 第二十五剑式：合并链表
+
+> 题目来源：LeetCode 剑指 Offer 25
+
+输入两个递增排序的链表，合并这两个链表并使新链表中的节点仍然是递增排序的。
+
+```java
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
+        //把second加first上面
+        if(l1 == null && l2 == null) return null;
+        else if(l1 == null && l2 != null) return l2;
+        else if(l1 != null && l2 == null) return l1;
+        ListNode first = l1;
+        ListNode second = l2;
+        //第一个值小的作为first
+        if(l1.val > l2.val ){
+            first = l2;
+            second = l1;
+        }
+        ListNode root = first;
+        ListNode t1 = null,t2 = null;
+        while(first.next != null && second != null){
+            t2 = second.next;
+            if(first.next.val < second.val){
+                first = first.next;
+                continue;
+            }else{
+                second.next = first.next;
+                first.next = second;
+            }
+            second = t2;
+            first = first.next;
+        }
+        if(second != null){
+            first.next = second;
+        }
+        return root;
+    }
+}
+```
+
+#### 第二十六剑式：两个链表的第一个公共结点
+
+> 题目来源：LeetCode 剑指 Offer 52
+
+输入两个链表，找出它们的第一个公共节点。
+
+哈希表：
+
+```java
+public class Solution {
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        Set<ListNode> s = new HashSet<>();
+        while(headA != null){
+            s.add(headA);
+            headA = headA.next;
+        }
+        while(headB != null){
+            if(s.contains(headB)) return headB;
+            headB = headB.next;
+        }
+        return null;
+    }
+}
+```
+
+双指针：
+
+只有当链表 headA 和 headB 都不为空时，两个链表才可能相交。因此首先判断链表 headA 和 headB 是否为空，如果其中至少有一个链表为空，则两个链表一定不相交，返回 null。
+
+当链表 headA 和 headB 都不为空时，创建两个指针 pA 和 pB，初始时分别指向两个链表的头节点 headA 和 headB，然后将两个指针依次遍历两个链表的每个节点。具体做法如下：
+
+每步操作需要同时更新指针 pA 和 pB。
+
+- 如果指针 pA 不为空，则将指针 pA 移到下一个节点；如果指针 pB 不为空，则将指针 pB 移到下一个节点
+- 如果指针 pA 为空，则将指针 pA 移到链表 headB 的头节点；如果指针 pB 为空，则将指针  pB 移到链表 headA 的头节点。
+- 当指针 pA 和  pB 指向同一个节点或者都为空时，返回它们指向的节点或者  null。
+
+```java
+public class Solution {
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        if (headA == null || headB == null) {
+            return null;
+        }
+        ListNode pA = headA, pB = headB;
+        while (pA != pB) {
+            pA = pA == null ? headB : pA.next;
+            pB = pB == null ? headA : pB.next;
+        }
+        return pA;
+    }
+}
+```
+
