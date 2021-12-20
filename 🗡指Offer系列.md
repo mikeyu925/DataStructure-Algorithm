@@ -1240,3 +1240,132 @@ public class Solution {
 }
 ```
 
+
+
+#### 第二十七剑式：调整数组顺序使奇数位于偶数前面
+
+> 题目来源：LeetCode 剑指 Offer 21
+
+输入一个整数数组，实现一个函数来调整该数组中数字的顺序，使得所有奇数在数组的前半部分，所有偶数在数组的后半部分。
+
+**题目解析**：
+
+维护两个奇、偶指针，分别从前和从后开始，然后寻找对于不符合条件的数，然后交换位置。
+
+```java
+class Solution {
+    public int[] exchange(int[] nums) {
+        int left = 0,right = nums.length - 1;
+        while(left < right){
+            while(left < right && nums[left] % 2 == 1){
+                left += 1;
+            }
+            while(left < right && nums[right] % 2 == 0){
+                right -= 1;
+            }
+            int tmp = nums[left];
+            nums[left] = nums[right];
+            nums[right] =tmp;
+        }
+        return nums;
+    }
+}
+```
+
+
+
+#### 第二十八剑式：和为s的两个数字
+
+> 题目来源：LeetCode 剑指 Offer 
+
+输入一个递增排序的数组和一个数字s，在数组中查找两个数，使得它们的和正好是s。如果有多对数字的和等于s，则输出任意一对即可
+
+```java
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        int left = 0,right = nums.length-1;
+        while(left < right){
+            if(nums[left] + nums[right] == target){
+                return new int[]{nums[left],nums[right]};
+            }else if(nums[left] + nums[right] < target){
+                left += 1;
+            }else{
+                right -= 1;
+            }
+        }
+        return null;
+    }
+}
+```
+
+
+
+#### 第二十九剑式：翻转单词顺序
+
+> 题目来源：LeetCode 剑指 Offer 58
+
+输入一个英文句子，翻转句子中单词的顺序，但单词内字符的顺序不变。为简单起见，标点符号和普通字母一样处理。例如输入字符串"I am a student. "，则输出"student. a am I"
+
+```
+输入: "the sky is blue"
+输出: "blue is sky the"
+```
+
+题目解析：
+
+先翻转每个单词，再将整个句子翻转  - -时间复杂度有点高呀~
+
+```java
+class Solution {
+    public String reverse(String word){
+        StringBuilder sb = new StringBuilder(word.length());
+        for (int i = word.length()-1;i >= 0;i--){
+            sb.append(word.charAt(i));
+        }
+        return sb.toString();
+    }
+    public String reverseWords(String s) {
+        String[] words = s.split(" ");
+        String tmp = "";
+        int cnt = 0;
+        for(int i = 0;i < words.length;i++){
+            if(words[i].equals("")) continue;
+            if (cnt == 0){
+                tmp += reverse(words[i]);
+            }else{
+                tmp += " " + reverse(words[i]);
+            }
+            cnt += 1;
+        }
+        return reverse(tmp);
+    }
+}
+```
+
+直接到序输出呀，人傻了
+
+```java
+class Solution {
+    public String reverseWords(String s) {
+        String[] strs = s.trim().split(" "); // 删除首尾空格，分割字符串
+        StringBuilder res = new StringBuilder();
+        for(int i = strs.length - 1; i >= 0; i--) { // 倒序遍历单词列表
+            if(strs[i].equals("")) continue; // 遇到空单词则跳过
+            res.append(strs[i] + " "); // 将单词拼接至 StringBuilder
+        }
+        return res.toString().trim(); // 转化为字符串，删除尾部空格，并返回
+    }
+}
+```
+
+
+
+#### 第三十剑式：
+
+> 题目来源：LeetCode 剑指 Offer 
+
+
+
+#### 第三十一剑式：
+
+> 题目来源：LeetCode 剑指 Offer 
