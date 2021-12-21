@@ -1360,12 +1360,131 @@ class Solution {
 
 
 
-#### 第三十剑式：
+#### 第三十剑式：矩阵中的路径
 
-> 题目来源：LeetCode 剑指 Offer 
+> 题目来源：LeetCode 剑指 Offer  12
+
+给定一个 m x n 二维字符网格 board 和一个字符串单词 word 。如果 word 存在于网格中，返回 true ；否则，返回 false 。
+
+单词必须按照字母顺序，通过相邻的单元格内的字母构成，其中“相邻”单元格是那些水平相邻或垂直相邻的单元格。同一个单元格内的字母不允许被重复使用。
+
+![img](🗡指Offer系列.assets/word2.jpg)
+
+```
+输入：board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word = "ABCCED"
+输出：true
+```
+
+题目解析：
+
+比较简单的深搜问题
+
+```java
+class Solution {
+    boolean [][] used;
+    int [][] dirs = new int[][]{{-1,0},{1,0},{0,1},{0,-1}};
+    int m,n;
+    public boolean dfs(char [][] board,String word,int idx,int x,int y){
+        if(idx == word.length()){
+            return true;
+        }
+        used[x][y] = true;
+        for(int i = 0;i < 4;i++){
+            int nx = x + dirs[i][0];
+            int ny = y + dirs[i][1];
+            if(nx >= m || nx < 0 || ny >= n || ny < 0 || used[nx][ny] == true) continue;
+            if(board[nx][ny] != word.charAt(idx)) continue;
+            if (dfs(board,word,idx+1,nx,ny)) return true;
+        }
+        used[x][y] = false;
+        return false;
+    }
+    public boolean exist(char[][] board, String word) {
+        if(board == null) return false;
+        m = board.length;
+        n = board[0].length;
+        used = new boolean[m][n];
+        for(int i = 0; i < m;i++){
+            for(int j = 0;j < n;j++){
+                if(board[i][j] == word.charAt(0)){
+                    used[i][j] = true;
+                    if(dfs(board,word,1,i,j)) return true;
+                    used[i][j] = false;
+                }
+            }
+        }
+        return false;
+    }
+}
+```
 
 
 
-#### 第三十一剑式：
 
-> 题目来源：LeetCode 剑指 Offer 
+
+#### 第三十一剑式：机器人的运动范围
+
+> 题目来源：LeetCode 剑指 Offer  13
+
+地上有一个m行n列的方格，从坐标 [0,0] 到坐标 [m-1,n-1] 。一个机器人从坐标 [0, 0] 的格子开始移动，它每次可以向左、右、上、下移动一格（不能移动到方格外），也不能进入行坐标和列坐标的数位之和大于k的格子。例如，当k为18时，机器人能够进入方格 [35, 37] ，因为3+5+3+7=18。但它不能进入方格 [35, 38]，因为3+5+3+8=19。请问该机器人能够到达多少个格子？
+
+```
+输入：m = 2, n = 3, k = 1
+输出：3
+```
+
+题目解析：
+
+比较简单的搜索遍历问题，小优化：只需要从[0,0]开始向下和向右搜索。
+
+```java
+class node{
+    public int x;
+    public int y;
+    node(int x,int y){
+        this.x = x;
+        this.y = y;
+    }
+}
+class Solution {
+    
+    int[][] dirs = new int[][]{{0,1},{1,0}};
+
+    public int getSum(int x,int y){
+        int sum = 0;
+        while (x != 0){
+            sum += (x % 10);
+            x /= 10;
+        }
+        while (y != 0){
+            sum += (y % 10);
+            y /= 10;
+        }
+        return sum;
+    }
+
+    public int movingCount(int m, int n, int k) {
+        boolean[][] used = new boolean[m][n];
+        Deque<node> dq = new ArrayDeque<>();
+        dq.offerLast(new node(0,0));
+        used[0][0] = true;
+        int cnt = 1;
+        while (!dq.isEmpty()){
+            node nowNode = dq.pollFirst();
+            for(int i = 0; i < 2;i++){
+                int nx = nowNode.x + dirs[i][0];
+                int ny = nowNode.y + dirs[i][1];
+                if(nx >= m || ny >= n || used[nx][ny] == true) continue;
+                if(getSum(nx,ny) <= k){
+                    used[nx][ny] = true;
+                    dq.offerLast(new node(nx,ny));
+                    cnt += 1;
+                }
+            }
+        }
+        return cnt;
+
+    }
+}
+```
+
