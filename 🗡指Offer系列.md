@@ -1488,3 +1488,150 @@ class Solution {
 }
 ```
 
+
+
+#### 第三十二剑式：二叉树中和为某一值的路径
+
+> 题目来源：LeetCode 剑指 Offer  34
+
+给你二叉树的根节点 root 和一个整数目标和 targetSum ，找出所有 从根节点到叶子节点 路径总和等于给定目标和的路径。
+
+叶子节点 是指没有子节点的节点。
+
+![img](🗡指Offer系列.assets/pathsumii1.jpg)
+
+```
+输入：root = [5,4,8,11,null,13,4,7,2,null,null,5,1], targetSum = 22
+输出：[[5,4,11,2],[5,8,4,5]]
+```
+
+**题目解析**：
+
+一个简单的树的深度优先搜索问题
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    List<List<Integer>> ans = new ArrayList<List<Integer>>();
+    List<Integer> path = new ArrayList<>();
+    public void dfs(TreeNode node,int val,int target){
+        if(node == null){
+            return ;
+        }
+        if(node.left == null && node.right == null && val + node.val == target){
+            path.add(node.val);
+            ans.add(new LinkedList<>(path));
+            path.remove(path.size() - 1);
+            return ;
+        }
+        path.add(node.val);
+        dfs(node.left,val+ node.val,target);
+        dfs(node.right,val+ node.val,target);
+        path.remove(path.size()-1);
+    }
+    public List<List<Integer>> pathSum(TreeNode root, int target) {
+        if (root == null) return ans;
+        dfs(root,0,target);
+        return ans;
+    }
+}
+```
+
+
+
+#### 第三十三剑式：二叉搜索树的第k大结点
+
+> 题目来源：LeetCode 剑指 Offer  54
+
+给定一棵二叉搜索树，请找出其中第 `k` 大的节点的值。
+
+**题目解析**：
+
+一个中序遍历搞定！
+
+```java
+class Solution {
+    List<Integer> ans = new ArrayList<>();
+    public void dfs(TreeNode root){
+        if(root == null) return;
+        dfs(root.left);
+        ans.add(root.val);
+        dfs(root.right);
+    }
+    public int kthLargest(TreeNode root, int k) {
+        dfs(root);
+        return ans.get(ans.size() - k);
+    }
+}
+```
+
+
+
+#### 第三十四剑式：二叉搜索树与双向链表
+
+> 题目来源：LeetCode 剑指 Offer  36
+
+输入一棵二叉搜索树，将该二叉搜索树转换成一个排序的循环双向链表。要求不能创建任何新的节点，只能调整树中节点指针的指向。
+
+为了更好地理解问题，以下面的二叉搜索树为例:
+
+![img](🗡指Offer系列.assets/bstdlloriginalbst.png)
+
+将这个二叉搜索树转化为双向循环链表。链表中的每个节点都有一个前驱和后继指针。对于双向循环链表，第一个节点的前驱是最后一个节点，最后一个节点的后继是第一个节点。
+
+下图展示了上面的二叉搜索树转化成的链表。“head” 表示指向链表中有最小元素的节点。
+
+![img](🗡指Offer系列.assets/bstdllreturndll.png)
+
+题目解析：
+
+这题还是需要一点技巧的，我们想要修改一个结点的后继指针(即right)，我们可以标记一个pre指针指向前一个结点，利用`pre.right = now`来修改结点的后继指针，通过`now.left = pre`来修改当前结点的前驱指针。对于二叉搜索树，如果需要结果是递增有序，则就联系到了`中序遍历`。
+
+因此，本题目采用中序遍历来遍历树，然后在操作区间修改结点的前驱指针和后继指针。
+
+注意：
+
+- 在修改前驱指针和后继指针时，如果当`pre == null`时，说明当前结点是第一个结点（即树的最左端的结点，双向循环链表的第一个结点）此时修改`head = now`；如果当`pre != null`，修改`pre.right = now`。同时注意修改当前结点的前驱指针`node.left = pre`，更新pre指针为`pre = now`。
+
+```java
+class Solution {
+    Node head = null;
+    Node pre = null;
+    public void dfs(Node node){
+        if(node == null) return;
+        dfs(node.left); //递归左子树
+        /*前驱指针、后继指针处理部分*/
+        if(pre == null){
+            head = node; //说明当前结点是头节点
+        }else{
+            pre.right = node; //修改前驱结点的后继指针
+        }
+        node.left = pre; //修改当前结点的前驱指针
+        pre = node; //更新pre为当前结点
+        dfs(node.right); //递归处理右子树
+    }
+    public Node treeToDoublyList(Node root) {
+        if(root == null) return null; //特殊情况，特殊处理
+        dfs(root); //遍历
+        /*修改头节点和尾结点的指针*/
+        head.left = pre; 
+        pre.right = head;
+        return head;
+    }
+}
+```
+
