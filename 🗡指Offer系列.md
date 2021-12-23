@@ -1635,3 +1635,92 @@ class Solution {
 }
 ```
 
+
+
+#### 第三十五剑式：把数组排成最小的数
+
+> 题目来源：LeetCode 剑指 Offer  45
+
+输入一个非负整数数组，把数组里所有数字拼接起来排成一个数，打印能拼接出的所有数字中最小的一个。
+
+```
+输入: [3,30,34,5,9]
+输出: "3033459"
+```
+
+**题目解析**：
+
+此题求拼接起来的最小数字，本质上是一个排序问题。设数组nums 中任意两数字的字符串为 x 和 y ，则规定 排序判断规则 为：
+
+- 若拼接字符串 `x + y > y + x `，则 x “大于” y ；
+- 反之，若` x + y < y + x `，则 x “小于” y ；
+
+> x “小于” y 代表：排序完成后，数组中 x 应在 y 左边；“大于” 则反之。
+
+```java
+class Solution {
+    public String minNumber(int[] nums) {
+        String [] strs = new String[nums.length];
+        for(int i = 0; i < strs.length;i++){
+            strs[i] = String.valueOf(nums[i]);
+        }
+        //自定义排序
+        Arrays.sort(strs,(x,y)->((x+y).compareTo(y+x)));
+        StringBuilder sb = new StringBuilder(strs.length);
+        for (int i = 0;i < strs.length;i++){
+            sb.append(strs[i]);
+        }
+        return sb.toString();
+    }
+}
+```
+
+
+
+#### 第三十五剑式：扑克牌中的顺子
+
+> 题目来源：LeetCode 剑指 Offer  61
+
+从若干副扑克牌中随机抽 5 张牌，判断是不是一个顺子，即这5张牌是不是连续的。2～10为数字本身，A为1，J为11，Q为12，K为13，而大、小王为 0 ，可以看成任意数字。A 不能视为 14。
+
+```
+输入: [0,0,1,2,5]
+输出: True
+```
+
+**题目解析**：
+
+先排序，然后遍历，遇到大小王更新一下大小王个数`bigCnt`，遇到非大小王时，判断当前值和前一个值`last`的关系：
+
+- 如果前一个值是大小王，则更新`last`并`continue`
+- 如果前一个值不是大小王
+  - 如果当前值等于 last + 1，更新`last`并`continue`
+  - 如果当前值等于 last，直接返回`false`
+  - 如果当前值 - last - 1 > bigCnt，说明缺省的数字个数大于当前的大小王数，返回`false`
+  - 否则就是当前值和last中间的值用大小王来弥补，即更新`bigCnt -=nums[i] - last - 1;`
+
+```java
+class Solution {
+    public boolean isStraight(int[] nums) {
+        Arrays.sort(nums);
+        int bigCnt = 0;
+        int last = 0;
+        for(int i = 0; i < 5;i++){
+            if(nums[i] == 0){
+                bigCnt += 1;
+            }
+            if (last == 0 || nums[i] - last == 1){
+                last = nums[i];
+                continue;
+            }
+            if(nums[i] == last || nums[i] - last - 1 > bigCnt){
+                return false;
+            }
+            bigCnt -= nums[i] - last - 1;
+            last = nums[i];
+        }
+        return true;
+    }
+}
+```
+
