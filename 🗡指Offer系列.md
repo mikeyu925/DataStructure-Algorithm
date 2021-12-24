@@ -1677,7 +1677,7 @@ class Solution {
 
 
 
-#### 第三十五剑式：扑克牌中的顺子
+#### 第三十六剑式：扑克牌中的顺子
 
 > 题目来源：LeetCode 剑指 Offer  61
 
@@ -1720,6 +1720,95 @@ class Solution {
             last = nums[i];
         }
         return true;
+    }
+}
+```
+
+
+
+
+
+#### 第三十七剑式：数据流中的中位数
+
+> 题目来源：LeetCode 剑指 Offer  41
+
+如何得到一个数据流中的中位数？如果从数据流中读出奇数个数值，那么中位数就是所有数值排序之后位于中间的数值。如果从数据流中读出偶数个数值，那么中位数就是所有数值排序之后中间两个数的平均值。
+
+例如：
+
+[2,3,4] 的中位数是 3
+
+[2,3] 的中位数是 (2 + 3) / 2 = 2.5
+
+设计一个支持以下两种操作的数据结构：
+
+- void addNum(int num) - 从数据流中添加一个整数到数据结构中。
+- double findMedian() - 返回目前所有元素的中位数。
+
+**题目解析**：
+
+定义两个优先级队列，分别是 高优先级队列low 和 低优先级队列high 。
+
+高优先级队列low 存储的都是 前半部分数字——比中位数小的数（包括中位数）
+
+低优先级队列high 存储的都是 后半部分数字——比中位数大的数字
+
+然后每当插入一个数字时：
+
+- 如果`low空`则插入low中
+- 如果`low不空`
+  - 如果当前值小于low的队头(即前半部分最大的数字)，那么说明当前元素应该在前半部分，插入 low 中。
+  - 如果当前值大于等于low的队头(即前半部分最大的数字)，那么说明当前元素应该在后半部分，插入 high 中。
+- 插入完成后我们要维护一下两个队列的长度平衡（即两者的长度差 <= 1），这样在返回MediaNum时可以直接返回
+  - 如果`low.size() - high.size() > 1`，将 low 的队头元素(前半部分最大的元素）弹出并插入high中
+  - 如果`high.size() - low.size() > 1`，将 high的队头元素（后半部分最小的元素）弹出并插入low中
+
+```java
+class MedianFinder {
+    private Queue<Integer> low ;  //高优先级队列
+    private Queue<Integer> high;  //低优先级队列
+    /** initialize your data structure here. */
+    public MedianFinder() {
+        this.low = new PriorityQueue<>(new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return o2  - o1;
+            }
+        });
+        this.high = new PriorityQueue<>(new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return o1 - o2;
+            }
+        });
+    }
+
+    public void addNum(int num) {
+        if(low.isEmpty()){
+            low.offer(num);
+            return ;
+        } 
+        if(num < low.peek()){
+            low.offer(num);
+            if(low.size() - high.size() > 1){
+                high.offer(low.poll());
+            }
+        }else{
+            high.offer(num);
+            if(high.size() - low.size() > 1){
+                low.offer(high.poll());
+            }
+        }
+    }
+
+    public double findMedian() {
+        if(low.size() == high.size()){
+            return  ((double)low.peek() + (double)high.peek()) / 2.0;
+        }else if(low.size() > high.size()){
+            return (double) low.peek();
+        }else{
+            return (double) high.peek();
+        }
     }
 }
 ```
