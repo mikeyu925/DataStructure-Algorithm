@@ -1813,3 +1813,94 @@ class MedianFinder {
 }
 ```
 
+#### 第三十八剑式：二叉树的深度
+
+> 题目来源：LeetCode 剑指 Offer  55-I
+
+输入一棵二叉树的根节点，求该树的深度。从根节点到叶节点依次经过的节点（含根、叶节点）形成树的一条路径，最长路径的长度为树的深度。
+
+```
+例如：
+给定二叉树 [3,9,20,null,null,15,7]，
+
+    3
+   / \
+  9  20
+    /  \
+   15   7
+返回它的最大深度 3 。
+```
+
+题目解析：
+
+就是简单的深度优先搜索
+
+```java
+class Solution {
+    int maxDepth = Integer.MIN_VALUE;
+    public void dfs(TreeNode root,int depth){
+        if(root == null) return;
+        maxDepth = Math.max(maxDepth,depth);
+        dfs(root.left,depth+1);
+        dfs(root.right,depth+1);
+    }
+    public int maxDepth(TreeNode root) {
+        if(root == null) return 0;
+        dfs(root,1);
+        return maxDepth;
+    }
+}
+```
+
+
+
+#### 第三十九剑式：平衡二叉树
+
+> 题目来源：LeetCode 剑指 Offer  55-II
+
+定义函数 height，用于计算二叉树中的任意一个节点 p 的高度：
+
+$$
+height(n) =
+\begin{cases} 
+0,  & \text{if }n\text{ is null} \\
+Math.max(height(n.left),height(n.right)) & \text{if }n\text{ is not null}
+\end{cases}
+$$
+
+
+有了计算节点高度的函数，即可判断二叉树是否平衡。**自顶向下类似于二叉树的前序遍历**，即对于当前遍历到的节点，首先计算左右子树的高度，如果左右子树的高度差是否不超过 1，再分别递归地遍历左右子节点，并判断左子树和右子树是否平衡。这是一个自顶向下的递归的过程。
+
+```java
+//自顶向下遍历
+public int height(TreeNode node){
+    if(node == null) return 0;
+    return Math.max(height(node.left),height(node.right))+1;
+}
+
+public boolean isBalanced(TreeNode root) {
+    if (root == null) return true;
+    return Math.abs(height(root.left) - height(root.right)) <= 1 && isBalanced(root.left) && isBalanced(root.right);
+}
+```
+
+方法一由于是自顶向下递归，因此对于同一个节点，函数height 会被重复调用，导致时间复杂度较高。如果使用自底向上的做法，则对于每个节点，函数 height 只会被调用一次。
+
+**自底向上递归的做法类似于后序遍历**，对于当前遍历到的节点，先递归地判断其左右子树是否平衡，再判断以当前节点为根的子树是否平衡。如果一棵子树是平衡的，则返回其高度（高度一定是非负整数），否则返回 −1。如果存在一棵子树不平衡，则整个二叉树一定不平衡。
+
+```java
+//自底向上遍历
+    public int getDepth(TreeNode node){
+        if(node == null) return 0;
+        int leftDep = getDepth(node.left);
+        int rightDep = getDepth(node.right);
+        if(leftDep == -1 || rightDep == -1 || Math.abs(leftDep-rightDep) > 1) return -1;
+        return Math.max(leftDep,rightDep)+1;
+    }
+
+    public boolean isBalanced(TreeNode root) {
+        if (root == null) return true;
+        return getDepth(root) >= 0;
+    }
+```
+
