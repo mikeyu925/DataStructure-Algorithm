@@ -1904,3 +1904,110 @@ public boolean isBalanced(TreeNode root) {
     }
 ```
 
+
+
+#### 第四十剑式：求1+2+…+n
+
+> 题目来源：LeetCode 剑指 Offer  64
+
+求 `1+2+...+n` ，要求不能使用乘除法、for、while、if、else、switch、case等关键字及条件判断语句（A?B:C）。
+
+题目解析：
+
+递归方法解决
+
+```java
+class Solution {
+    public int sumNums(int n) {
+        return n == 0 ? 0 : sumNums(n-1) + n;
+    }
+}
+```
+
+
+
+#### 第四十一剑式：二叉搜索树的最近公共祖先
+
+> 题目来源：LeetCode 剑指 Offer  68-I
+
+给定一个二叉搜索树, 找到该树中两个指定节点的最近公共祖先。
+
+- 所有节点的值都是唯一的。
+- p、q 为不同节点且均存在于给定的二叉搜索树中。
+
+题目解析：
+
+利用二叉搜索树的性质，如果两个目标结点分别在当前结点的左右子树中，则当前结点是最近公共祖先，如果都在右子树或左子树，则更新当前结点为左孩子或右孩子。
+
+```java
+class Solution {
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if(root == null) return null;
+        while(root.val != p.val && root.val != q.val){
+            if(root.val > p.val && root.val > q.val){
+                root = root.left;
+            }else if(root.val < p.val && root.val < q.val){
+                root = root.right;
+            }else{
+                return root;
+            }
+        }
+        return root;
+    }
+}
+```
+
+#### 第四十二剑式：二叉树的最近公共祖先
+
+> 题目来源：LeetCode 剑指 Offer  68-II
+
+给定一个二叉树, 找到该树中两个指定节点的最近公共祖先。
+
+题目解析：
+
+方法一：
+
+和上题的大体思路是一样的，只不过不能用二叉搜索树的性质了，需要我们自己寻找目标结点在左子树还是右子树。如果两个目标结点分别在当前结点的左右子树中，则当前结点是最近公共祖先，如果都在右子树或左子树，则递归搜索。
+
+```java
+class Solution {
+    
+    public TreeNode dfs(TreeNode root,TreeNode p,TreeNode q){
+        if(root == null) return null;
+        if(root.val == p.val || root.val == q.val) return root;
+        boolean pinleft = hasNode(root.left,p);
+        boolean qinleft = hasNode(root.left,q);
+        if(pinleft && qinleft){
+            return dfs(root.left,p,q);
+        }else if(!pinleft && !qinleft ){
+            return dfs(root.right,p,q);
+        }
+        return root; // pinleft && !qinleft || !pinleft && qinleft
+    }
+
+    public boolean hasNode(TreeNode root,TreeNode target){
+        if(root == null) return false;
+        if(root.val == target.val) return true;
+        return hasNode(root.left,target) || hasNode(root.right,target);
+    }
+
+
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if(root == null) return null;
+        return dfs(root,p,q);  
+    }
+}
+```
+
+方法二：
+
+可以用哈希表存储所有节点的父节点，然后我们就可以利用节点的父节点信息从 p 结点开始不断往上跳，并记录已经访问过的节点，再从 q 节点开始不断往上跳，如果碰到已经访问过的节点，那么这个节点就是我们要找的最近公共祖先。
+
+1. 从根节点开始遍历整棵二叉树，用哈希表记录每个节点的父节点指针
+2. 从 p 节点开始不断往它的祖先移动，并用数据结构记录已经访问过的祖先节点。
+3. 同样，我们再从 q 节点开始不断往它的祖先移动，如果有祖先已经被访问过，即意味着这是 p 和 q 的深度最深的公共祖先，即 LCA 节点。
+
+```java
+//利用java的HashMap解决问题，方法比较简单，自己尝试呀~
+```
+
