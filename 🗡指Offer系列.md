@@ -1,5 +1,12 @@
 插个眼！截至目前`2021年12月8日`，自己已经坚持刷题10个月了！已经再LeetCode做了大约300道题目了，因此想着**尝试不看任何题解**把剑指Offer系列的题目全做一遍，看看自己的水平如何。祝好！
 
+总结一下你可能需要掌握的知识点：
+
+- 数据结构：链表（单向、双向、循环）、队列（双端队列、优先级队列）、栈（单调栈）、堆（大顶堆、小顶堆）、二叉树（二叉搜索树）、图
+- 算法：排序、二分、分治、递归、搜索（A*、BFS、DFS)、KMP、滑动窗口、双指针、位运算（快速幂）、贪心（证明）、动态规划（状态压缩）
+
+> 一些感悟吧...感觉坚持刷题真的有效果，刷offer的时候感觉许多题之前都刷到过类似的，然后很快就有思路。
+
 #### 第一剑式：用两个栈实现队列
 
 > 题目来源：LeetCode 剑指 Offer 09
@@ -2009,5 +2016,129 @@ class Solution {
 
 ```java
 //利用java的HashMap解决问题，方法比较简单，自己尝试呀~
+```
+
+
+
+#### 第四十三剑式：重建二叉树
+
+> 题目来源：LeetCode 剑指 Offer  07
+
+输入某二叉树的前序遍历和中序遍历的结果，请构建该二叉树并返回其根节点。
+
+假设输入的前序遍历和中序遍历的结果中都不含重复的数字。
+
+题目解析：
+
+采用递归 + 分治的解题思路。
+
+对于任意一颗树而言，前序遍历的形式总是
+
+`[ 根节点, [左子树的前序遍历结果], [右子树的前序遍历结果] ]`
+即根节点总是前序遍历中的第一个节点。而中序遍历的形式总是
+
+`[ [左子树的中序遍历结果], 根节点, [右子树的中序遍历结果] ]`
+
+因此，现在中序遍历定位根节点，由此得到左右子树的结点个数，从而在前序遍历中划分左右子树，然后继续分治、递归
+
+```java
+class Solution {
+    Map<Integer,Integer> m = new HashMap<>();
+    public TreeNode preInBuildTree(int[] preorder,int preleft,int preright,int[] inorder,int inleft,int inright){
+        if(preleft > preright) return null;
+        TreeNode node = new TreeNode(preorder[preleft]);
+        int inNodeIndex = m.get(node.val);
+
+        int leftNum = inNodeIndex - inleft;
+        int rightMum = inright - inNodeIndex;
+
+        node.left = preInBuildTree(preorder,preleft+1,preleft+leftNum,inorder,inleft,inNodeIndex - 1);
+        node.right = preInBuildTree(preorder,preleft+ leftNum + 1,preright,inorder,inNodeIndex + 1,inright);
+        return node;
+    }
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        int n = preorder.length;
+        if (n == 0) return null;
+        for(int i = 0;i < inorder.length;i++){
+            m.put(inorder[i],i);
+        }
+        return preInBuildTree(preorder,0,n-1,inorder,0,n-1);
+    }
+}
+```
+
+#### 第四十四剑式：数值的整数次方
+
+> 题目来源：LeetCode 剑指 Offer  16
+
+实现` pow(x, n)`，即计算 x 的 n 次幂函数（即，xn）。不得使用库函数，同时不需要考虑大数问题。
+
+题目解析：
+
+采用快速幂解决。
+
+```java
+class Solution {
+    public double myPow(double x, int n) {
+        if(x == 0) return 0;
+        long t = n;
+        if(t < 0){
+            x = 1 / x;
+            t = -t;
+        }
+        double res = 1.0;
+        while(t > 0){
+            if((t & 1) == 1) res = res * x;
+            x *= x;
+            t >>= 1; 
+        }
+        return res;
+    }
+}
+```
+
+
+
+#### 第四十五剑式：数值的整数次方
+
+> 题目来源：LeetCode 剑指 Offer  33
+
+输入一个整数数组，判断该数组是不是某二叉搜索树的后序遍历结果。如果是则返回 `true`，否则返回 `false`。假设输入的数组的任意两个数字都互不相同。
+
+**题目解析**：
+
+根据二叉搜索树的定义，可以通过递归，判断所有子树的 **正确性** （即其后序遍历是否满足二叉搜索树的定义） ，若所有子树都正确，则此序列为二叉搜索树的后序遍历。
+
+终止条件： 
+
+​	当  i≥j ，说明此子树节点数量 ≤1 ，无需判别正确性，因此直接返回 true 
+递推工作：
+
+1. ​	划分左右子树： 遍历后序遍历的` [i,j] `区间元素，寻找 第一个大于根节点 的节点，索引记为 m 。此时，可划分出左子树区间` [i,m−1] `、右子树区间` [m,j−1] `、根节点索引 j 。
+2. 判断是否为二叉搜索树：
+   - 左子树区间` [i,m−1] `内的所有节点都应 <postorder[j] 。而第 1.划分左右子树 步骤已经保证左子树区间的正确性，因此只需要判断右子树区间即可。
+   - 右子树区间` [m,j−1] `内的所有节点都应 > postorder[j] 。实现方式为遍历，当遇到 ≤postorder[j] 的节点则跳出；则可通过 p=j 判断是否为二叉搜索树。
+
+返回值： 所有子树都需正确才可判定正确，因此使用 与逻辑符 && 连接。
+
+1. `p=j `： 判断 此树 是否正确。
+2. `recur(i,m−1) `： 判断 此树的左子树 是否正确。
+3. `recur(m,j−1)`： 判断 此树的右子树 是否正确。
+
+```java
+class Solution {
+    public boolean func(int[] postorder,int left,int right){
+        if(left >= right) return true;
+        int p = left;
+        while(postorder[p] < postorder[right]) p++;
+        int m = p;
+        while(postorder[p] > postorder[right]) p++;
+        return p == right && func(postorder,left,m-1) && func(postorder,m,right-1);
+    }
+
+    public boolean verifyPostorder(int[] postorder) {
+        return func(postorder,0,postorder.length-1);
+    }
+}
 ```
 
