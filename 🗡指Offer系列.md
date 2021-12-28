@@ -2142,3 +2142,45 @@ class Solution {
 }
 ```
 
+
+
+#### 第四十六剑式：二进制中1的个数
+
+> 题目来源：LeetCode 剑指 Offer  15
+
+编写一个函数，输入是一个无符号整数（以二进制串的形式），返回其二进制表达式中数字位数为 '1' 的个数
+
+```java
+public class Solution {
+    // you need to treat n as an unsigned value
+    public int hammingWeight(int n) {
+        int cnt = 0;
+        while( n != 0){
+            n = n & (n-1);
+            cnt += 1;
+        }
+        return cnt;
+    }
+}
+```
+
+#### 第四十七剑式：不用加减乘除做加法
+
+> 题目来源：LeetCode 剑指 Offer  65
+
+写一个函数，求两个整数之和，要求在函数体内不得使用 “+”、“-”、“*”、“/” 四则运算符号。
+
+```java
+class Solution {
+    public int add(int a, int b) {
+        int c = 0;
+        while(b != 0){
+            c = (a & b) << 1;
+            a = a ^ b;
+            b = c;
+        }
+        return a;
+    }
+}
+```
+
