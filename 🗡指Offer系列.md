@@ -2385,3 +2385,84 @@ class Solution {
 }
 ```
 
+#### 第五十二剑式：顺时针打印矩阵
+
+> 题目来源：LeetCode 剑指 Offer  29
+
+输入一个矩阵，按照从外向里以顺时针的顺序依次打印出每一个数字。
+
+```
+输入：matrix = [[1,2,3],[4,5,6],[7,8,9]]
+输出：[1,2,3,6,9,8,7,4,5]
+```
+
+**题目解析**：
+
+就是一道简单的模拟类题目..相信大家都能直接秒了
+
+```java
+class Solution {
+    private int[][] dirs = new int[][] {{0,1},{1,0},{0,-1},{-1,0}};
+    public int[] spiralOrder(int[][] matrix) {
+        if (matrix.length == 0) return new int[0];
+        int m = matrix.length;
+        int n = matrix[0].length;
+        int cnt = 0;
+        int [] ans = new int[m * n];
+        int x = 0,y = 0;
+        int Didx = 0;
+        for (;cnt < m * n;){
+            if (x >= 0 && x < m && y >= 0 && y < n && matrix[x][y] != Integer.MIN_VALUE){
+                ans[cnt++] = matrix[x][y];
+                matrix[x][y] = Integer.MIN_VALUE;
+            }else{
+                x = x - dirs[Didx][0];
+                y = y - dirs[Didx][1];
+                Didx = (Didx + 1) % 4;
+            }
+
+            x = x + dirs[Didx][0];
+            y = y + dirs[Didx][1];
+        }
+        return ans;
+    }
+}
+```
+
+#### 第五十三剑式：栈的压入、弹出序列
+
+> 题目来源：LeetCode 剑指 Offer  31
+
+输入两个整数序列，第一个序列表示栈的压入顺序，请判断第二个序列是否为该栈的弹出顺序。假设压入栈的所有数字均不相等。
+
+**题目解析**：
+
+模拟栈的压入、弹出序列即可
+
+```java
+class Solution {
+    public boolean validateStackSequences(int[] pushed, int[] popped) {
+        Deque<Integer> dq = new ArrayDeque<>();
+        int pushIdx = 0;
+        int popIdx = 0;
+        while(pushIdx < pushed.length){
+
+            dq.offerLast(pushed[pushIdx]);
+            while(!dq.isEmpty() && dq.peekLast() == popped[popIdx]){
+                popIdx += 1;
+                dq.pollLast();
+            }
+            pushIdx += 1;
+        }
+        while(!dq.isEmpty()){
+            if (dq.peekLast() != popped[popIdx]){
+                return false;
+            }
+            dq.pollLast();
+            popIdx += 1;
+        }
+        return true;
+    }
+}
+```
+
