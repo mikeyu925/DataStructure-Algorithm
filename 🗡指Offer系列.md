@@ -2525,3 +2525,134 @@ class Solution {
 }
 ```
 
+
+
+#### 第五十五剑式：把字符串转化为整数
+
+> 题目来源：LeetCode 剑指 Offer 59-I
+
+给定一个数组 `nums` 和滑动窗口的大小 `k`，请找出所有滑动窗口里的最大值。
+
+```
+输入: nums = [1,3,-1,-3,5,3,6,7], 和 k = 3
+输出: [3,3,5,5,6,7] 
+解释: 
+
+  滑动窗口的位置                最大值
+---------------               -----
+[1  3  -1] -3  5  3  6  7       3
+ 1 [3  -1  -3] 5  3  6  7       3
+ 1  3 [-1  -3  5] 3  6  7       5
+ 1  3  -1 [-3  5  3] 6  7       5
+ 1  3  -1  -3 [5  3  6] 7       6
+ 1  3  -1  -3  5 [3  6  7]      7
+```
+
+**题目解析**：
+
+优先级队列解决
+
+```java
+class node{
+    private int val;
+    private int idx;
+    public node(int val, int idx) {
+        this.val = val;
+        this.idx = idx;
+    }
+    public int getVal() {
+        return val;
+    }
+    public void setVal(int val) {
+        this.val = val;
+    }
+    public int getIdx() {
+        return idx;
+    }
+    public void setIdx(int idx) {
+        this.idx = idx;
+    }
+}
+class Solution {
+    public int[] maxSlidingWindow(int[] nums, int k) {
+        if(nums == null || nums.length == 0 || k == 0){
+            return new int[0];
+        }
+        //定义一个优先级队列并且定义排序规则为：值大的靠前，值相等索引小的靠前
+        Queue<node> pq = new PriorityQueue<>(new Comparator<node>() {
+            @Override
+            public int compare(node o1, node o2) {
+                    if (o1.getVal()== o2.getVal()){
+                        return ( o1.getIdx() -  o2.getIdx());
+                    }
+                    return o2.getVal() - o1.getVal();
+            }
+        });
+        //初始化 结果数组
+        int [] ans = new int[nums.length - k + 1];
+        //先塞进去 k - 1个
+        for (int i = 0;i < k-1;i++){
+            pq.offer(new node(nums[i],i));
+        }
+        //开始每次塞一个并检查是否队头元素需要出队
+        for (int i = k-1;i < nums.length;i++){
+            pq.offer(new node(nums[i],i));
+            //如果对头元素索引已经在窗口左边界外部-->弹出
+            while (!pq.isEmpty() && pq.peek().getIdx() <= i-k){
+                pq.poll();
+            }
+            //加入当前窗体中值最大元素
+            ans[i-k+1] = pq.peek().getVal();
+        }
+        return ans;
+    }
+}
+```
+
+
+
+#### 第五十六剑式：队列的最大值
+
+> 题目来源：LeetCode 剑指 Offer 59-II
+
+请定义一个队列并实现函数 max_value 得到队列里的最大值，要求函数`max_value、push_back` 和 `pop_front` 的均摊时间复杂度都是O(1)。
+
+若队列为空，`pop_front `和 `max_value` 需要返回 -1
+
+题目解析：
+
+维护两个队列，一个双端队列（维护为单调递减队列），一个普通队列（作为辅助队列）
+
+```java
+class MaxQueue {
+    private Queue<Integer> q;
+    private Deque<Integer> dq;
+    public MaxQueue() {
+        q = new ArrayDeque<>();
+        dq = new ArrayDeque<>();
+    }
+
+    public int max_value() {
+        if (!dq.isEmpty()) return dq.peekFirst();
+        return -1;
+    }
+
+    public void push_back(int value) {
+        while(!dq.isEmpty() && dq.peekLast() < value){
+            dq.pollLast();
+        }
+        dq.offerLast(value);
+        q.offer(value);
+    }
+
+    public int pop_front() {
+        if (q.isEmpty()) return -1;
+        int val = q.peek();
+        if (val == dq.peekFirst()){
+            dq.pollFirst();
+        }
+        return q.poll();
+    }
+}
+```
+
