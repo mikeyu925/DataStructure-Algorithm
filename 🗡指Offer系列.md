@@ -2656,3 +2656,104 @@ class MaxQueue {
 }
 ```
 
+
+
+#### 第五十七剑式：序列化二叉树
+
+> 题目来源：LeetCode 剑指 Offer 37
+
+请实现两个函数，分别用来序列化和反序列化二叉树。
+
+你需要设计一个算法来实现二叉树的序列化与反序列化。这里不限定你的序列 / 反序列化算法执行逻辑，你只需要保证一个二叉树可以被序列化为一个字符串并且将这个字符串反序列化为原始的树结构。
+
+**题目解析**：
+
+序列化: DFS深度优先搜索  ---> 字符串: node,node,null的格式
+
+反序列化：将字符串用","分割开，然后DFS创建树
+
+```java
+class Codec {
+    String serializeStr = "";
+    public void dfs_serialize(TreeNode root) {
+        if (root == null) {
+            serializeStr += "null,";
+            return ;
+        }
+        serializeStr += root.val + ",";
+        dfs_serialize(root.left);
+        dfs_serialize(root.right);
+    }
+
+    // Encodes a tree to a single string.
+    public String serialize(TreeNode root) {
+        dfs_serialize(root);
+        return serializeStr;
+    }
+    public TreeNode buildTree(List<String> nodes){
+        if (nodes.get(0).equals("null")){
+            nodes.remove(0);
+            return null;
+        }
+        TreeNode node = new TreeNode(Integer.parseInt(nodes.get(0)));
+        nodes.remove(0);
+        node.left = buildTree(nodes);
+        node.right = buildTree(nodes);
+        return node;
+    }
+    // Decodes your encoded data to tree.
+    public TreeNode deserialize(String data) {
+        String [] nodes = data.split(",");
+        List<String > arrayNodes = new LinkedList<>(Arrays.asList(nodes));
+        return buildTree(arrayNodes);
+    }
+}
+```
+
+#### 第五十八剑式：字符串的排列
+
+> 题目来源：LeetCode 剑指 Offer 38
+
+输入一个字符串，打印出该字符串中字符的所有排列。
+
+你可以以任意顺序返回这个字符串数组，但里面不能有重复元素。
+
+题目解析：
+
+对于全排列的不重复问题，可以尝试排序+前后是否相等判断
+
+```java
+class Solution {
+   boolean [] used;
+    StringBuilder sb;
+    List<String> ans = new ArrayList<>();
+    public void dfs(char[] characters,int idx){
+        if (idx == characters.length){
+            ans.add(sb.toString());
+            return ;
+        }
+        for (int i = 0; i < characters.length;i++){
+            if (used[i]) continue;
+            if (i > 0 && !used[i-1] && characters[i] == characters[i-1]) continue;
+            used[i] = true;
+            sb.append(characters[i]);
+            dfs(characters,idx+1);
+            sb.deleteCharAt(sb.length()-1);
+            used[i] = false;
+        }
+    }
+    public String[] permutation(String s) {
+        used = new boolean[s.length()];
+        sb = new StringBuilder(s.length());
+        char[] characters =  s.toCharArray();
+        Arrays.sort(characters);
+        dfs(characters,0);
+        String [] res = new String[ans.size()];
+        for (int i = 0; i < ans.size();i++){
+            res[i] = ans.get(i);
+        }
+        return res;
+    }
+}
+```
+
