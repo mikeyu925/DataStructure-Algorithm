@@ -2757,3 +2757,165 @@ class Solution {
 }
 ```
 
+
+
+#### 第五十九剑式：丑数
+
+> 题目来源：LeetCode 剑指 Offer 49
+
+我们把只包含质因子 2、3 和 5 的数称作丑数（Ugly Number）。求按从小到大的顺序的第 n 个丑数。
+
+```
+输入: n = 10
+输出: 12
+解释: 1, 2, 3, 4, 5, 6, 8, 9, 10, 12 是前 10 个丑数。
+```
+
+**题目解析**：
+
+小顶堆：
+
+初始时堆为空。首先将最小的丑数 1 加入堆。
+
+每次取出堆顶元素 $x$，则 $x$ 是堆中最小的丑数，由于 $2x, 3x, 5x$  也是丑数，因此将 $2x, 3x, 5x$  加入堆。
+
+> 可能导致堆中出现重复元素的情况，使用哈希集合去重，避免相同元素多次加入堆。
+
+在排除重复元素的情况下，第 n 次从最小堆中取出的元素即为第 n 个丑数。
+
+```java
+class Solution {
+    public int nthUglyNumber(int n) {
+        Set<Long> set = new HashSet<>();
+        PriorityQueue<Long> pq = new PriorityQueue<>();
+        pq.offer(1l);
+        set.add(1l);
+        for (int i = 1;i < n;i++){
+            long x = pq.poll();
+            if (!set.contains(x * 2)) 
+            {
+                set.add(x * 2);
+                pq.offer(x * 2);
+            }
+            if (!set.contains(x * 3)) {
+                set.add(x * 3);
+                pq.offer(x * 3);
+            }
+            if (!set.contains(x * 5)) {
+                set.add(x * 5);
+                pq.offer(x * 5);
+            }
+        }
+        return (int)((long)pq.peek());
+    }
+}
+```
+
+动态规划：
+
+
+
+#### 第六十剑式：n个骰子的点数
+
+> 题目来源：LeetCode 剑指 Offer 60
+
+把n个骰子扔在地上，所有骰子朝上一面的点数之和为s。输入n，打印出s的所有可能的值出现的概率。
+
+你需要用一个浮点数数组返回答案，其中第 i 个元素代表这 n 个骰子所能掷出的点数集合中第 i 小的那个的概率。
+
+**题目解析**：
+
+动态规划...没想到怎么解决 看了题解。动态规划还是难顶啊
+
+```java
+class Solution {
+    public double[] dicesProbability(int n) {
+        double[] dp = new double[6];
+        Arrays.fill(dp,1.0/6.0);
+        for (int i = 2;i <= n;i++){
+            double[] tmp = new double[i*5+1];
+            for (int j = 0;j < dp.length;j++){
+                for (int k = 0;k < 6;k++){
+                    tmp[j+k] += dp[j] / 6.0;
+                }
+            }
+            dp = tmp;
+        }
+        return dp;
+    }
+}
+```
+
+
+
+#### 第六十一剑式：数组中的逆序对
+
+> 题目来源：LeetCode 剑指 Offer 51
+
+在数组中的两个数字，如果前面一个数字大于后面的数字，则这两个数字组成一个逆序对。输入一个数组，求出这个数组中的逆序对的总数。
+
+```
+输入: [7,5,6,4]
+输出: 5
+```
+
+题目解析：
+
+归并排序
+
+```java
+class Solution {
+    public int reversePairs(int[] nums) {
+        int len = nums.length;
+        if(len < 2) return 0; //如果元素个数小于2，不可能有逆序对
+        int []copy = new int[len]; //申请一块新内存存储元素值
+        for(int i = 0;i < len;i++){
+            copy[i] = nums[i];
+        }
+        int [] temp = new int[len];
+        return reverse(copy,0,len-1,temp); //分治——排序
+    }
+
+    private int reverse(int[] nums,int left,int right,int[]temp){
+        if(left == right){ //如果仅剩一个元素，不需要进一步操作
+            return 0;
+        }
+        int mid = left + ((right - left) >> 1);
+        //分治
+        int leftPairs = reverse(nums,left,mid,temp);   //左边有多少个逆序对
+        int rightPairs = reverse(nums,mid+1,right,temp);  //右边有多少逆序对
+        if(nums[mid] <= nums[mid+1] ){//说明当前部分此时已经升序有序
+            return leftPairs + rightPairs;
+        }
+        int crossPairs = mergeAndCount(nums,left,mid,right,temp);//中间部分有多少逆序对
+        return leftPairs + crossPairs + rightPairs;
+    }
+
+    private int mergeAndCount(int[] nums,int left,int mid,int right,int []temp){
+        for(int i = left;i <= right;i++){
+            temp[i] = nums[i];
+        }
+        int i = left;
+        int j = mid + 1;
+        int cnt = 0;
+        for(int k = left;k <= right;k++){
+            if(i == mid + 1){ //左半边已经处理完毕
+                nums[k] = temp[j];
+                j++;
+            }else if(j == right + 1){ //右半边已经处理完毕
+                nums[k] = temp[i];
+                i++;
+            }else if(temp[i] <= temp[j]){
+                nums[k] = temp[i];
+                i++;
+            }else{
+                nums[k] = temp[j];
+                j++;
+                cnt += (mid - i + 1); //增加逆序对
+            }
+        }
+        return cnt;
+    }
+}
+```
+
