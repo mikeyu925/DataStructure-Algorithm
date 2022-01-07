@@ -7,6 +7,8 @@
 - 数学：约瑟夫环问题、剪绳子问题、
 
 > 一些感悟吧...感觉坚持刷题真的有效果，刷offer的时候感觉许多题之前都刷到过类似的，然后很快就有思路。
+>
+> 所谓真正扎实的武功ጿ ኈ ቼ ዽ ጿ ኈ ቼ ዽ ጿ ኈ ቼ ዽ ጿ ኈ ቼ ዽ ጿ ኈ ቼ ዽ ጿ，都是在不断地训练中出来地！天才也需要99的汗水才能成功呢！
 
 #### 第一剑式：用两个栈实现队列
 
@@ -2915,6 +2917,71 @@ class Solution {
             }
         }
         return cnt;
+    }
+}
+```
+
+#### 第六十二剑式：1～n 整数中 1 出现的次数
+
+> 题目来源：LeetCode 剑指 Offer 43
+
+输入一个整数 n ，求1～n这n个整数的十进制表示中1出现的次数。
+
+例如，输入12，1～12这些整数中包含1 的数字有1、10、11和12，1一共出现了5次。
+
+**题目解析**：
+
+逐个求每一位出现的1的个数，然后累加。
+
+如果该数位可以表示为 $10^k$（例如 k=0, 1, 2分别表示「个位」「十位」「百位」），那么数字 1 出现的次数为：
+
+$\lfloor n /(10^{k+1}) \rfloor *10^{k} + min(max(0,n \mod 10^{k+1} - 10^{k} + 1 ),10^{k})$
+
+```java
+class Solution {
+    public int countDigitOne(int n) {
+        int ans = 0;
+        long mulk = 1;
+        for (int i = 0;n >= mulk;i++){
+            ans += (n / (mulk * 10))* mulk + Math.min(Math.max(0,(n%(mulk * 10) - mulk + 1)),mulk);
+            mulk *= 10;
+        }
+        return ans;
+    }
+}
+```
+
+
+
+
+
+#### 第六十二剑式：数字序列中某一位的数字
+
+> 题目来源：LeetCode 剑指 Offer 44
+
+数字以0123456789101112131415…的格式序列化到一个字符序列中。在这个序列中，第5位（从下标0开始计数）是5，第13位是1，第19位是4，等等。
+
+请写一个函数，求任意第n位对应的数字。
+
+```
+输入：n = 3
+输出：3
+```
+
+```java
+class Solution {
+    public int findNthDigit(int n) {
+        int digit= 1;
+        long start= 1;
+        long cnt = 9;
+        while (n > cnt){ //确定digit
+            n -= cnt;
+            digit += 1;
+            start *= 10;
+            cnt = digit * start * 9;
+        }
+        long num = start + (n - 1) / digit;//确定数字
+        return Long.toString(num).charAt((n-1) % digit) - '0'; //确定在该数字的第几个数上
     }
 }
 ```
