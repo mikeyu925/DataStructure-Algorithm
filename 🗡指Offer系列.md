@@ -2955,7 +2955,7 @@ class Solution {
 
 
 
-#### 第六十二剑式：数字序列中某一位的数字
+#### 第六十三剑式：数字序列中某一位的数字
 
 > 题目来源：LeetCode 剑指 Offer 44
 
@@ -2985,4 +2985,166 @@ class Solution {
     }
 }
 ```
+
+
+
+#### 第六十四剑式：整数除法
+
+> 题目来源：LeetCode 剑指 Offer II 001
+
+给定两个整数 `a` 和 `b` ，求它们的除法的商 `a/b` ，要求不得使用乘号 `'*'`、除号 `'/'` 以及求余符号 `'%'` 。
+
+- 整数除法的结果应当截去（truncate）其小数部分，例如：truncate(8.345) = 8 以及 truncate(-2.7335) = -2
+- 假设我们的环境只能存储 32 位有符号整数，其数值范围是 $[−2^{31}, 2^{31}−1]$。本题中，如果除法结果溢出，则返回 $2^{31} − 1$
+
+```
+输入：a = 7, b = -3
+输出：-2
+解释：7/-3 = truncate(-2.33333..) = -2
+```
+
+题目解析：
+
+用加减代替乘除运算，用二分法进行优化（二分过程中肯定也有乘除，可以用位移运算符代替）
+
+```java
+class Solution {
+    public int divide(int a, int b) {
+        int ans = 0;
+        int flag = 0;
+        //正数更容易溢出，转换为负数
+        if (a > 0) {
+            a = -a;
+            flag += 1;
+        }
+        if (b > 0) {
+            b = -b;
+            flag += 1;
+        }
+        //当 a-b还能够减许多次时
+        while(a <= b){
+            int tmp_cnt = 1;
+            int tmp_b = b;
+            //如果还能减的话，就乘2倍，但是如果有溢出风险就结束
+            while( tmp_b >= (Integer.MIN_VALUE >> 1) && a  <= (tmp_b<<1)){
+                tmp_b += tmp_b;
+                tmp_cnt += tmp_cnt;
+            }
+            a -= tmp_b;
+            ans -= tmp_cnt;  //为什么要 - 呢？？ 因为正数2^32-1 + 1会溢出
+        }
+        if (flag != 1 && ans == Integer.MIN_VALUE) {
+            ans++;
+        }
+        return flag == 1 ? ans : -ans;
+    }
+}
+```
+
+
+
+#### 第六十五剑式：二进制加法
+
+> 题目来源：LeetCode 剑指 Offer II 002
+
+给定两个 01 字符串 `a` 和 `b` ，请计算它们的和，并以二进制字符串的形式输出。
+
+输入为 **非空** 字符串且只包含数字 `1` 和 `0`。
+
+```
+输入: a = "1010", b = "1011"
+输出: "10101"
+```
+
+方法一：逐位相加+进位标志
+
+```java
+class Solution {
+    public String addBinary(String a, String b) {
+        int len_diff = a.length() - b.length();
+        if (len_diff != 0){
+            StringBuilder sb = new StringBuilder(Math.abs(len_diff));
+            for (int i = 0;i < Math.abs(len_diff);i++){
+                sb.append("0");
+            }
+            if (len_diff < 0){
+                a = sb.toString() + a;
+            }else{
+                b = sb.toString() + b;
+            }
+        }
+        char[] chars_a = a.toCharArray();
+        char[] chars_b = b.toCharArray();
+        int add = 0;
+        for (int i = chars_a.length-1;i >=0;i --){
+            chars_a[i] += (chars_b[i]-'0') + add;
+            if (chars_a[i] > '1'){
+                chars_a[i] -= 2;
+                add = 1;
+            }else{
+                add = 0;
+            }
+        }
+        String ans = new String(chars_a);
+        if (add == 1){
+            return "1" + ans;
+        }
+        return ans;
+    }
+}
+```
+
+方法二：
+
+取巧法，仅仅适用于二进制字符串转整数不会溢出的情况
+
+```java
+class Solution {
+     public String addBinary(String a, String b) {
+        int sum = Integer.valueOf(a,2) + Integer.valueOf(b,2);
+        return Integer.toBinaryString(sum);
+    }
+}
+```
+
+
+
+
+
+#### 第六十六剑式：前n个数字二进制中1的个数
+
+> 题目来源：LeetCode 剑指 Offer II 003
+
+给定一个非负整数 `n` ，请计算 `0` 到 `n` 之间的每个数字的二进制表示中 1 的个数，并输出一个数组。
+
+```
+输入: n = 5
+输出: [0,1,1,2,1,2]
+解释:
+0 --> 0
+1 --> 1
+2 --> 10
+3 --> 11
+4 --> 100
+5 --> 101
+```
+
+**题目解析**：
+
+动态规划、最低有效位
+
+```java
+class Solution {
+    public int[] countBits(int n) {
+        int[] dp = new int[n+1];
+        dp[0] = 0;
+        for (int i = 1;i <= n;i++){
+            dp[i] = dp[i & (i-1)] + 1;
+        }
+        return dp;
+    }
+}
+```
+
+
 
