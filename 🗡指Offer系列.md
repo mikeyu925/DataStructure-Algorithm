@@ -3148,3 +3148,122 @@ class Solution {
 
 
 
+#### 第六十七剑式：只出现一次的数字
+
+> 题目来源：LeetCode 剑指 Offer II 004
+
+给你一个整数数组 `nums` ，除某个元素仅出现 **一次** 外，其余每个元素都恰出现 **三次 。**请你找出并返回那个只出现了一次的元素。
+
+```
+输入：nums = [2,2,3,2]
+输出：3
+```
+
+**题目解析**：
+
+考虑答案的第 i 个二进制位（i从 0开始编号），它可能为 0 或 1。对于数组中非答案的元素，每一个元素都出现了 3 次，对应着第 i 个二进制位的 3 个 0 或 3 个 1，无论是哪一种情况，它们的和都是 3 的倍数（即和为 0 或 3）。因此：
+
+> 答案的第 i 个二进制位就是数组中所有元素的第 i 个二进制位之和除以 3 的余数。
+
+这样一来，对于数组中的每一个元素 x，我们使用位运算(x >> i) & 1 得到 x 的第 i 个二进制位，并将它们相加再对 3 取余，得到的结果一定为 0 或 1，即为答案的第 i 个二进制位。
+
+```java
+class Solution {
+    public int singleNumber(int[] nums) {
+        int ans = 0;
+        for (int i = 0;i < 32;i++){
+            int cnt = 0;
+            for (int num:nums){
+                cnt += ((num>>i) & 1);
+            }
+            ans |= ((cnt % 3) << i);
+        }
+        return ans;
+    }
+}
+```
+
+
+
+#### 第六十八剑式：单词长度的最大乘积
+
+> 题目来源：LeetCode 剑指 Offer II 005
+
+给定一个字符串数组 words，请计算当两个字符串 words[i] 和 words[j] 不包含相同字符时，它们长度的乘积的最大值。假设字符串中只包含英语的小写字母。如果没有不包含相同字符的一对字符串，返回 0。
+
+```
+输入: words = ["abcw","baz","foo","bar","fxyz","abcdef"]
+输出: 16 
+解释: 这两个单词为 "abcw", "fxyz"。它们不包含相同字符，且长度的乘积最大。
+```
+
+题目解析：
+
+二进制编码 + 位运算
+
+因为每个字符串只由小写字母(26个)构成，因此可以用一个整数代表一个字符串，整数的第`i`位为代表该字符串是否有字母`i + 'a'`。
+
+想要判断两个字符串是否有公共字符只需要判断两个数字的`&`操作是否为`0`
+
+```java
+class Solution {
+    public int maxProduct(String[] words) {
+        Map<String,Integer> m = new HashMap<>();
+        for (String word : words){
+            int val = 0;
+            for (int i = 0;i < word.length();i++){
+                val |= (1 << (word.charAt(i) - 'a'));
+            }
+            m.put(word,val);
+        }
+        int ans = 0;
+        for (int i = 0;i < words.length;i++){
+            for (int j = i+1;j < words.length;j++){
+                if ((m.get(words[i]) & m.get(words[j])) == 0){
+                    ans = Math.max(ans,words[i].length() * words[j].length());
+                }
+            }
+        }
+        return ans;
+    }
+}
+```
+
+
+
+#### 第六十九剑式：排序数组中两个数字之和
+
+> 题目来源：LeetCode 剑指 Offer II 006
+
+给定一个已按照 升序排列  的整数数组 numbers ，请你从数组中找出两个数满足相加之和等于目标数 target 。
+
+函数应该以长度为 2 的整数数组的形式返回这两个数的下标值。numbers 的下标 从 0 开始计数 ，所以答案数组应当满足 0 <= answer[0] < answer[1] < numbers.length 。
+
+假设数组中存在且只存在一对符合条件的数字，同时一个数字不能使用两次。
+
+```
+输入：numbers = [1,2,4,6,10], target = 8
+输出：[1,3]
+解释：2 与 6 之和等于目标数 8 。因此 index1 = 1, index2 = 3 。
+```
+
+**题目解析**：
+
+很简单的一道题，直接撸
+
+```java
+    public int[] twoSum(int[] numbers, int target) {
+        int left = 0,right = numbers.length-1;
+        while (numbers[left] + numbers[right] != target){
+            if (numbers[left] + numbers[right] < target){
+                left += 1;
+            }else {
+                right -= 1;
+            }
+        }
+        return new int[]{left,right};
+    }
+```
+
+
+
