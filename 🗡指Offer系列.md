@@ -3267,3 +3267,131 @@ class Solution {
 
 
 
+#### 第七十剑式：数组中和为0的三个数
+
+> 题目来源：LeetCode 剑指 Offer II 007
+
+给定一个包含 n 个整数的数组 nums，判断 nums 中是否存在三个元素 a ，b ，c ，使得 a + b + c = 0 ？请找出所有和为 0 且 不重复 的三元组。
+
+题目解析：
+
+这题是上一题的升级版，有以下几个要点：
+
+- 三个数的和`a+b+c=0` ==> `a+b = -c` 是不是就和上一道一样了
+- 数组没说是有序的  ==> 排序
+- 不重复 ==> 集合 或 按序查找
+
+首先对数组进行排序，从0~n-1遍历元素nums[i],在`i+1 ~ n-1`内找 `nums[i] + nums[left] + nums[right] == 0`的三元组
+
+> 优化：当nums[i] > 0，就没必要继续找了，直接break。因为都大于0了
+
+```java
+class Solution {
+    public List<List<Integer>> threeSum(int[] nums) {
+        List<List<Integer>> ans = new ArrayList<List<Integer>>();
+        int n = nums.length;
+        Arrays.sort(nums);
+        for (int i = 0;i < n;i++){
+            if (nums[i] > 0) break; //后面的查找无意义
+            if (i > 0 && nums[i] == nums[i-1]) continue; //防止重复
+            int left = i+1;
+            int right = n-1;
+            while (left < right){
+                int total = nums[i] + nums[left] + nums[right];
+                if (total == 0){ //如果找到了
+                    ans.add(Arrays.asList(nums[i],nums[left],nums[right]));//加入该三元组
+                    while (left < right && nums[left] == nums[left+1]){ //排除重复元素，继续找
+                        left += 1;
+                    }
+                    left += 1; //一定不要忘记！
+                }else if (total > 0){
+                    right -= 1;
+                }else{
+                    left += 1;
+                }
+            }
+        }
+        return ans;
+    }
+}
+```
+
+#### 第七十一剑式：和大于等于target的最短子数组
+
+> 题目来源：LeetCode 剑指 Offer II 008
+
+给定一个含有 n 个正整数的数组和一个正整数 target 。
+
+找出该数组中满足其和 ≥ target 的长度最小的 连续子数组 [numsl, numsl+1, ..., numsr-1, numsr] ，并返回其长度。如果不存在符合条件的子数组，返回 0 。
+
+```
+输入：target = 7, nums = [2,3,1,2,4,3]
+输出：2
+解释：子数组 [4,3] 是该条件下的长度最小的子数组。
+```
+
+题目解析：
+
+一看到题目就想到了双指针。那就直接用双指针维护当前窗口内元素的值！
+
+```java
+class Solution {
+    public int minSubArrayLen(int target, int[] nums) {
+        int left = 0, right = 0; //初始窗口
+        int sum = 0;  //存储窗口元素值
+        int minWindow = Integer.MAX_VALUE;
+        while(right < nums.length){ //结束条件，窗口有边界越界
+            sum += nums[right]; //将当前元素加入窗口
+            while (sum >= target){  //如果当前窗口元素和大于目标值
+                minWindow = Math.min(minWindow,right-left+1); //更新以下最短长度
+                sum -= nums[left]; //将左边界元素弹出
+                left += 1;
+            }
+            right += 1;
+        }
+        return minWindow == Integer.MAX_VALUE ? 0 :minWindow;
+    }
+}
+```
+
+#### 第七十二剑式：乘积小于K的子数组
+
+> 题目来源：LeetCode 剑指 Offer II 009
+
+给定一个正整数数组 `nums`和整数 `k` ，请找出该数组内乘积小于 `k` 的连续的子数组的个数。
+
+```
+输入: nums = [10,5,2,6], k = 100
+输出: 8
+解释: 8 个乘积小于 100 的子数组分别为: [10], [5], [2], [6], [10,5], [5,2], [2,6], [5,2,6]。
+需要注意的是 [10,5,2] 并不是乘积小于100的子数组。
+```
+
+题目解析：
+
+还是滑动窗口。
+
+```java
+class Solution {
+    public int numSubarrayProductLessThanK(int[] nums, int k) {
+        int left = 0;
+        if (k == 0) return 0;
+        int mul = 1;
+        int ans = 0;
+        int right = 0;
+        while(right < nums.length){
+            mul = mul * nums[right];
+            while (left <= right && mul >= k){
+                mul /= nums[left];
+                left += 1;
+            }
+            if (left <= right){
+                ans += right - left + 1;
+            }
+            right += 1;
+        }
+        return ans;
+    }
+}
+```
+
