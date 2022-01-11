@@ -3632,3 +3632,127 @@ class NumMatrix {
 }
 ```
 
+
+
+
+
+#### 第七十七剑式：字符串中的变位词
+
+> 题目来源：LeetCode 剑指 Offer II 014
+>
+> 标签：滑动窗口
+
+给定两个字符串 `s1` 和 `s2`，写一个函数来判断 `s2` 是否包含 `s1` 的某个变位词。
+
+换句话说，第一个字符串的排列之一是第二个字符串的 **子串** 。
+
+```
+输入: s1 = "ab" s2 = "eidbaooo"
+输出: True
+解释: s2 包含 s1 的排列之一 ("ba").
+```
+
+比较简单，就直接撸了
+
+```java
+class Solution {
+    public boolean checkInclusion(String s1, String s2) {
+        int lens1 = s1.length(),lens2 = s2.length();
+        if (lens1 > lens2) return false; //如果len(s1) > len(s) 直接返回false
+        int[] cnt1 = new int[26]; //记录s1中有哪些字符，每个字符的个数
+        int[] cnt2 = new int[26]; //记录s2中和s1相同长度的窗口中有哪些字符以及其个数
+        for (int i = 0;i < lens1;i++){
+            cnt1[s1.charAt(i) - 'a'] += 1;
+            cnt2[s2.charAt(i) - 'a'] += 1;
+        }
+        if (Arrays.equals(cnt1,cnt2)) return true;
+        for (int i = lens1;i < lens2;i++){
+            cnt2[s2.charAt(i) - 'a'] += 1;
+            cnt2[s2.charAt(i-lens1) - 'a'] -= 1;
+            if (Arrays.equals(cnt1,cnt2)) return true; //如果两个窗口中字符及个数相等，则返回true
+        }
+        return false;
+    }
+}
+```
+
+#### 第七十八剑式：字符串中的所有变位词
+
+> 题目来源：LeetCode 剑指 Offer II 015
+>
+> 标签：滑动窗口
+
+给定两个字符串 `s` 和 `p`，找到 `s` 中所有 `p` 的 **变位词** 的子串，返回这些子串的起始索引。不考虑答案输出的顺序。**变位词** 指字母相同，但排列不同的字符串。
+
+```
+输入: s = "cbaebabacd", p = "abc"
+输出: [0,6]
+解释:
+起始索引等于 0 的子串是 "cba", 它是 "abc" 的变位词。
+起始索引等于 6 的子串是 "bac", 它是 "abc" 的变位词。
+```
+
+```java
+class Solution {
+    public List<Integer> findAnagrams(String s, String p) {
+        List<Integer> ans = new ArrayList<>();
+        int lens1 = s.length(),lens2 = p.length();
+        if (lens2 > lens1) return ans;
+        int[] cnt1 = new int[26];
+        int[] cnt2 = new int[26];
+        for (int i = 0;i < lens2;i++){
+            cnt1[s.charAt(i) - 'a'] += 1;
+            cnt2[p.charAt(i) - 'a'] += 1;
+        }
+        if (Arrays.equals(cnt1,cnt2)) ans.add(0);
+        for (int i = lens2;i < lens1;i++){
+            cnt1[s.charAt(i) - 'a'] += 1;
+            cnt1[s.charAt(i-lens2) - 'a'] -= 1;
+            if (Arrays.equals(cnt1,cnt2)) ans.add(i-lens2 + 1);
+        }
+        return ans;
+    }
+}
+```
+
+#### 第七十九剑式：不含重复字符的最长子字符串
+
+> 题目来源：LeetCode 剑指 Offer II 016
+>
+> 标签：双指针
+
+给定一个字符串 `s` ，请你找出其中不含有重复字符的 **最长连续子字符串** 的长度。
+
+```
+输入: s = "abcabcbb"
+输出: 3 
+解释: 因为无重复字符的最长子字符串是 "abc"，所以其长度为 3。
+```
+
+
+
+```java
+class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        if (s.length() < 2) return s.length(); //如果s的长度小于2，则肯定没有重复的，直接返回对于长度
+        int maxlen = 0;
+        int left = 0,right = 0; //双指针初始化
+        Map<Character,Integer> m = new HashMap<>();  //hashtable初始化 key:字符 val:上一次出现的位置
+        while (right < s.length()){
+            if (m.get(s.charAt(right)) == null) {//之前没有出现过
+                m.put(s.charAt(right),right); //直接加入哈希表
+            }else{//之前出现过
+                int lastidx = m.get(s.charAt(right)); //获取上传出现的位置
+                if (lastidx >= left){ //如果上次出现的位置再窗口范围内，则更新一次maxlen
+                    maxlen = Math.max(maxlen,right-left);
+                    left = lastidx + 1; //并直接将窗口左边界更新为重复元素的位置的右边
+                }
+                m.put(s.charAt(right),right); //更新上一次出现的位置
+            }
+            right += 1; //有边界扩增1
+        }
+        return Math.max(maxlen,right-left); //滑动完了还要再更新一次最大值
+    }
+}
+```
+
