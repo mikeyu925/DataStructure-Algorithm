@@ -3756,3 +3756,100 @@ class Solution {
 }
 ```
 
+#### 第八十剑式：有效的回文
+
+> 题目来源：LeetCode 剑指 Offer II 018
+>
+> 标签：双指针
+
+给定一个字符串 `s` ，验证 `s` 是否是 **回文串** ，只考虑字母和数字字符，可以忽略字母的大小写。
+
+本题中，将空字符串定义为有效的 **回文串** 。
+
+**题目解析**：
+
+我直接调用了反转函数来处理比较方便但是耗时，其实这道题用双指针做会快很多。
+
+方法1：字符串反转 + String.equals()
+
+```java
+class Solution {
+    public boolean isPalindrome(String s) {
+        StringBuilder sb = new StringBuilder();
+        s = s.toLowerCase();
+        for (int i = 0;i < s.length();i++){
+            if ((s.charAt(i) >= 'a' && s.charAt(i) <= 'z') || (s.charAt(i) >= '0' && s.charAt(i) <= '9')){
+                sb.append(s.charAt(i));
+            }
+        }
+        System.out.println(sb.toString());
+        System.out.println(sb.reverse().toString());
+        return sb.toString().equals(sb.reverse().toString());
+    }
+}
+```
+
+方法2：双指针
+
+```java
+class Solution {
+    public boolean isPalindrome(String s) {
+        int n = s.length();
+        s = s.toLowerCase();
+        int left = 0,right = n-1;
+        while (left < right){
+            while (left < right && !((s.charAt(left) >= 'a' && s.charAt(left) <= 'z') || (s.charAt(left) >= '0' && s.charAt(left) <= '9'))){
+                left += 1;
+            }
+            while (left < right && !((s.charAt(right) >= 'a' && s.charAt(right) <= 'z') || (s.charAt(right) >= '0' && s.charAt(right) <= '9'))){
+                right -= 1;
+            }
+            if (left < right && s.charAt(left) != s.charAt(right)) return false;
+            left += 1;
+            right -= 1;
+        }
+        return true;
+    }
+}
+```
+
+
+
+
+
+#### 第八十一剑式：最多删除一个字符得到回文
+
+> 题目来源：LeetCode 剑指 Offer II 019
+>
+> 标签：双指针
+
+给定一个非空字符串 `s`，请判断如果 **最多** 从字符串中删除一个字符能否得到一个回文字符串。
+
+题目解析：
+
+当遇到不相等的字符==> 跳过左字符比较剩余字符 或者 跳过右字符比较剩余字符
+
+```java
+class Solution {
+    public boolean validPalindrome(String s) {
+        for(int left = 0, right = s.length() - 1; left < right; left++, right--){
+            // 如果不相等，则分两种情况：删除左边的元素，或者右边的元素，再判断各自是否回文，满足一种即可。
+            if(s.charAt(left) != s.charAt(right)) 
+                return isPalindrome(s, left+1, right) || isPalindrome(s, left, right - 1);
+        }
+        return true;
+    }
+
+    // 判断字符串 s 的 [left, right] 的区间是否是回文串
+    private boolean isPalindrome(String s, int left , int right){
+        while (left < right){
+            if (s.charAt(left) != s.charAt(right))
+                return false;
+            left += 1;
+            right -= 1;
+        }
+        return true;
+    }
+}
+```
+
