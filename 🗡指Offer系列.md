@@ -3910,3 +3910,134 @@ class Solution {
 }
 ```
 
+
+
+
+
+#### 第八十三剑式：删除链表的倒数第n个结点
+
+> 题目来源：LeetCode 剑指 Offer II 021
+>
+> 标签：链表、快慢指针
+
+给定一个链表，删除链表的倒数第 `n` 个结点，并且返回链表的头结点。
+
+![img](🗡指Offer系列.assets/remove_ex1.jpg)
+
+```
+输入：head = [1,2,3,4,5], n = 2
+输出：[1,2,3,5]
+```
+
+```java
+class Solution {
+    public ListNode removeNthFromEnd(ListNode head, int n) {
+        ListNode now = head; //快指针
+        ListNode del = head; //标记待删除的结点
+        ListNode pre = null; //删除结点的前驱结点
+        //快慢指针，先移动快指针
+        for(int i = 0;i < n;i++){
+            now = now.next;
+        }
+        //快慢指针同时移动
+        while(now != null){
+            now = now.next;
+            pre = del;
+            del = del.next;
+        }
+        //如果删除的是头结点 直接 return head.next
+        if(del == head){
+            head = head.next;
+        }else{
+            pre.next = del.next;
+        }
+        return head;
+    }
+}
+```
+
+
+
+#### 第八十四剑式：链表中环的入口结点
+
+> 题目来源：LeetCode 剑指 Offer II 022
+>
+> 标签：链表、快慢指针
+
+给定一个链表，返回链表开始入环的第一个节点。 从链表的头节点开始沿着 next 指针进入环的第一个节点为环的入口节点。如果链表无环，则返回 null。
+
+为了表示给定链表中的环，我们使用整数 pos 来表示链表尾连接到链表中的位置（索引从 0 开始）。 如果 pos 是 -1，则在该链表中没有环。注意，pos 仅仅是用于标识环的情况，并不会作为参数传递到函数中。
+
+说明：不允许修改给定的链表。
+
+![img](🗡指Offer系列.assets/circularlinkedlist.png)
+
+```
+输入：head = [3,2,0,-4], pos = 1
+输出：返回索引为 1 的链表节点
+解释：链表中有一个环，其尾部连接到第二个节点。
+```
+
+**题目解析**：
+
+可能看到这一题第一想法就是用hashtable存储每个结点，如果下一次遍历到hashtable中的结点的话那么就说明该节点是`环的入口结点`
+
+但是还有种方法是利用`快慢指针`的方法求解。
+
+![image-20220113112057193](🗡指Offer系列.assets/image-20220113112057193.png)
+
+```java
+public class Solution {
+    public ListNode detectCycle(ListNode head) {
+        ListNode slow = head;
+        ListNode quick = head;
+        while(quick != null && quick.next != null){
+            slow = slow.next;
+            quick = quick.next.next;
+            if (slow == quick){
+                ListNode tmp = head;
+                while (tmp != slow){
+                    tmp = tmp.next;
+                    slow = slow.next;
+                }
+                return slow;
+            }
+        }
+        return null;
+    }
+}
+```
+
+#### 第八十五剑式：两个链表的第一个重合结点
+
+> 题目来源：LeetCode 剑指 Offer II 023
+>
+> 标签：链表、双指针
+
+给定两个单链表的头节点 headA 和 headB ，请找出并返回两个单链表相交的起始节点。如果两个链表没有交点，返回 null 。
+
+图示两个链表在节点 c1 开始相交：
+
+![img](🗡指Offer系列.assets/160_statement.png)
+
+题目数据 保证 整个链式结构中不存在环。
+
+注意，函数返回结果后，链表必须 保持其原始结构 。
+
+![9cab9b6741de2416fe2f00b17df1a84](🗡指Offer系列.assets/9cab9b6741de2416fe2f00b17df1a84.jpg)
+
+```java
+public class Solution {
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        if(headA == null || headB == null) return null;
+        ListNode nowA = headA;
+        ListNode nowB = headB;
+        while (nowA != nowB){
+            nowA = nowA == null ? headB : nowA.next;
+            nowB = nowB == null ? headA : nowB.next;
+        }
+        return nowA;
+    }
+}
+```
+
