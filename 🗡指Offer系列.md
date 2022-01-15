@@ -4041,3 +4041,342 @@ public class Solution {
 }
 ```
 
+
+
+#### 第八十六剑式：反转链表
+
+> 题目来源：LeetCode 剑指 Offer II 024
+>
+> 标签：链表、头插法
+
+给定单链表的头节点 `head` ，请反转链表，并返回反转后的链表的头节点。
+
+题目解析：
+
+就是一个头插法创建链表的过程
+
+```java
+class Solution {
+    public ListNode reverseList(ListNode head) {
+        ListNode new_head_pre = new ListNode();
+        ListNode now = head;
+        ListNode now_next = null;
+        while (now != null){
+            now_next = now.next;
+            now.next = new_head_pre.next;
+            new_head_pre.next = now;
+            now = now_next;
+        }
+        return new_head_pre.next;
+    }
+}
+```
+
+
+
+#### 第八十七剑式： 链表中的两数相加
+
+> 题目来源：LeetCode 剑指 Offer II 025
+>
+> 标签：链表、链表反转
+
+给定两个 **非空链表** `l1`和 `l2` 来代表两个非负整数。数字最高位位于链表开始位置。它们的每个节点只存储一位数字。将这两数相加会返回一个新的链表。
+
+可以假设除了数字 0 之外，这两个数字都不会以零开头。
+
+解题思路：
+
+先反转两个链表 ==> 逐个结点相加 ==> 反转最终链表
+
+```java
+class Solution {
+    //上一题的头插法反转链表函数
+    public ListNode reverseList(ListNode head) {
+        ListNode new_head_pre = new ListNode();
+        ListNode now = head;
+        ListNode now_next = null;
+        while (now != null){
+            now_next = now.next;
+            now.next = new_head_pre.next;
+            new_head_pre.next = now;
+            now = now_next;
+        }
+        return new_head_pre.next;
+    }
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        //反转两个链表
+        ListNode L1_head = reverseList(l1);
+        ListNode L2_head = reverseList(l2);
+        ListNode node_l1 = L1_head;
+        ListNode node_l2 = L2_head;
+        ListNode pre1 = null;
+        ListNode pre2 = null;
+        int add = 0;
+        //当两个都没有遍历完
+        while (node_l1 != null && node_l2 != null){
+            pre1 = node_l1;
+            pre2 = node_l2;
+            //计算当前结点以及进位的和
+            int val = (node_l1.val + node_l2.val + add) % 10;
+            //更新进位
+            add = (node_l1.val + node_l2.val + add) / 10;
+            //更新结果
+            node_l1.val = val;
+            node_l1 = node_l1.next;
+            node_l2 = node_l2.next;
+        }
+        //因为我们是把结果l1上的结点作为 结点和的值，如果l2比l1长，那么l2后面的结点直接接在l1后即可
+        if (node_l1 == null && node_l2 != null){
+            pre1.next = node_l2;
+        }
+        //l1的当前结点回退一个
+        node_l1 = pre1.next;
+        //继续遍历剩下没有遍历的结点，此时只剩l1中的结点了
+        while (node_l1 != null){
+            pre1 = node_l1;
+            int val = (node_l1.val + add) % 10;
+            add = (node_l1.val + add) / 10;
+            node_l1.val = val;
+            node_l1 = node_l1.next;
+        }
+        //如果有进位，新创建一个结点
+        if(add == 1){
+            pre1.next = new ListNode(1);
+        }
+        return reverseList(L1_head);
+    }
+}
+```
+
+
+
+#### 第八十八剑式： 重排链表
+
+> 题目来源：LeetCode 剑指 Offer II 026
+>
+> 标签：链表、哈希表
+
+给定一个单链表 L 的头节点 head ，单链表 L 表示为：
+
+ L0 → L1 → … → Ln-1 → Ln 
+请将其重新排列后变为：
+
+L0 → Ln → L1 → Ln-1 → L2 → Ln-2 → …
+
+不能只是单纯的改变节点内部的值，而是需要实际的进行节点交换
+
+```java
+class Solution {
+    public void reorderList(ListNode head) {
+        ArrayList<ListNode> arr = new ArrayList<>();
+        ListNode node = head;
+        while (node != null){
+            arr.add(node);
+            node = node.next;
+        }
+        ListNode ans_pre = new ListNode();
+        ListNode tail = ans_pre;
+        int left = 0,right = arr.size() - 1;
+        while (left < right){
+            tail.next = arr.get(left);
+            left += 1;
+            tail = tail.next;
+            tail.next = arr.get(right);
+            right -= 1;
+            tail = tail.next;
+        }
+        if(left == right){
+            tail.next = arr.get(left);
+            tail = tail.next;
+        }
+        tail.next = null;
+        head = ans_pre.next;
+    }
+}
+```
+
+
+
+#### 第八十九剑式： 回文链表
+
+> 题目来源：LeetCode 剑指 Offer II 027
+>
+> 标签：链表、反转链表
+
+给定一个链表的 **头节点** `head` **，**请判断其是否为回文链表。
+
+如果一个链表是回文，那么链表节点序列从前往后看和从后往前看是相同的。
+
+```java
+class Solution {
+    public boolean isPalindrome(ListNode head) {
+        ListNode new_head = new ListNode();
+        ListNode node = head;
+        //创建一个新的逆序链表
+        while (node != null){
+            ListNode tmp = new ListNode(node.val);
+            tmp.next = new_head.next;
+            new_head.next = tmp;
+            node = node.next;
+        }
+        node = head;
+        ListNode new_node = new_head.next;
+        while (node != null && new_node != null){
+            if (node.val != new_node.val) return false;
+            node = node.next;
+            new_node = new_node.next;
+        }
+        return true;
+    }
+}
+```
+
+
+
+#### 第九十剑式： 展平多级双向链表
+
+> 题目来源：LeetCode 剑指 Offer II 028
+>
+> 标签：双向链表、栈
+
+多级双向链表中，除了指向下一个节点和前一个节点指针之外，它还有一个子链表指针，可能指向单独的双向链表。这些子列表也可能会有一个或多个自己的子项，依此类推，生成多级数据结构，如下面的示例所示。
+
+给定位于列表第一级的头节点，请扁平化列表，即将这样的多级双向链表展平成普通的双向链表，使所有结点出现在单级双链表中。
+
+```
+输入：head = [1,2,3,4,5,6,null,null,null,7,8,9,10,null,null,11,12]
+输出：[1,2,3,7,8,11,12,9,10,4,5,6]
+```
+
+解释：输入的多级列表如下图所示：
+
+![img](🗡指Offer系列.assets/multilevellinkedlist.png)
+
+
+
+扁平化后的链表如下图：
+
+![img](🗡指Offer系列.assets/multilevellinkedlistflattened.png)
+
+```java
+class Solution {
+    public Node flatten(Node head) {
+        if (head == null) return null;
+        //创建双端队列 模拟 栈
+        Deque<Node> st = new ArrayDeque<>();
+        // now 标记当前遍历到哪个结点了
+        Node now = head;
+        // now 的前驱结点
+        Node pre = null;
+        while (now != null){
+            //首先更新前驱结点
+            pre = now;
+            //如果当前结点有孩子结点
+            if (now.child != null){
+                //如果now.next != null 将now的后继结点加入栈中，先遍历子链表
+                if(now.next != null)
+                    st.offerLast(now.next);
+                //now.child.prev -> now
+                now.child.prev = now;
+                //now.next -> now.child
+                now.next = now.child;;
+                //now.childe -> null
+                now.child = null;
+            }
+            now = now.next;
+        }
+        //依次将栈中的剩下链表的头结点插入当前的尾结点后面
+        while (!st.isEmpty()){
+            Node tmp = st.pollLast();
+            pre.next = tmp;
+            tmp.prev = pre;
+            while (tmp != null){
+                pre = tmp;
+                tmp = tmp.next;
+            }
+        }
+        return head;
+    }
+}
+```
+
+
+
+#### 第九十一剑式： 展平多级双向链表
+
+> 题目来源：LeetCode 剑指 Offer II 029
+>
+> 标签：循环链表
+
+给定循环单调非递减列表中的一个点，写一个函数向这个列表中插入一个新元素 insertVal ，使这个列表仍然是循环升序的。
+
+给定的可以是这个列表中任意一个顶点的指针，并不一定是这个列表中最小元素的指针。
+
+如果有多个满足条件的插入位置，可以选择任意一个位置插入新的值，插入后整个列表仍然保持有序。
+
+如果列表为空（给定的节点是 null），需要创建一个循环有序列表并返回这个节点。否则。请返回原先给定的节点。
+
+![img](🗡指Offer系列.assets/example_1_before_65p.jpg)
+
+```
+输入：head = [3,4,1], insertVal = 2
+输出：[3,4,1,2]
+```
+
+![img](🗡指Offer系列.assets/example_1_after_65p.jpg)
+
+题目解析：
+
+根据题目，进行了3、4的提交错误后，发现起始能够插入的情况无非如下三种，以及一些特殊情况（空链表、只有一个结点）
+
+> 注：图片借鉴自`https://leetcode-cn.com/problems/4ueAj6/solution/cai-keng-liu-lei-leng-jing-fen-xi-by-che-n8u9/`
+
+<img src="🗡指Offer系列.assets/2022-01-15_184558.jpg" alt="2022-01-15_184558" style="zoom:50%;" />
+
+```java
+class Solution {
+    public Node insert(Node head, int insertVal) {
+        //创建插入的结点
+        Node add = new Node(insertVal);
+        //如果是空链表，直接构造成循环链表并返回
+        if (head == null){
+            add.next = add;
+            return add;
+        }else if (head.next == head){//如果是只有一个结点的链表，直接插入
+            add.next = head;
+            head.next = add;
+            return head;
+        }
+        Node now = head;
+        boolean flag = false;
+        Node start = head;
+        Node pre = null;
+        while (true){
+            pre = now;//记录前驱结点
+            if ((now.val <= insertVal && now.next.val > insertVal)){ //情况1
+                break;
+            }
+            if (now.val > now.next.val){
+                if (insertVal >= now.val || insertVal <= now.next.val){ //情况2
+                    break;
+                }
+            }
+            now = now.next; //移动至下一个结点
+            if(now == start){ //情况3，全部相同
+                flag = true;
+                break;
+            }
+        }
+        if (flag){ //情况3的插入
+            add.next = now;
+            pre.next = add;
+            return head;
+        }
+        //情况1，2的插入
+        add.next = now.next;
+        now.next = add;
+        return head;
+    }
+}
+```
+
