@@ -4380,3 +4380,30 @@ class Solution {
 }
 ```
 
+
+
+#### 第九十二剑式： 有效的变位词
+
+> 题目来源：LeetCode 剑指 Offer II 032
+>
+> 标签：数组、哈希表
+
+给定两个字符串 `s` 和 `t` ，编写一个函数来判断它们是不是一组变位词（字母异位词）。
+
+**注意：**若 `s` 和 `t` 中每个字符出现的次数都相同且**字符顺序不完全相同**，则称 `s` 和 `t` 互为变位词（字母异位词）。
+
+```java
+public boolean isAnagram(String s, String t) {
+    if (s.equals(t) == true) return false;
+    int [] cnt_s = new int[26];
+    int [] cnt_t = new int[26];
+    for (int i = 0;i < s.length();i++){
+        cnt_s[s.charAt(i) - 'a'] += 1;
+    }
+    for (int i = 0;i < t.length();i++){
+        cnt_t[t.charAt(i) - 'a'] += 1;
+    }
+    return Arrays.equals(cnt_s,cnt_t);
+}
+```
+
