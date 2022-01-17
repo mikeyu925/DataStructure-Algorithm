@@ -4407,3 +4407,127 @@ public boolean isAnagram(String s, String t) {
 }
 ```
 
+#### 第九十三剑式： 变位词组
+
+> 题目来源：LeetCode 剑指 Offer II 033
+>
+> 标签：排序、哈希表
+
+给定一个字符串数组 `strs` ，将 **变位词** 组合在一起。 可以按任意顺序返回结果列表。
+
+**注意：**若两个字符串中每个字符出现的次数都相同，则称它们互为变位词。
+
+```
+输入: strs = ["eat", "tea", "tan", "ate", "nat", "bat"]
+输出: [["bat"],["nat","tan"],["ate","eat","tea"]]
+```
+
+**解题思路**：
+
+如果两个单词是变位词，则对这两个单词排序后结果一样。
+
+```java
+class Solution {
+    public List<List<String>> groupAnagrams(String[] strs) {
+        Map<String,List<String>> m = new HashMap<>();
+        for (int i = 0;i < strs.length;i++){
+            char [] str_arr = strs[i].toCharArray();
+            Arrays.sort(str_arr);
+            String tmp = new String(str_arr);
+            List<String> list = m.getOrDefault(tmp,new ArrayList<>());
+            list.add(strs[i]);
+            m.put(tmp,list);
+        }
+        // map -> List
+        return new ArrayList<List<String>> (m.values());
+    }
+}
+```
+
+#### 第九十四剑式：外星语言是否排序 
+
+> 题目来源：LeetCode 剑指 Offer II 034
+>
+> 标签：字符串、哈希表
+
+某种外星语也使用英文小写字母，但可能顺序 order 不同。字母表的顺序（order）是一些小写字母的排列。
+
+给定一组用外星语书写的单词 words，以及其字母表的顺序 order，只有当给定的单词在这种外星语中按字典序排列时，返回 true；否则，返回 false。
+
+题目解析：
+
+比较简单，先获得每个字符的优先级存储在HashMap中，然后遍历words判断是否是按照字典序排序。
+
+```java
+class Solution {
+    public boolean isAlienSorted(String[] words, String order) {
+        Map<Character,Integer> m = new HashMap<>();
+        for (int i = 0;i < order.length();i++){
+            m.put(order.charAt(i),i);
+        }
+        for (int i = 0;i < words.length - 1;i++){
+            int idx = 0;
+            boolean flag = false;
+            while (idx < words[i].length() && idx < words[i+1].length()){
+                if (words[i].charAt(idx) == words[i+1].charAt(idx)){
+                    idx += 1;
+                    continue;
+                }
+                if (m.get(words[i].charAt(idx)) < m.get(words[i+1].charAt(idx))){
+                    flag = true;
+                    break;
+                }else{
+                    return false;
+                }
+            }
+            if(!flag){
+                if(words[i].length() > words[i+1].length()) return false;
+            }
+        }
+        return true;
+    }
+}
+```
+
+#### 第九十五剑式：最小时间差
+
+> 题目来源：LeetCode 剑指 Offer II 035
+>
+> 标签：字符串、排序
+
+给定一个 24 小时制（小时:分钟 **"HH:MM"**）的时间列表，找出列表中任意两个时间的最小时间差并以分钟数表示。
+
+题目解析：
+
+将 "HH:MM"转换为一天中的第几分钟，然后排序，再比较相邻的两个时间差
+
+> 注：首尾两个也是相连的哦，时间差 = 一个的总时间 - （两者时间差的绝对值）
+
+```java
+class Solution {
+    public int findMinDifference(List<String> timePoints) {
+        int n = timePoints.size();
+        List<Integer> arr = new ArrayList<>();
+        for (String time : timePoints){
+            int val = 0;
+            String [] ts = time.split(":");
+            val = Integer.parseInt(ts[0]);
+            val = val * 60 + Integer.parseInt(ts[1]);
+            arr.add(val);
+        }
+        arr.sort(new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return o1 - o2;
+            }
+        });
+        int mindiff = Integer.MAX_VALUE;
+        for (int i = 1;i < n;i++){
+            mindiff = Math.min(mindiff,Math.abs(arr.get(i)-arr.get(i-1)));
+        }
+        //最后记得比较一下首尾两个元素的时间差
+        return Math.min(mindiff,1440-Math.abs(arr.get(0)-arr.get(n-1)));
+    }
+}
+```
+
