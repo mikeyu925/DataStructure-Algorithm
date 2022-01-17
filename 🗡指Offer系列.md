@@ -4531,3 +4531,86 @@ class Solution {
 }
 ```
 
+
+
+#### 第九十六剑式：后缀表达式
+
+> 题目来源：LeetCode 剑指 Offer II 036
+>
+> 标签：栈
+
+根据 逆波兰表示法，求该后缀表达式的计算结果。
+
+有效的算符包括 `+`、`-`、`*`、`/` 。每个运算对象可以是整数，也可以是另一个逆波兰表达式。
+
+**说明：**
+
+- 整数除法只保留整数部分。
+- 给定逆波兰表达式总是有效的。换句话说，表达式总会得出有效数值且不存在除数为 0 的情况。
+
+```
+输入：tokens = ["2","1","+","3","*"]
+输出：9
+解释：该算式转化为常见的中缀算术表达式为：((2 + 1) * 3) = 9
+```
+
+题目解析：
+
+题目比较简单，一个栈就可以解决
+
+```java
+class Solution {
+    public int evalRPN(String[] tokens) {
+        int n = tokens.length;
+        Deque<Integer> st = new ArrayDeque<>();
+        for (int i = 0;i < n;i++){
+            if (tokens[i].charAt(0) >= '0' && tokens[i].charAt(0) <= '9'){
+                st.offerLast(Integer.parseInt(tokens[i]));
+            }else if (tokens[i].length() > 1){
+                st.offerLast(Integer.parseInt(tokens[i]));
+            }else{
+                int a = st.pollLast();
+                int b = st.pollLast();
+                switch (tokens[i].charAt(0)){
+                    case '+' :
+                    {
+                        st.offerLast(a + b);
+                        break;
+                    }
+                    case '-' :
+                    {
+                        st.offerLast(b - a);
+                        break;
+                    }
+                    case '*' :
+                    {
+                        st.offerLast(b * a);
+                        break;
+                    }
+                    case '/' :
+                    {
+                        st.offerLast(b / a);
+                        break;
+                    }
+                }
+            }
+        }
+        return  st.peekLast();
+    }
+}
+```
+
+
+
+#### 第九十七剑式：小行星碰撞
+
+> 题目来源：LeetCode 剑指 Offer II 037
+>
+> 标签：栈
+
+
+
+```java
+
+```
+
