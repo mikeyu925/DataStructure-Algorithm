@@ -4608,9 +4608,122 @@ class Solution {
 >
 > 标签：栈
 
+给定一个整数数组 asteroids，表示在同一行的小行星。
 
+对于数组中的每一个元素，其绝对值表示小行星的大小，正负表示小行星的移动方向（**正表示向右移动，负表示向左移动**）。每一颗小行星以相同的速度移动。
+
+找出碰撞后剩下的所有小行星。碰撞规则：两个行星相互碰撞，较小的行星会爆炸。如果两颗行星大小相同，则两颗行星都会爆炸。两颗移动方向相同的行星，永远不会发生碰撞。
+
+题目解析：
+
+就是用栈来模拟小行星的碰撞：
+
+我们用一个`boolean变量 destory `来表示当前陨石状态
+
+- 如果栈空- => 直接入栈
+
+- 如果栈不空
+
+  - 如果当前陨石方向和栈顶方向不同(`st.peekLast() * val < 0`) 并且 当前陨石没有粉碎`!destory`
+
+    - 如果栈顶向左(``st.peekLast() < 0`)，则不会碰撞，将当前陨石入栈
+
+    - 如果栈顶向右(``st.peekLast() > 0`)，就要判断两个陨石的大小了
+
+      - 如果当前陨石大于栈顶陨石，则粉碎栈顶陨石，并继续比较
+
+        ```java
+        if (Math.abs(val) > Math.abs(st.peekLast())){
+            st.pollLast();
+            continue;
+        }
+        ```
+
+      - 如果两个陨石大小相等，则两个都粉碎；如果当前陨石小于栈顶，则粉碎当前陨石
+
+        ```java
+        if (Math.abs(val) == Math.abs(st.peekLast())){
+            st.pollLast();
+        }
+        destory = true;
+        ```
+
+  - 如果当前陨石没有粉碎，就将当前陨石入栈
+
+    ```java
+    if (!destory)
+        st.offerLast(val);
+    ```
 
 ```java
+class Solution {
+    public int[] asteroidCollision(int[] asteroids) {
+        Deque<Integer> st = new ArrayDeque<>();
+        for (int i = 0;i < asteroids.length;i++){
+            int val = asteroids[i];
+            boolean destory = false;
+            while (!st.isEmpty() && st.peekLast() * val < 0 && !destory){
+                if (st.peekLast() < 0){
+                    break;
+                }
+                if (Math.abs(val) > Math.abs(st.peekLast())){
+                    st.pollLast();
+                    continue;
+                }
+                if (Math.abs(val) == Math.abs(st.peekLast())){
+                    st.pollLast();
+                }
+                destory = true;
+            }
+            if (!destory)
+                st.offerLast(val);
+        }
+        int [] ans = new int[st.size()];
+        int idx = 0;
+        while (!st.isEmpty()){
+            ans[idx++] = st.pollFirst();
+        }
+        return ans;
+    }
+}
+```
 
+#### 第九十八剑式：每日稳定
+
+> 题目来源：LeetCode 剑指 Offer II 038
+>
+> 标签：栈、单调递减栈
+
+请根据每日 气温 列表 temperatures ，重新生成一个列表，要求其对应位置的输出为：要想观测到更高的气温，至少需要等待的天数。如果气温在这之后都不会升高，请在该位置用 0 来代替。
+
+```
+输入: temperatures = [73,74,75,71,69,72,76,73]
+输出: [1,1,4,2,1,1,0,0]
+```
+
+题目解析：
+
+一看就是个单调栈的问题，直接撸
+
+```java
+class Solution {
+    public int[] dailyTemperatures(int[] temperatures) {
+        Deque<Integer> lower_st = new ArrayDeque<>();
+        int [] ans = new int[temperatures.length];
+        for (int i = 0;i < temperatures.length;i++){
+            int now_temp = temperatures[i]; //当前温度
+            //如果栈不空 并且 栈顶天气温度 < 当前问题，将栈顶天数移除
+            while (!lower_st.isEmpty() && temperatures[lower_st.peekLast()] < now_temp){
+                int peekidx = lower_st.pollLast();
+                ans[peekidx] = (i - peekidx); //计算两天的间隔
+            }
+            lower_st.offerLast(i);
+        }
+        while (!lower_st.isEmpty()){ //剩余栈中的天数都是不会再有更高的温度了
+            ans[lower_st.pollLast()] = 0;
+        }
+        return ans;
+    }
+}
 ```
 
