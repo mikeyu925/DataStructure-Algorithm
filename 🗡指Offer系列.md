@@ -4727,3 +4727,118 @@ class Solution {
 }
 ```
 
+#### 第九十九剑式：直方图最大矩形面积
+
+> 题目来源：LeetCode 剑指 Offer II 039
+>
+> 标签：栈、单调递减栈
+
+给定非负整数数组 `heights` ，数组中的数字用来表示柱状图中各个柱子的高度。每个柱子彼此相邻，且宽度为 `1` 。
+
+求在该柱状图中，能够勾勒出来的矩形的最大面积。
+
+![img](🗡指Offer系列.assets/histogram.jpg)
+
+```
+输入：heights = [2,1,5,6,2,3]
+输出：10
+解释：最大的矩形为图中红色区域，面积为 10
+```
+
+题目解析：
+
+就是利用单调栈确定柱子可以向左右扩展的最远距离。
+
+```java
+class Solution {
+    public int largestRectangleArea(int[] heights) {
+        Deque<Integer> st = new ArrayDeque<>();
+        int n =  heights.length;
+        int maxArea = Integer.MIN_VALUE;
+        for (int i = 0;i < heights.length;i++){
+            // 如果当前柱子高度小于 栈顶的圆柱，说明栈顶圆柱的右边界不能继续扩展了。
+            while (!st.isEmpty() && heights[i] <= heights[st.peekLast()]){
+                int idx = st.pollLast();
+                //弹出栈顶元素，此时栈顶元素的下边即左边界
+                int left = st.isEmpty() ? -1 : st.peekLast();
+                //通过左右边界计算以 栈顶元素柱子高度向左右拓展的矩形面积
+                int nowArea = heights[idx] * (i - left - 1);
+                maxArea = Math.max(maxArea,nowArea);
+            }
+            st.offerLast(i);
+        }
+        //此时栈中剩余的柱子有边界即 n-1，继续按照上述规则计算面积
+        while (!st.isEmpty()){
+            int idx = st.pollLast();
+            int left = st.isEmpty() ? -1 : st.peekLast();
+            int nowArea = heights[idx] * (n - left - 1);
+            maxArea = Math.max(maxArea,nowArea);
+        }
+        return maxArea;
+    }
+}
+```
+
+
+
+#### 第一百剑式：矩形中最大的矩形
+
+> 题目来源：LeetCode 剑指 Offer II 040
+>
+> 标签：栈、单调递减栈
+
+给定一个由 `0` 和 `1` 组成的矩阵 `matrix` ，找出只包含 `1` 的最大矩形，并返回其面积。
+
+**注意：**此题 `matrix` 输入格式为一维 `01` 字符串数组。
+
+![img](🗡指Offer系列.assets/maximal.jpg)
+
+```
+输入：matrix = ["10100","10111","11111","10010"]
+输出：6
+解释：最大矩形如上图所示。
+```
+
+题目解析：
+
+上一题会了这一题不就会了嘛？我们可以将本题转为上一题。
+
+```java
+class Solution {
+    public int largestRectangleArea(int[] heights) {
+        Deque<Integer> st = new ArrayDeque<>();
+        int n =  heights.length;
+        int maxArea = Integer.MIN_VALUE;
+        for (int i = 0;i < heights.length;i++){
+            while (!st.isEmpty() && heights[i] <= heights[st.peekLast()]){
+                int idx = st.pollLast();
+                int left = st.isEmpty() ? -1 : st.peekLast();
+                int nowArea = heights[idx] * (i - left - 1);
+                maxArea = Math.max(maxArea,nowArea);
+            }
+            st.offerLast(i);
+        }
+        while (!st.isEmpty()){
+            int idx = st.pollLast();
+            int left = st.isEmpty() ? -1 : st.peekLast();
+            int nowArea = heights[idx] * (n - left - 1);
+            maxArea = Math.max(maxArea,nowArea);
+        }
+        return maxArea;
+    }
+    public int maximalRectangle(String[] matrix) {
+        if(matrix.length == 0) return 0;
+        int n = matrix[0].length();
+        int [] heights = new int[n];
+        int maxArea = Integer.MIN_VALUE;
+        for (int i = 0;i < matrix.length;i++){
+            for (int j = 0;j < matrix[i].length();j++){
+                heights[j] = matrix[i].charAt(j) == '1' ? heights[j] + 1 : 0;
+            }
+            maxArea = Math.max(maxArea,largestRectangleArea(heights));
+        }
+        return maxArea;
+    }
+}
+```
+
