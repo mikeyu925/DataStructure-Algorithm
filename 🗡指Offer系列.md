@@ -4842,3 +4842,529 @@ class Solution {
 }
 ```
 
+
+
+#### 第一百零一剑式：滑动窗口的平均值
+
+> 题目来源：LeetCode 剑指 Offer II 041
+>
+> 标签：队列、模拟
+
+给定一个整数数据流和一个窗口大小，根据该滑动窗口的大小，计算滑动窗口里所有数字的平均值。
+
+实现 `MovingAverage` 类：
+
+- `MovingAverage(int size)` 用窗口大小 `size` 初始化对象。
+- `double next(int val)` 成员函数 `next` 每次调用的时候都会往滑动窗口增加一个整数，请计算并返回数据流中最后 `size` 个值的移动平均值，即滑动窗口里所有数字的平均值。
+
+```
+输入：
+inputs = ["MovingAverage", "next", "next", "next", "next"]
+inputs = [[3], [1], [10], [3], [5]]
+输出：
+[null, 1.0, 5.5, 4.66667, 6.0]
+```
+
+题目解析：
+
+起始就是考验对队列数据结构的应用。
+
+```java
+class MovingAverage {
+    Deque<Double> q = new ArrayDeque<>();
+    double sum ;
+    int limit;
+    /** Initialize your data structure here. */
+    public MovingAverage(int size) {
+        limit = size;
+        sum = 0;
+    }
+
+    public double next(int val) {
+        q.offerLast((double)val);
+        sum += val;
+        if (q.size() > limit){
+            sum -= q.pollFirst();
+        }
+        return sum / q.size();
+    }
+}
+```
+
+#### 第一百零二剑式：最近的请求次数
+
+> 题目来源：LeetCode 剑指 Offer II 042
+>
+> 标签：队列、模拟
+
+写一个 `RecentCounter` 类来计算特定时间范围内最近的请求。
+
+请实现 `RecentCounter` 类：
+
+- `RecentCounter()` 初始化计数器，请求数为 0 。
+- `int ping(int t)` 在时间 `t` 添加一个新请求，其中 `t` 表示以毫秒为单位的某个时间，并返回过去 `3000` 毫秒内发生的所有请求数（包括新请求）。确切地说，返回在 `[t-3000, t]` 内发生的请求数。
+
+**保证** 每次对 `ping` 的调用都使用比之前更大的 `t` 值。
+
+```java
+class RecentCounter {
+    int requestCnt;
+    Deque<Integer> q;
+    public RecentCounter() {
+        requestCnt = 0;
+        q = new ArrayDeque<>();
+    }
+
+    public int ping(int t) {
+        q.offerLast(t);
+        requestCnt += 1;
+        while (!q.isEmpty() && q.peekFirst() < t - 3000){
+            q.pollFirst();
+            requestCnt -= 1;
+        }
+        return requestCnt;
+    }
+}
+
+```
+
+
+
+#### 第一百零三剑式：向完全二叉树添加结点
+
+> 题目来源：LeetCode 剑指 Offer II 043
+>
+> 标签：队列、二叉树
+
+完全二叉树是每一层（除最后一层外）都是完全填充（即，节点数达到最大，第 `n` 层有 `2n-1` 个节点）的，并且所有的节点都尽可能地集中在左侧。
+
+设计一个用完全二叉树初始化的数据结构 `CBTInserter`，它支持以下几种操作：
+
+- `CBTInserter(TreeNode root)` 使用根节点为 `root` 的给定树初始化该数据结构；
+- `CBTInserter.insert(int v)` 向树中插入一个新节点，节点类型为 `TreeNode`，值为 `v` 。使树保持完全二叉树的状态，**并返回插入的新节点的父节点的值**；
+- `CBTInserter.get_root()` 将返回树的根节点。
+
+题目解析：
+
+
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Node {
+    public TreeNode node;
+    public int floor;
+    public Node(TreeNode node, int floor) {
+        this.node = node;
+        this.floor = floor;
+    }
+}
+class CBTInserter {
+    List<TreeNode> arr;
+    public void dfs(TreeNode root){
+        if (root == null) return;
+        Deque<Node> q = new ArrayDeque<>();
+        q.offerLast(new Node(root,1));
+        while (!q.isEmpty()){
+            int nowfloor = q.peekFirst().floor;
+            while (!q.isEmpty() && q.peekFirst().floor == nowfloor){
+                Node tmp = q.pollFirst();
+                arr.add(tmp.node);
+                if (tmp.node.left != null)
+                    q.offerLast(new Node(tmp.node.left,nowfloor + 1));
+                if (tmp.node.right != null)
+                    q.offerLast(new Node(tmp.node.right,nowfloor + 1));
+            }
+        }
+    }
+    public CBTInserter(TreeNode root) {
+        arr = new ArrayList<>();
+        dfs(root);
+    }
+
+    public TreeNode get_father_node(int v){
+        int n = arr.size();
+        return arr.get((n-1) / 2);
+    }
+    public int insert(int v) {
+        TreeNode father = get_father_node(v);
+        TreeNode node = new TreeNode(v);
+        if (father.left == null){
+            father.left = node;
+        }else{
+            father.right = node;
+        }
+        arr.add(node);
+        return father.val;
+    }
+
+    public TreeNode get_root() {
+        return arr.get(0);
+    }
+}
+```
+
+#### 第一百零四剑式：二叉树每层的最大值
+
+> 题目来源：LeetCode 剑指 Offer II 044
+>
+> 标签：队列、二叉树
+
+给定一棵二叉树的根节点 `root` ，请找出该二叉树中每一层的最大值。
+
+```
+输入: root = [1,3,2,5,3,null,9]
+输出: [1,3,9]
+解释:
+          1
+         / \
+        3   2
+       / \   \  
+      5   3   9 
+```
+
+题目解析：
+
+
+
+```java
+ class Node {
+    public TreeNode node;
+    public int floor;
+    public Node(TreeNode node, int floor) {
+        this.node = node;
+        this.floor = floor;
+    }
+}
+class Solution {
+    public List<Integer> largestValues(TreeNode root) {
+        List<Integer> ans = new ArrayList<>();
+        if(root == null) return ans;
+        Deque<Node> q = new ArrayDeque<>();
+        q.offerLast(new Node(root,1));
+        while (!q.isEmpty()){
+            int nowfloor = q.peekFirst().floor;
+            int maxval = Integer.MIN_VALUE;
+            while (!q.isEmpty() && q.peekFirst().floor == nowfloor){
+                Node tmp = q.pollFirst();
+                maxval = Math.max(maxval,tmp.node.val);
+                if (tmp.node.left != null){
+                    q.offerLast(new Node(tmp.node.left,nowfloor+1));
+                }
+                if (tmp.node.right != null){
+                    q.offerLast(new Node(tmp.node.right,nowfloor+1));
+                }
+            }
+            ans.add(maxval);
+        }
+        return ans;
+    }
+}
+```
+
+
+
+
+
+#### 第一百零五剑式：二叉树最底层最左边的值
+
+> 题目来源：LeetCode 剑指 Offer II 045
+>
+> 标签：队列、二叉树
+
+给定一个二叉树的 **根节点** `root`，请找出该二叉树的 **最底层 最左边** 节点的值。
+
+假设二叉树中至少有一个节点。
+
+![img](🗡指Offer系列.assets/tree2.jpg)
+
+```
+输入: [1,2,3,4,null,5,6,null,null,7]
+输出: 7
+```
+
+
+
+```java
+class Node {
+    public TreeNode node;
+    public int floor;
+    public Node(TreeNode node, int floor) {
+        this.node = node;
+        this.floor = floor;
+    }
+}
+
+class Solution {
+    public int findBottomLeftValue(TreeNode root) {
+        Deque<Node> q = new ArrayDeque<>();
+        q.offerLast(new Node(root,1));
+        int ans = 0;
+        while (!q.isEmpty()){
+            int nowfloor = q.peekFirst().floor;
+            ans = q.peekFirst().node.val;
+            while (!q.isEmpty() && q.peekFirst().floor == nowfloor){
+                Node tmp = q.pollFirst();
+
+                if (tmp.node.left != null){
+                    q.offerLast(new Node(tmp.node.left,nowfloor+1));
+                }
+                if (tmp.node.right != null){
+                    q.offerLast(new Node(tmp.node.right,nowfloor+1));
+                }
+            }
+        }
+        return ans;
+    }
+}
+```
+
+
+
+
+
+#### 第一百零六剑式：二叉树的右侧视图
+
+> 题目来源：LeetCode 剑指 Offer II 046
+>
+> 标签：队列、二叉树
+
+给定一个二叉树的 **根节点** `root`，想象自己站在它的右侧，按照从顶部到底部的顺序，返回从右侧所能看到的节点值。
+
+![img](🗡指Offer系列.assets/tree.jpg)
+
+```
+输入: [1,2,3,null,5,null,4]
+输出: [1,3,4]
+```
+
+```java
+class Node {
+    public TreeNode node;
+    public int floor;
+    public Node(TreeNode node, int floor) {
+        this.node = node;
+        this.floor = floor;
+    }
+}
+class Solution {
+    public List<Integer> rightSideView(TreeNode root) {
+        List<Integer> ans = new ArrayList<>();
+        if(root == null) return ans;
+        Deque<Node> q = new ArrayDeque<>();
+        q.offerLast(new Node(root,1));
+        Node last = null;
+        while (!q.isEmpty()){
+            int nowfloor = q.peekFirst().floor;
+            while (!q.isEmpty() && q.peekFirst().floor == nowfloor){
+                Node tmp = q.pollFirst();
+                last = tmp;
+                if (tmp.node.left != null){
+                    q.offerLast(new Node(tmp.node.left,nowfloor+1));
+                }
+                if (tmp.node.right != null){
+                    q.offerLast(new Node(tmp.node.right,nowfloor+1));
+                }
+            }
+            ans.add(last.node.val);
+        }
+        return ans;
+    }
+}
+```
+
+
+
+#### 第一百零七剑式：二叉树剪枝
+
+> 题目来源：LeetCode 剑指 Offer II 047
+>
+> 标签：深度优先搜索DFS、递归
+
+给定一个二叉树 **根节点** `root` ，树的每个节点的值要么是 `0`，要么是 `1`。请剪除该二叉树中所有节点的值为 `0` 的子树。
+
+节点 `node` 的子树为 `node` 本身，以及所有 `node` 的后代。
+
+![img](🗡指Offer系列.assets/1028_1.png)
+
+```
+输入: [1,0,1,0,0,0,1]
+输出: [1,null,1,null,1]
+```
+
+```java
+class Solution {
+    public TreeNode dfs(TreeNode root){
+        if (root == null) return null;
+        TreeNode left = dfs(root.left);
+        TreeNode right = dfs(root.right);
+        if (root.val == 0 && left == null && right == null) return null;
+        root.left = left;
+        root.right = right;
+        return root;
+    }
+
+    public TreeNode pruneTree(TreeNode root) {
+        return dfs(root);
+    }
+}
+```
+
+#### 第一百零八剑式：序列化与反序列化二叉树
+
+> 题目来源：LeetCode 剑指 Offer II 048
+>
+> 标签：深度优先搜索DFS、递归
+
+序列化是将一个数据结构或者对象转换为连续的比特位的操作，进而可以将转换后的数据存储在一个文件或者内存中，同时也可以通过网络传输到另一个计算机环境，采取相反方式重构得到原数据。
+
+请设计一个算法来实现二叉树的序列化与反序列化。这里不限定你的序列 / 反序列化算法执行逻辑，只需要保证一个二叉树可以被序列化为一个字符串并且将这个字符串反序列化为原始的树结构。
+
+![img](🗡指Offer系列.assets/serdeser.jpg)
+
+```
+输入：root = [1,2,3,null,null,4,5]
+输出：[1,2,3,null,null,4,5]
+```
+
+```java
+public class Codec {
+    String serializeStr = "";
+    String [] nodes;
+    int idx = 0;
+    public void serializedfs(TreeNode root){
+        if (root == null){
+            serializeStr += "#,";
+            return ;
+        }
+        serializeStr += String.valueOf(root.val);
+        serializeStr +=",";
+        serializedfs(root.left);
+        serializedfs(root.right);
+    }
+    // Encodes a tree to a single string.
+    public String serialize(TreeNode root) {
+        serializedfs(root);
+        return serializeStr;
+    }
+    public TreeNode deserializedfs(){
+        if (idx == nodes.length || nodes[idx].equals("#") == true){
+            return null;
+        }
+        TreeNode node = new TreeNode(Integer.valueOf(nodes[idx]));
+        idx += 1;
+        node.left = deserializedfs();
+        idx += 1;
+        node.right = deserializedfs();
+        return node;
+    }
+    // Decodes your encoded data to tree.
+    public TreeNode deserialize(String data) {
+        nodes = data.split(",");
+        TreeNode root = null;
+        idx = 0;
+        return deserializedfs();
+    }
+}
+```
+
+#### 第一百零九剑式：从根节点到叶节点的路径数字之和
+
+> 题目来源：LeetCode 剑指 Offer II 049
+>
+> 标签：深度优先搜索DFS、递归
+
+给定一个二叉树的根节点 `root` ，树中每个节点都存放有一个 `0` 到 `9` 之间的数字。
+
+每条从根节点到叶节点的路径都代表一个数字：
+
+- 例如，从根节点到叶节点的路径 `1 -> 2 -> 3` 表示数字 `123` 。
+
+计算从根节点到叶节点生成的 **所有数字之和** 。
+
+**叶节点** 是指没有子节点的节点。
+
+```java
+class Solution {
+    int ans = 0;
+    int path_val = 0;
+    public void dfs(TreeNode root){
+        path_val = path_val * 10 + root.val;
+        if (root.left == null && root.right == null){
+            ans += path_val;
+            return;
+        }
+        if(root.left != null){
+            dfs(root.left);
+            path_val /= 10;
+        }
+        if (root.right != null){
+            dfs(root.right);
+            path_val /= 10;
+        }
+    }
+    public int sumNumbers(TreeNode root) {
+        dfs(root);
+        return ans;
+    }
+}
+```
+
+
+
+#### 第一百一十剑式：向下的路径节点之和
+
+> 题目来源：LeetCode 剑指 Offer II 049
+>
+> 标签：深度优先搜索DFS、递归
+
+给定一个二叉树的根节点 `root` ，和一个整数 `targetSum` ，求该二叉树里节点值之和等于 `targetSum` 的 **路径** 的数目。
+
+**路径** 不需要从根节点开始，也不需要在叶子节点结束，但是路径方向必须是向下的（只能从父节点到子节点）。
+
+![img](🗡指Offer系列.assets/pathsum3-1-tree.jpg)
+
+```
+输入：root = [10,5,-3,3,2,null,11,3,-2,null,1], targetSum = 8
+输出：3
+```
+
+```java
+class Solution {
+    int ans = 0;
+    public  void Search(TreeNode node,int now,int target){
+        if (node == null){
+            return ;
+        }
+        if (now + node.val == target){
+            ans += 1;
+        }
+        Search(node.left,now + node.val,target);
+        Search(node.right,now + node.val,target);
+    }
+    public  void dfs(TreeNode root,int targetSum){
+        if (root == null) return;
+        Search(root,0,targetSum);
+        dfs(root.left,targetSum);
+        dfs(root.right,targetSum);
+    }
+    public int pathSum(TreeNode root, int targetSum) {
+        dfs(root,targetSum);
+        return ans;
+    }
+}
+```
+
