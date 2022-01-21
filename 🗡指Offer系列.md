@@ -5327,7 +5327,7 @@ class Solution {
 
 #### 第一百一十剑式：向下的路径节点之和
 
-> 题目来源：LeetCode 剑指 Offer II 049
+> 题目来源：LeetCode 剑指 Offer II 050
 >
 > 标签：深度优先搜索DFS、递归
 
@@ -5364,6 +5364,289 @@ class Solution {
     public int pathSum(TreeNode root, int targetSum) {
         dfs(root,targetSum);
         return ans;
+    }
+}
+```
+
+#### 第一百一十一剑式：向下的路径节点之和
+
+> 题目来源：LeetCode 剑指 Offer II 051
+>
+> 标签：深度优先搜索DFS、后序遍历
+
+路径 被定义为一条从树中任意节点出发，沿父节点-子节点连接，达到任意节点的序列。同一个节点在一条路径序列中 至多出现一次 。该路径 至少包含一个 节点，且不一定经过根节点。
+
+**路径和** 是路径中各节点值的总和。
+
+给定一个二叉树的根节点 root ，返回其 最大路径和，即所有路径上节点值之和的最大值。
+
+
+
+![img](🗡指Offer系列.assets/exx2.jpg)
+
+```
+输入：root = [-10,9,20,null,null,15,7]
+输出：42
+解释：最优路径是 15 -> 20 -> 7 ，路径和为 15 + 20 + 7 = 42
+```
+
+题目解析：
+
+```java
+class Solution {
+    //maxPath ：路径和最大值
+    int maxPath = Integer.MIN_VALUE;
+    public int dfs(TreeNode node){
+        //如果是空结点，其值为0
+        if (node == null) return 0;
+        //递归，获得左子树的最长路径和，如果小于0直接舍弃
+        int leftval = Math.max(0,dfs(node.left));
+        //递归，获得右子树的最长路径和，如果小于0直接舍弃
+        int rightval = Math.max(0,dfs(node.right));
+        //判断 以当前结点node为根的二叉树的最长路径，如果大于 maxPath 则更新结果
+        maxPath = Math.max(maxPath,node.val + leftval + rightval);
+        //向上一层返回以 当前结点为分叉点的最长路径
+        return node.val + Math.max(rightval,leftval);
+    }
+    public int maxPathSum(TreeNode root) {
+        dfs(root);
+        return maxPath;
+    }
+}
+```
+
+
+
+#### 第一百一十二剑式：展平二叉搜索树
+
+> 题目来源：LeetCode 剑指 Offer II 052
+>
+> 标签：深度优先搜索DFS、后序遍历
+
+给你一棵二叉搜索树，请 **按中序遍历** 将其重新排列为一棵递增顺序搜索树，使树中最左边的节点成为树的根节点，并且每个节点没有左子节点，只有一个右子节点。
+
+![img](🗡指Offer系列.assets/ex1.jpg)
+
+```
+输入：root = [5,3,6,2,4,null,8,1,null,null,null,7,9]
+输出：[1,null,2,null,3,null,4,null,5,null,6,null,7,null,8,null,9]
+```
+
+题目解析：
+
+可以先中序遍历，将每个结点的值用数组保存，然后再遍历数组创建树。但是这样的空间复杂度为O(n)，如果要求空间复杂度为O(1)`虽然此题没有...`，那我们就只能在遍历的同时修改结点的指针来展平二叉树
+
+```java
+class Solution {
+    TreeNode pre ; //指向前一个结点
+    public void dfs(TreeNode node){
+        if (node == null){
+            return ;
+        }
+        //中序遍历：左节点、处理根、右节点
+        dfs(node.left);
+        pre.right = node; //将前一个结点的右指针指向当前结点
+        node.left = null; 
+        pre = node; //更新前一个结点的指向
+        dfs(node.right);
+    }
+    public TreeNode increasingBST(TreeNode root) {
+        TreeNode node = new TreeNode(-1);
+        pre = node;
+        dfs(root);
+        return node.right;
+    }
+}
+```
+
+
+
+#### 第一百一十三剑式：二叉搜索树中的中序后继
+
+> 题目来源：LeetCode 剑指 Offer II 053
+>
+> 标签：深度优先搜索DFS、中序遍历
+
+给定一棵二叉搜索树和其中的一个节点 `p` ，找到该节点在树中的中序后继。如果节点没有中序后继，请返回 `null` 。
+
+节点 `p` 的后继是值比 `p.val` 大的节点中键值最小的节点，即按中序遍历的顺序节点 `p` 的下一个节点。
+
+题目解析：
+
+中序遍历的时候用`pre`指针保存上一次访问的结点，当`pre==p`的时候，那么现在访问的`node`就是我们要找的后继
+
+```java
+class Solution {
+    TreeNode pre = null;
+    TreeNode ans = null;
+    public void dfs(TreeNode node,TreeNode p){
+        if (node == null){
+            return;
+        }
+        if (ans == null){
+            dfs(node.left,p);
+        }
+        if (pre == p){
+            ans = node;
+        }
+        pre = node;
+        if (ans == null){
+            dfs(node.right,p);
+        }          
+    }
+    public TreeNode inorderSuccessor(TreeNode root, TreeNode p) {
+        dfs(root,p);
+        return ans;
+    }
+}
+```
+
+#### 第一百一十四剑式：所有大于等于节点的值之和
+
+> 题目来源：LeetCode 剑指 Offer II 054
+>
+> 标签：深度优先搜索DFS、中序遍历
+
+给定一个二叉搜索树，请将它的每个节点的值替换成树中大于或者等于该节点值的所有节点值之和。
+
+```java
+    int sum = 0;
+    int preval = 0;
+    public void getSum(TreeNode node){
+        if (node == null) return;
+        sum += node.val;
+        getSum(node.left);
+        getSum(node.right);
+    }
+    public void dfs(TreeNode node){
+        if (node == null) return;
+        dfs(node.left);
+        int tmp = node.val;
+        node.val = sum - preval;
+        preval = tmp;
+        dfs(node.right);
+    }
+    public TreeNode convertBST(TreeNode root) {
+        getSum(root);
+        dfs(root);
+        return root;
+    }
+```
+
+
+
+#### 第一百一十五剑式： 二叉搜索树迭代器
+
+> 题目来源：LeetCode 剑指 Offer II 055
+>
+> 标签：深度优先搜索DFS、中序遍历
+
+实现一个二叉搜索树迭代器类`BSTIterator` ，表示一个按中序遍历二叉搜索树（BST）的迭代器：
+
+- `BSTIterator(TreeNode root)` 初始化 `BSTIterator` 类的一个对象。BST 的根节点 `root` 会作为构造函数的一部分给出。指针应初始化为一个不存在于 BST 中的数字，且该数字小于 BST 中的任何元素。
+- `boolean hasNext()` 如果向指针右侧遍历存在数字，则返回 `true` ；否则返回 `false` 。
+- `int next()`将指针向右移动，然后返回指针处的数字。
+
+注意，指针初始化为一个不存在于 BST 中的数字，所以对 `next()` 的首次调用将返回 BST 中的最小元素。
+
+可以假设 `next()` 调用总是有效的，也就是说，当调用 `next()` 时，BST 的中序遍历中至少存在一个下一个数字。
+
+```java
+class BSTIterator {
+    List<Integer> arr = new ArrayList<>();
+    int idx;
+    public void dfs(TreeNode root){
+        if (root == null) return;
+        dfs(root.left);
+        arr.add(root.val);
+        dfs(root.right);
+    }
+    public BSTIterator(TreeNode root) {
+        dfs(root);
+        idx = 0;
+    }
+
+    public int next() {
+        return arr.get(idx++);
+    }
+
+    public boolean hasNext() {
+        return idx < arr.size();
+    }
+}
+```
+
+
+
+#### 第一百一十六剑式： 二叉搜索树中两个节点之和
+
+> 题目来源：LeetCode 剑指 Offer II 056
+>
+> 标签：深度优先搜索DFS、中序遍历
+
+给定一个二叉搜索树的 **根节点** `root` 和一个整数 `k` , 请判断该二叉搜索树中是否存在两个节点它们的值之和等于 `k` 。假设二叉搜索树中节点的值均唯一。
+
+```java
+class Solution {
+    List<Integer> nums = new ArrayList<>();
+    public void dfs(TreeNode node){
+        if(node == null) return;
+        dfs(node.left);
+        nums.add(node.val);
+        dfs(node.right);
+    }
+    public boolean findTarget(TreeNode root, int k) {
+        dfs(root);
+        int left = 0,right = nums.size()-1;
+        while (left < right){
+            int val = nums.get(left) + nums.get(right);
+            if (val == k) return true;
+            else if (val > k){
+                right -= 1;
+            }else{
+                left += 1;
+            }
+        }
+        return false;
+    }
+}
+```
+
+
+
+#### 第一百一十七剑式： 值和下标都在给定的范围内
+
+> 题目来源：LeetCode 剑指 Offer II 057
+>
+> 标签：有序集合、滑动窗口
+
+给你一个整数数组 `nums` 和两个整数 `k` 和 `t` 。请你判断是否存在 **两个不同下标** `i` 和 `j`，使得 `abs(nums[i] - nums[j]) <= t` ，同时又满足 `abs(i - j) <= k` 。
+
+如果存在则返回 `true`，不存在返回 `false`。
+
+题目解析：
+
+根据题目，由于第i个元素和第i+1个元素的考虑范围有`k-1`个重复的元 ==> 滑动窗口
+
+对于第i个元素`nums[i-1]`我们通过维护一个滑动窗口表示符合 `j <= i && abs(i-j) <= k`，因为`j > i && abs(i-j) <= k`会在后续弥补上，即重复考虑，因此此时不需要考虑
+
+对于窗口中的元素，我们需要找到一个元素`enum`使得 $enum \in [nums[i] - t,nums[i]+t]$，为了方便查找，我们可以使用有序集合。
+
+```java
+class Solution {
+    public boolean containsNearbyAlmostDuplicate(int[] nums, int k, int t) {
+        TreeSet<Long> sortedset = new TreeSet<>();
+        for (int i = 0;i < nums.length;i++){
+            Long num = sortedset.ceiling((long)nums[i] - t);
+            if (num != null && num <= (long)nums[i] + t){
+                return true;
+            }
+            sortedset.add((long)nums[i]);
+            if (i >= k){
+                sortedset.remove((long)nums[i-k]);
+            }
+        }
+        return false;
     }
 }
 ```
