@@ -5651,3 +5651,190 @@ class Solution {
 }
 ```
 
+
+
+#### 第一百一十八剑式： 日程表
+
+> 题目来源：LeetCode 剑指 Offer II 058
+>
+> 标签：有序集合、红黑树
+
+请实现一个 MyCalendar 类来存放你的日程安排。如果要添加的时间内没有其他安排，则可以存储这个新的日程安排。
+
+MyCalendar 有一个 book(int start, int end)方法。它意味着在 start 到 end 时间内增加一个日程安排，注意，这里的时间是半开区间，即 [start, end), 实数 x 的范围为，  start <= x < end。
+
+当两个日程安排有一些时间上的交叉时（例如两个日程安排都在同一时间内），就会产生重复预订。
+
+每次调用 MyCalendar.book方法时，如果可以将日程安排成功添加到日历中而不会导致重复预订，返回 true。否则，返回 false 并且不要将该日程安排添加到日历中。
+
+请按照以下步骤调用 MyCalendar 类: MyCalendar cal = new MyCalendar(); MyCalendar.book(start, end)
+
+```java
+class MyCalendar {
+    // 用红黑树存储时间段<start,end>，根据时间 start 进行排序
+    private TreeMap<Integer,Integer> timeMap;
+    // 初始化
+    public MyCalendar() {
+        timeMap = new TreeMap<>();
+    }
+    
+    public boolean book(int start, int end) {
+        // 获取比当前时间段前的最接近的时间
+        Map.Entry<Integer, Integer> floorPeriod = timeMap.floorEntry(start);
+        // 获取比当前时间段后的最接近的时间
+        Map.Entry<Integer, Integer> ceilPeriod = timeMap.ceilingEntry(start);
+        // 记录 "比当前时间段前的最近时间" 的 "结束时间"
+        int lastEnd = Integer.MIN_VALUE;
+        // 记录 "比当前时间段后的最近时间" 的 "开始时间"
+        int nextStart = Integer.MAX_VALUE;
+        if(floorPeriod != null){
+            lastEnd = floorPeriod.getValue();
+        }
+        if(ceilPeriod != null){
+            nextStart = ceilPeriod.getKey();
+        }
+        // 如果当前开始时间比 最近上一段时间的结束时间 晚，又比 最近下一段时间的开始时间 早，则可以预定
+        if(lastEnd <= start && end <= nextStart){
+            timeMap.put(start,end);
+            return true;
+        }
+        return false;
+    }
+}
+```
+
+#### 第一百一十九剑式： 数据流的第K大的数值
+
+> 题目来源：LeetCode 剑指 Offer II 059
+>
+> 标签：优先级队列、堆
+
+设计一个找到数据流中第 `k` 大元素的类（class）。注意是排序后的第 `k` 大元素，不是第 `k` 个不同的元素。
+
+请实现 `KthLargest` 类：
+
+- `KthLargest(int k, int[] nums)` 使用整数 `k` 和整数流 `nums` 初始化对象。
+- `int add(int val)` 将 `val` 插入数据流 `nums` 后，返回当前数据流中第 `k` 大的元素。
+
+ 题目解析：
+
+看下图你就应该明白了...
+
+![数据流的第K大数值](🗡指Offer系列.assets/数据流的第K大数值.jpg)
+
+```java
+class KthLargest {
+    Queue<Integer> high_q;
+    int limit;
+    public KthLargest(int k, int[] nums) {
+        limit = k;
+        high_q = new PriorityQueue<>();
+        for (int i = 0;i < nums.length;i++){
+            add(nums[i]);
+        }
+    }
+
+    public int add(int val) {
+        high_q.offer(val);
+        if (high_q.size() > limit){
+            high_q.poll();
+        }
+        return high_q.peek();
+    }
+}
+```
+
+
+
+#### 第一百二十剑式： 出现频率最高的 k 个数字
+
+> 题目来源：LeetCode 剑指 Offer II 060
+>
+> 标签：优先级队列、堆
+
+给定一个整数数组 `nums` 和一个整数 `k` ，请返回其中出现频率前 `k` 高的元素。可以按 **任意顺序** 返回答案。
+
+```java
+class node{
+    int val;
+    int cnt;
+    node(){}
+    node(int v,int c){
+        val = v;
+        cnt = c;
+    }
+}
+
+class Solution {
+    Map<Integer,Integer> m = new HashMap<>();
+    Queue<node> pq = new PriorityQueue<>(new Comparator<node>() {
+        @Override
+        public int compare(node o1, node o2) {
+            return o2.cnt - o1.cnt;
+        }
+    });
+    public int[] topKFrequent(int[] nums, int k) {
+        for (int i = 0;i < nums.length;i++){
+            m.put(nums[i],m.getOrDefault(nums[i],-1) + 1);
+        }
+        for (Map.Entry<Integer,Integer> entry: m.entrySet()){
+            pq.offer(new node(entry.getKey(),entry.getValue()));
+        }
+        int [] ans = new int[k];
+        for (int i = 0;i < k;i++){
+            ans[i] = pq.poll().val;
+        }
+        return ans;
+    }
+}
+```
+
+
+
+#### 第一百二十一剑式： 和最小的k个数对
+
+> 题目来源：LeetCode 剑指 Offer II 061
+>
+> 标签：优先级队列、堆
+
+给定两个以升序排列的整数数组 nums1 和 nums2 , 以及一个整数 k 。
+
+定义一对值 (u,v)，其中第一个元素来自 nums1，第二个元素来自 nums2 。
+
+请找到和最小的 k 个数对 (u1,v1),  (u2,v2)  ...  (uk,vk) 
+
+```java
+class node{
+    int val1;
+    int val2;
+    node(){}
+    node(int v1,int v2){
+        val1 = v1;
+        val2 = v2;
+    }
+}
+
+class Solution {
+    public List<List<Integer>> kSmallestPairs(int[] nums1, int[] nums2, int k) {
+        Queue<node> pq = new PriorityQueue<>(new Comparator<node>() {
+            @Override
+            public int compare(node o1, node o2) {
+                return (o1.val1 + o1.val2) - (o2.val1 + o2.val2);
+            }
+        });
+        for (int i = 0;i < nums1.length;i++){
+            for (int j = 0;j < nums2.length;j++){
+                pq.add(new node(nums1[i],nums2[j]));
+            }
+        }
+        List<List<Integer>> ans = new ArrayList<List<Integer>>();
+        for (int i = 0;i < k;i++){
+            node t = pq.poll();
+            if (t == null) break;
+            ans.add(new ArrayList<>(Arrays.asList(t.val1,t.val2)));
+        }
+        return ans;
+    }
+}
+```
+
