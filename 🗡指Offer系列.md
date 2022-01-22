@@ -5838,3 +5838,119 @@ class Solution {
 }
 ```
 
+
+
+
+
+#### 第一百二十二剑式： 实现前缀树
+
+> 题目来源：LeetCode 剑指 Offer II 062
+>
+> 标签：集合、前缀树
+
+Trie（发音类似 "try"）或者说 前缀树 是一种树形数据结构，用于高效地存储和检索字符串数据集中的键。这一数据结构有相当多的应用情景，例如自动补完和拼写检查。
+
+请你实现 Trie 类：
+
+- Trie() 初始化前缀树对象。
+- void insert(String word) 向前缀树中插入字符串 word 。
+- boolean search(String word) 如果字符串 word 在前缀树中，返回 true（即，在检索之前已经插入）；否则，返回 false 。
+- boolean startsWith(String prefix) 如果之前已经插入的字符串 word 的前缀之一为 prefix ，返回 true ；否则，返回 false 。
+
+```java
+//笨方法，时间复杂度较高，不过还是AC了
+class Trie {
+    Set<String> set;
+    /** Initialize your data structure here. */
+    public Trie() {
+        set = new HashSet<String>();
+    }
+
+    /** Inserts a word into the trie. */
+    public void insert(String word) {
+        if (set.contains(word)){
+            return ;
+        }
+        set.add(word);
+    }
+
+    /** Returns if the word is in the trie. */
+    public boolean search(String word) {
+        if (set.contains(word)){
+            return true;
+        }
+        return false;
+    }
+
+    /** Returns if there is any word in the trie that starts with the given prefix. */
+    public boolean startsWith(String prefix) {
+        Iterator<String> iter = set.iterator();
+        while (iter.hasNext()){
+            String str = iter.next();
+            if (str.length() < prefix.length()) continue;
+            if (prefix.equals(str.substring(0,prefix.length()))){
+                return true;
+            }
+        }
+        return false;
+    }
+}
+```
+
+方法二：采用字典树的真实实现
+
+Trie，又称前缀树或字典树，是一棵有根树，其每个节点包含以下字段：
+
+- 指向子节点的指针数组$\textit{children}$。对于本题而言，数组长度为 26，即小写英文字母的数量。此时 $\textit{children}[0]$ 对应小写字母 a，$\textit{children}[1]$ 对应小写字母 b，…，$\textit{children}[25]$ 对应小写字母 z。
+- 布尔字段 $\textit{isEnd}$，表示该节点是否为字符串的结尾。
+
+```java
+class Trie {
+    private Trie [] children;
+    private boolean end;
+    /** Initialize your data structure here. */
+    public Trie() {
+        children = new Trie[26];
+        end = false;
+    }
+
+    /** Inserts a word into the trie. */
+    public void insert(String word) {
+        Trie node = this;
+        for (int i = 0;i < word.length();i++){
+            char ch = word.charAt(i);
+            int idx = ch - 'a';
+            if (node.children[idx] == null){
+                node.children[idx] = new Trie();
+            }
+            node = node.children[idx];
+        }
+        node.end = true;
+    }
+
+    /** Returns if the word is in the trie. */
+    public boolean search(String word) {
+        Trie node = searchPrefix(word);
+        return node != null && node.end;
+    }
+
+    /** Returns if there is any word in the trie that starts with the given prefix. */
+    public boolean startsWith(String prefix) {
+        return searchPrefix(prefix) != null;
+    }
+    
+    private Trie searchPrefix(String prefix){
+        Trie node = this;
+        for (int i = 0;i < prefix.length();i++){
+            char ch = prefix.charAt(i);
+            int idx = ch - 'a';
+            if (node.children[idx] == null){
+                return null;
+            }
+            node = node.children[idx];
+        }
+        return node;
+    }
+}
+```
+
