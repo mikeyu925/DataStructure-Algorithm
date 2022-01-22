@@ -5954,3 +5954,163 @@ class Trie {
 }
 ```
 
+
+
+#### 第一百二十三剑式： 替换单词
+
+> 题目来源：LeetCode 剑指 Offer II 063
+>
+> 标签：前缀树
+
+在英语中，有一个叫做 词根(root) 的概念，它可以跟着其他一些词组成另一个较长的单词——我们称这个词为 继承词(successor)。例如，词根an，跟随着单词 other(其他)，可以形成新的单词 another(另一个)。
+
+现在，给定一个由许多词根组成的词典和一个句子，需要将句子中的所有继承词用词根替换掉。如果继承词有许多可以形成它的词根，则用最短的词根替换它。
+
+需要输出替换之后的句子。
+
+ ```
+输入：dictionary = ["cat","bat","rat"], sentence = "the cattle was rattled by the battery"
+输出："the cat was rat by the bat"
+ ```
+
+```java
+//前缀树实现-->通过上一题稍作修改即可
+class Trie {
+    private Trie [] children;
+    private boolean end;
+    /** Initialize your data structure here. */
+    public Trie() {
+        children = new Trie[26];
+        end = false;
+    }
+    /** Inserts a word into the trie. */
+    public void insert(String word) {
+        Trie node = this;
+        for (int i = 0;i < word.length();i++){
+            char ch = word.charAt(i);
+            int idx = ch - 'a';
+            if (node.children[idx] == null){
+                node.children[idx] = new Trie();
+            }else if (node.end){
+            	break;
+            }
+            node = node.children[idx];
+        }
+        node.end = true;
+    }
+    public String getMinPrefix(String word){
+        StringBuilder sb = new StringBuilder();
+        Trie node = this;
+        for (int i = 0;i < word.length();i++){
+            char ch = word.charAt(i);
+            int idx = ch - 'a';
+            if (node.children[idx] == null || node.end == true) break;
+            sb.append(ch);
+            node = node.children[idx];
+        }
+        if (node.end){
+            return sb.toString();
+        }
+        return null;
+    }
+}
+class Solution {
+    public String replaceWords(List<String> dictionary, String sentence) {
+        StringBuilder sb = new StringBuilder();
+        Trie tree = new Trie();
+        for (int i = 0;i < dictionary.size();i++){
+            tree.insert(dictionary.get(i));
+        }
+        String []words = sentence.split(" ");
+        for (String word:words){
+            String newword = tree.getMinPrefix(word);
+            if (newword != null){
+                sb.append(newword);
+            }else{
+                sb.append(word);
+            }
+            sb.append(" ");
+        }
+        return sb.toString().strip();
+    }
+}
+```
+
+#### 第一百二十四剑式： 神奇的字典
+
+> 题目来源：LeetCode 剑指 Offer II 064
+>
+> 标签：前缀树、深度优先搜索
+
+设计一个使用单词列表进行初始化的数据结构，单词列表中的单词 **互不相同** 。 如果给出一个单词，请判定能否只将这个单词中**一个**字母换成另一个字母，使得所形成的新单词存在于已构建的神奇字典中。
+
+实现 `MagicDictionary` 类：
+
+- `MagicDictionary()` 初始化对象
+- `void buildDict(String[] dictionary)` 使用字符串数组 `dictionary` 设定该数据结构，`dictionary` 中的字符串互不相同
+- `bool search(String searchWord)` 给定一个字符串 `searchWord` ，判定能否只将字符串中 **一个** 字母换成另一个字母，使得所形成的新字符串能够与字典中的任一字符串匹配。如果可以，返回 `true` ；否则，返回 `false` 。
+
+
+
+```java
+//字典树
+class Trie{
+    public Trie [] children;
+    public boolean isend;
+    Trie(){
+        children = new Trie[26];
+        isend = false;
+    }
+    public void insert(String str){
+        Trie node = this;
+        for (int i = 0;i < str.length();i++){
+            char ch = str.charAt(i);
+            int idx = ch - 'a';
+            if (node.children[idx] == null){
+                node.children[idx] = new Trie();
+            }
+            node = node.children[idx];
+        }
+        node.isend = true;
+    }
+}
+
+class MagicDictionary {
+    private Trie tree;
+    /** Initialize your data structure here. */
+    public MagicDictionary() {
+        tree = new Trie();
+    }
+
+    public void buildDict(String[] dictionary) {
+        for (String word : dictionary){
+            tree.insert(word);
+        }
+    }
+    private boolean dfs(Trie node,String word,int idx,int edit){
+        if (node == null){
+            return false;
+        }
+        //如果进行了一次修改并且成功匹配了前缀树
+        if (node.isend == true && idx == word.length() && edit == 1){
+            return true;
+        }
+        //匹配当前第idx个字符
+        if (idx < word.length() && edit <= 1){
+            boolean found = false;
+            for (int j = 0;j < 26 && !found;j++){
+                //如果当前第idx个字符 和 其中一个成功匹配，不会增加edit次数，否则进行一次修改
+                int next = (j == (word.charAt(idx) - 'a') ? edit : edit + 1);
+                found = dfs(node.children[j],word,idx+1,next);
+            }
+            return found;
+        }
+        //修改次数过多，直接返回false
+        return false;
+    }
+    public boolean search(String searchWord) {
+        return dfs(tree,searchWord,0,0);
+    }
+}
+```
+
