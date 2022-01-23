@@ -1,18 +1,20 @@
-插个眼！截至目前`2021年12月8日`，自己已经坚持刷题9个月了！已经再LeetCode做了大约300道题目了，因此想着**尝试不看任何题解**把剑指Offer系列的题目全做一遍，看看自己的水平如何。祝好！
+插个眼！截至目前`2021年12月8日`，自己已经坚持刷题9个月了！已经在LeetCode做了大约300道题目了，因此想着**尝试不看任何题解**把剑指Offer系列的题目全做一遍，看看自己的水平如何。祝自己顺利！
 
 总结一下你可能需要掌握的知识点：
 
-- 数据结构：链表（单向、双向、循环）、队列（双端队列、优先级队列）、栈（单调栈）、堆（大顶堆、小顶堆）、二叉树（二叉搜索树）、图
-- 算法：排序、二分、分治、递归、搜索（A*、BFS、DFS)、KMP、滑动窗口、双指针、位运算（快速幂）、贪心（证明）、动态规划（状态压缩）
+- 数据结构：链表（单向、双向、循环）、队列（双端队列、优先级队列）、栈（单调栈）、堆（大顶堆、小顶堆）、二叉树（二叉搜索树）、图（最小生成树）
+- 算法：排序（自定义排序、快排、桶排序）、二分（二分答案）、分治、递归、搜索（A*、BFS、DFS)、KMP、滑动窗口、双指针、位运算（快速幂）、贪心（证明）、动态规划（状态压缩）、前缀树
 - 数学：约瑟夫环问题、剪绳子问题、
 
-> 一些感悟吧...感觉坚持刷题真的有效果，刷offer的时候感觉许多题之前都刷到过类似的，然后很快就有思路。
+> 讲一些自己感悟吧...感觉坚持刷题真的有效果，刷offer的时候感觉许多题之前都刷到过类似的，然后很快就有思路。
 >
 > 所谓真正扎实的武功ጿ ኈ ቼ ዽ ጿ ኈ ቼ ዽ ጿ ኈ ቼ ዽ ጿ ኈ ቼ ዽ ጿ ኈ ቼ ዽ ጿ，都是在不断地训练中出来地！天才也需要99的汗水才能成功呢！
 
 #### 第一剑式：用两个栈实现队列
 
 > 题目来源：LeetCode 剑指 Offer 09
+>
+> 标签：栈
 
 用两个栈实现一个队列。队列的声明如下，请实现它的两个函数 appendTail 和 deleteHead ，分别完成在队列尾部插入整数和在队列头部删除整数的功能。(若队列中没有元素，deleteHead 操作返回 -1 )
 
@@ -58,6 +60,8 @@ class CQueue {
 #### 第二剑式：包含min函数的栈
 
 > 题目来源：LeetCode 剑指 Offer 30
+>
+> 标签：栈
 
 定义栈的数据结构，请在该类型中实现一个能够得到栈的最小元素的 min 函数在该栈中，调用 min、push 及 pop 的时间复杂度都是 O(1)。
 
@@ -6110,6 +6114,230 @@ class MagicDictionary {
     }
     public boolean search(String searchWord) {
         return dfs(tree,searchWord,0,0);
+    }
+}
+```
+
+
+
+
+
+#### 第一百二十五剑式： 
+
+> 题目来源：LeetCode 剑指 Offer II 065 最短的单词编码
+>
+> 标签：前缀树、深度优先搜索DFS
+
+单词数组 `words` 的 **有效编码** 由任意助记字符串 `s` 和下标数组 `indices` 组成，且满足：
+
+- `words.length == indices.length`
+- 助记字符串 `s` 以 `'#'` 字符结尾
+- 对于每个下标 `indices[i]` ，`s` 的一个从 `indices[i]` 开始、到下一个 `'#'` 字符结束（但不包括 `'#'`）的 **子字符串** 恰好与 `words[i]` 相等
+
+给定一个单词数组 `words` ，返回成功对 `words` 进行编码的最小助记字符串 `s` 的长度 。
+
+
+
+```java
+class Trie{
+    public Trie [] children;
+    public boolean isend;
+    public int cnt; //当前结点有几个子节点
+    Trie(){
+        children = new Trie[26];
+        isend = false;
+        cnt = 0;
+    }
+    public void reverseinsert(String str){
+        Trie node = this;
+        for (int i = str.length()-1;i >= 0;i--){
+            char ch = str.charAt(i);
+            int idx = ch - 'a';
+            if (node.children[idx] == null){
+                node.children[idx] = new Trie();
+                node.cnt += 1;
+            }
+            node = node.children[idx];
+        }
+        node.isend = true;
+    }
+}
+
+class Solution {
+    int ans = 0;
+    public void dfs(Trie tree,int floor){
+        if (tree.isend && tree.cnt == 0){
+            ans += floor;
+            return ;
+        }
+        for (int i = 0;i < 26;i++){
+            if (tree.children[i] != null){
+                dfs(tree.children[i],floor+1);
+            }
+        }
+    }
+    public int minimumLengthEncoding(String[] words) {
+        Trie tree = new Trie();
+        for (String word: words){
+            tree.reverseinsert(word);
+        }
+        dfs(tree,1);
+        return ans;
+    }
+}
+```
+
+
+
+#### 第一百二十六剑式：单词之和
+
+> 题目来源：LeetCode 剑指 Offer II 066
+>
+> 标签：前缀树、深度优先搜索DFS
+
+实现一个 `MapSum` 类，支持两个方法，`insert` 和 `sum`：
+
+- `MapSum()` 初始化 `MapSum` 对象
+- `void insert(String key, int val)` 插入 `key-val` 键值对，字符串表示键 `key` ，整数表示值 `val` 。如果键 `key` 已经存在，那么原来的键值对将被替代成新的键值对。
+- `int sum(string prefix)` 返回所有以该前缀 `prefix` 开头的键 `key` 的值的总和。
+
+
+
+```java
+class Trie{
+    public Trie [] children;
+    public boolean isend;
+    public int cnt;
+    Trie(){
+        children = new Trie[26];
+        isend = false;
+        cnt = 0;
+    }
+    public void insert(String str){
+        Trie node = this;
+        for (int i = 0;i < str.length();i++){
+            char ch = str.charAt(i);
+            int idx = ch - 'a';
+            if (node.children[idx] == null){
+                node.children[idx] = new Trie();
+                node.cnt += 1;
+            }
+            node = node.children[idx];
+        }
+        node.isend = true;
+    }
+
+}
+class MapSum {
+    Trie tree;
+    Map<String ,Integer> m;
+    int ans = 0;
+    StringBuilder sb;
+    
+    public MapSum() {
+        tree = new Trie();
+        m = new HashMap<>();
+    }
+
+    public void insert(String key, int val) {
+        tree.insert(key);
+        m.put(key,val);
+    }
+    public void dfs(Trie node){
+        if (node == null) return;
+        if (node.isend){
+            ans += m.getOrDefault(sb.toString(),0);
+        }
+        if (node.cnt == 0) return;
+        for (int i  = 0; i < 26;i++){
+            if (node.children[i] == null) continue;
+            sb.append((char)('a' + i));
+            dfs(node.children[i]);
+            sb.deleteCharAt(sb.length()-1);
+        }
+    }
+    public int sum(String prefix) {
+        Trie node = tree;
+        for (int i = 0;i < prefix.length();i++){
+            char ch = prefix.charAt(i);
+            int idx = ch - 'a';
+            if ((node.children[idx] == null) || (node.isend && node.cnt == 0)){
+                return 0;
+            }
+            node = node.children[idx];
+        }
+        ans = 0;
+        sb = new StringBuilder(prefix);
+        dfs(node);
+        return ans;
+    }
+}
+```
+
+
+
+#### 第一百二十六剑式：数组中两个数的最大异或值
+
+> 题目来源：LeetCode 剑指 Offer II 067
+>
+> 标签：前缀树、位运算
+
+给你一个整数数组 `nums` ，返回 `nums[i] XOR nums[j]` 的最大运算结果，其中 `0 ≤ i ≤ j < n` 。
+
+**进阶：**你可以在 `O(n)` 的时间解决这个问题吗？
+
+```java
+class Trie{
+    public Trie [] children;
+    Trie(){
+        children = new Trie[2];
+    }
+    public void insert(int num){
+        Trie node = this;
+        for (int i = 30;i >= 0;i--){
+            int bit = (num >> i) & 1;
+            if (node.children[bit] == null){
+                node.children[bit] = new Trie();
+            }
+            node = node.children[bit];
+        }
+    }
+    public int check(int num){
+        Trie node = this;
+        int val = 0;
+        for (int i = 30;i >= 0;i--){
+            int bit = (num >> i) & 1;
+            if (bit == 1){
+                if (node.children[0] != null){
+                    val |= (1 << i);
+                    node = node.children[0];
+                }else{
+                    node = node.children[1];
+                }
+            }else{
+                if (node.children[1] != null){
+                    val |= (1 << i);
+                    node = node.children[1];
+                }else{
+                    node = node.children[0];
+                }
+            }
+        }
+        return val;
+    }
+}
+
+public class Solution {
+    public int findMaximumXOR(int[] nums) {
+        int ans = 0;
+        Trie tree = new Trie();
+        for (int num:nums){
+            tree.insert(num);
+        }
+        for (int num:nums){
+            ans = Math.max(ans,tree.check(num));
+        }
+        return ans;
     }
 }
 ```
