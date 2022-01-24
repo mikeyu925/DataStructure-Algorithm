@@ -3,7 +3,7 @@
 总结一下你可能需要掌握的知识点：
 
 - 数据结构：链表（单向、双向、循环）、队列（双端队列、优先级队列）、栈（单调栈）、堆（大顶堆、小顶堆）、二叉树（二叉搜索树）、图（最小生成树）
-- 算法：排序（自定义排序、快排、桶排序）、二分（二分答案）、分治、递归、搜索（A*、BFS、DFS)、KMP、滑动窗口、双指针、位运算（快速幂）、贪心（证明）、动态规划（状态压缩）、前缀树
+- 算法：排序（自定义排序、快排、桶排序）、二分法（二分搜索、二分答案）、分治、递归、搜索（A*、BFS、DFS)、KMP、滑动窗口、双指针、位运算（快速幂）、贪心（证明）、动态规划（状态压缩）、前缀树
 - 数学：约瑟夫环问题、剪绳子问题、
 
 > 讲一些自己感悟吧...感觉坚持刷题真的有效果，刷offer的时候感觉许多题之前都刷到过类似的，然后很快就有思路。
@@ -6122,9 +6122,9 @@ class MagicDictionary {
 
 
 
-#### 第一百二十五剑式： 
+#### 第一百二十五剑式：最短的单词编码
 
-> 题目来源：LeetCode 剑指 Offer II 065 最短的单词编码
+> 题目来源：LeetCode 剑指 Offer II 065
 >
 > 标签：前缀树、深度优先搜索DFS
 
@@ -6276,7 +6276,7 @@ class MapSum {
 
 
 
-#### 第一百二十六剑式：数组中两个数的最大异或值
+#### 第一百二十七剑式：数组中两个数的最大异或值
 
 > 题目来源：LeetCode 剑指 Offer II 067
 >
@@ -6337,6 +6337,411 @@ public class Solution {
         for (int num:nums){
             ans = Math.max(ans,tree.check(num));
         }
+        return ans;
+    }
+}
+```
+
+
+
+#### 第一百二十八剑式：查找插入位置
+
+> 题目来源：LeetCode 剑指 Offer II 068
+>
+> 标签：二分查找
+
+给定一个排序的整数数组 `nums` 和一个整数目标值` target` ，请在数组中找到 `target `，并返回其下标。如果目标值不存在于数组中，返回它将会被按顺序插入的位置。
+
+请必须使用时间复杂度为 `O(log n)` 的算法。
+
+```java
+public class Solution {
+   public int searchInsert(int[] nums, int target) {
+        int left = 0,right = nums.length;
+        while (left < right){
+            int mid = left + ((right - left) >> 1);
+            if (target == nums[mid]) return mid;
+            else if (target < nums[mid]){
+                right = mid;
+            }else{
+                left = mid + 1;
+            }
+        }
+        return left;
+    }
+}
+```
+
+
+
+#### 第一百二十九剑式：山峰数组的顶部
+
+> 题目来源：LeetCode 剑指 Offer II 069
+>
+> 标签：二分查找
+
+符合下列属性的数组 arr 称为 山峰数组（山脉数组） ：
+
+- arr.length >= 3
+- 存在 i（0 < i < arr.length - 1）使得：
+  - $arr[0] < arr[1] < ... arr[i-1] < arr[i]$
+  - $arr[i] > arr[i+1] > ... > arr[arr.length - 1]$
+
+给定由整数组成的山峰数组 arr ，返回任何满足 $arr[0] < arr[1] < ... arr[i - 1] < arr[i] > arr[i + 1] > ... > arr[arr.length - 1] $的下标 i ，即山峰顶部。
+
+
+
+```java
+class Solution {
+    public int peakIndexInMountainArray(int[] arr) {
+        int n = arr.length;
+        int left = 0,right = n-1;
+        while (left < right){
+            int mid = left + ((right - left) >> 1);
+            if (arr[mid-1] < arr[mid] && arr[mid] > arr[mid+1]){
+                return mid;
+            }else if(arr[mid-1] < arr[mid]){
+                left = mid + 1;
+            }else{
+                right = mid;
+            }
+        }
+        return left;
+    }
+}
+```
+
+
+
+#### 第一百三十剑式：排序数组中只出现一次的数字
+
+> 题目来源：LeetCode 剑指 Offer II 070
+>
+> 标签：二分查找、哈希表、异或
+
+给定一个只包含整数的有序数组 nums ，每个元素都会出现两次，唯有一个数只会出现一次，请找出这个唯一的数字。
+
+题目解析：
+
+哈希表、异或、二分查找均能解决
+
+```java
+//二分查找 O(log n)
+class Solution {
+    public int singleNonDuplicate(int[] nums) {
+        int n = nums.length;
+        int left = 0,right = n-1;
+        while (left < right){
+            int mid = left + ((right - left) >> 1);
+            if (mid == 0 || mid == n-1) return nums[mid];
+            if (nums[mid] != nums[mid-1] && nums[mid] != nums[mid+1]) return nums[mid];
+            if (nums[mid] == nums[mid-1] && mid % 2 == 1) left = mid + 1;
+            else if (nums[mid] == nums[mid-1] && mid % 2 == 0) right = mid - 2;
+            else if (nums[mid] == nums[mid+1] && mid % 2 == 1)  right = mid - 1;
+            else if (nums[mid] == nums[mid+1] && mid % 2 == 0) left = mid + 2;
+        }
+        return nums[left];
+    }
+}
+```
+
+
+
+#### 第一百三十一剑式：按权重生成随机数
+
+> 题目来源：LeetCode 剑指 Offer II 071
+>
+> 标签：二分查找、前缀和
+
+给定一个正整数数组 `w` ，其中 `w[i]` 代表下标 `i` 的权重（下标从 `0` 开始），请写一个函数 `pickIndex` ，它可以随机地获取下标 `i`，选取下标 `i` 的概率与 `w[i]` 成正比。
+
+例如，对于 `w = [1, 3]`，挑选下标 `0` 的概率为 `1 / (1 + 3) = 0.25` （即，25%），而选取下标 `1` 的概率为 `3 / (1 + 3) = 0.75`（即，75%）。
+
+也就是说，选取下标 `i` 的概率为 `w[i] / sum(w)` 。
+
+```java
+class Solution {
+    int [] pre;
+    int total;
+    public Solution(int[] w) {
+        pre = new int [w.length];
+        pre[0] = w[0];
+        for (int i = 1;i < w.length;i++){
+            pre[i] = pre[i-1] + w[i];
+        }
+        total = Arrays.stream(w).sum();
+    }
+
+    public int pickIndex() {
+        int x = (int)(Math.random() * total) + 1;
+        return binarySearch(x);
+    }
+
+    public int binarySearch(int x){
+        int left = 0,right = pre.length - 1;
+        while (left < right){
+            int mid = left + ((right - left) >> 1);
+            if (pre[mid] > x){
+                right = mid;
+            }else{
+                left = mid + 1;
+            }
+        }
+        return left;
+    }
+}
+```
+
+
+
+#### 第一百三十二剑式：求平方根
+
+> 题目来源：LeetCode 剑指 Offer II 072
+>
+> 标签：二分查找
+
+给定一个非负整数 `x` ，计算并返回 `x` 的平方根，即实现 `int sqrt(int x)` 函数。
+
+正数的平方根有两个，只输出其中的正数平方根。
+
+如果平方根不是整数，输出只保留整数的部分，小数部分将被舍去。
+
+```java
+//通过判别精度
+class Solution {
+    public int mySqrt(int x) {
+        int tmp = (int)Math.sqrt(x);
+        if ((int)Math.pow(tmp,2) == x){
+            return tmp;
+        }
+        double left = 0,right = x;
+        while (right - left > 0.001){
+            double mid = (left + right) / 2;
+            if (Math.pow(mid,2) > x){
+                right = mid;
+            }else{
+                left = mid;
+            }
+        }
+        return (int)(left);
+    }
+}
+```
+
+```java
+//通过判别 大小
+class Solution {
+	public int mySqrt(int x) {
+        int left = 1, right = x;    
+        while (left <= right)
+        {
+            int mid = left + ((right - left) >> 1);
+            if (mid <= x /mid){
+                if ((mid + 1) > x / (mid + 1)) return mid;
+                left = mid + 1;
+            }else{
+                right = mid - 1;
+            }
+        }
+        return 0;                  
+    }
+};
+```
+
+#### 第一百三十三剑式：狒狒吃香蕉
+
+> 题目来源：LeetCode 剑指 Offer II 073
+>
+> 标签：二分查找
+
+狒狒喜欢吃香蕉。这里有 `N` 堆香蕉，第 `i` 堆中有 `piles[i]` 根香蕉。警卫已经离开了，将在 `H` 小时后回来。
+
+狒狒可以决定她吃香蕉的速度 `K` （单位：根/小时）。每个小时，她将会选择一堆香蕉，从中吃掉 `K` 根。如果这堆香蕉少于 `K` 根，她将吃掉这堆的所有香蕉，然后这一小时内不会再吃更多的香蕉，下一个小时才会开始吃另一堆的香蕉。 
+
+狒狒喜欢慢慢吃，但仍然想在警卫回来前吃掉所有的香蕉。
+
+返回她可以在 `H` 小时内吃掉所有香蕉的最小速度 `K`（`K` 为整数）。
+
+题目解析：
+
+经典二分答案解决
+
+```java
+    public boolean check(int[] piles,int mid,int h){
+        //定义吃完所有香蕉的时间 need_h
+        int need_h = 0;
+        //遍历每一堆香蕉
+        for (int i = 0;i < piles.length;i++){
+            if (piles[i] % mid == 0){ //如果当前堆香蕉恰好能吃完，直接进行除法获取吃完第i堆香蕉的时间并累加
+                need_h += (piles[i] / mid);
+            }else{  //如果不能恰好吃完，就多吃一次
+                need_h += (piles[i] / mid) + 1;
+            }
+        }
+        return need_h <= h; //判断花费时间是否小于等于要求时间
+    }
+    public int minEatingSpeed(int[] piles, int h) {
+        int left = 1,right = Integer.MAX_VALUE;
+        while (left < right){
+            int mid = left + ((right - left) >> 1);
+            if (check(piles,mid,h)){
+                right = mid;
+            }else{
+                left = mid + 1;
+            }
+        }
+        return left;
+    }
+```
+
+
+
+#### 第一百三十四剑式：合并区间
+
+> 题目来源：LeetCode 剑指 Offer II 074
+>
+> 标签：排序
+
+以数组 intervals 表示若干个区间的集合，其中单个区间为 intervals[i] = [starti, endi] 。请你合并所有重叠的区间，并返回一个不重叠的区间数组，该数组需恰好覆盖输入中的所有区间。
+
+```java
+class Solution {
+    public int[][] merge(int[][] intervals) {
+        if(intervals.length == 0){
+            return intervals;
+        }
+        Arrays.sort(intervals, new Comparator<int[]>() {
+            @Override
+            public int compare(int[] o1, int[] o2) {
+                return o1[0] - o2[0];
+            }
+        });
+        List<int[]> ans = new ArrayList<int[]>();
+        ans.add(new int[]{intervals[0][0],intervals[0][1]});
+        for (int i = 1;i < intervals.length;i++){
+            int first = ans.get(ans.size() - 1)[0];
+            int second = ans.get(ans.size() - 1)[1];
+            if (intervals[i][0] >= first && intervals[i][0] <= second){
+                if (intervals[i][1] > second){
+                    ans.set(ans.size()-1,new int[]{first,intervals[i][1]});
+                }
+            }else{
+                ans.add(new int[]{intervals[i][0],intervals[i][1]});
+            }
+            
+        }
+        return ans.toArray(new int[ans.size()][]);
+    }
+}
+```
+
+
+
+#### 第一百三十五剑式：数组的相对排序
+
+> 题目来源：LeetCode 剑指 Offer II 075
+>
+> 标签：排序
+
+给定两个数组，`arr1` 和 `arr2`，
+
+- `arr2` 中的元素各不相同
+- `arr2` 中的每个元素都出现在 `arr1` 中
+
+对 `arr1` 中的元素进行排序，使 `arr1` 中项的相对顺序和 `arr2` 中的相对顺序相同。未在 `arr2` 中出现过的元素需要按照升序放在 `arr1` 的末尾。
+
+```java
+class Mynode{
+    int val;
+    int level;
+    Mynode(){}
+    Mynode(int v,int l){
+        val = v;
+        level = l;
+    }
+}
+class Solution {
+    public int[] relativeSortArray(int[] arr1, int[] arr2) {
+        Map<Integer,Integer> m = new HashMap<>();
+        for (int i = 0;i < arr2.length;i++){
+            m.put(arr2[i],i);
+        }
+        List<Mynode> ans = new ArrayList<>();
+        for (int i = 0;i < arr1.length;i++){
+            ans.add(new Mynode(arr1[i],m.getOrDefault(arr1[i],Integer.MAX_VALUE)));
+        }
+        ans.sort(new Comparator<Mynode>() {
+            @Override
+            public int compare(Mynode o1, Mynode o2) {
+                if (o1.level == o2.level){
+                    return o1.val - o2.val;
+                }
+                return o1.level - o2.level;
+            }
+        });
+        int [] arr_ans = new int[ans.size()];
+        for (int i = 0;i <arr_ans.length;i++){
+            arr_ans[i] = ans.get(i).val;
+        }
+        return arr_ans;
+    }
+}
+```
+
+#### 第一百三十六剑式：数组中第K大的数字
+
+> 题目来源：LeetCode 剑指 Offer II 076
+>
+> 标签：排序
+
+给定整数数组 `nums` 和整数 `k`，请返回数组中第 `**k**` 个最大的元素。
+
+请注意，你需要找的是数组排序后的第 `k` 个最大的元素，而不是第 `k` 个不同的元素。
+
+```java
+class Solution {
+    public int findKthLargest(int[] nums, int k) {
+        Arrays.sort(nums);
+        return nums[nums.length-k];
+    }
+}
+```
+
+
+
+#### 第一百三十七剑式：允许重复选择元素的组合
+
+> 题目来源：LeetCode 剑指 Offer II 077
+>
+> 标签：排序、回溯（递归）
+
+给定一个**无重复元素**的正整数数组 `candidates` 和一个正整数 `target` ，找出 `candidates` 中所有可以使数字和为目标数 `target` 的唯一组合。
+
+`candidates` 中的数字可以无限制重复被选取。如果至少一个所选数字数量不同，则两种组合是唯一的。 
+
+对于给定的输入，保证和为 `target` 的唯一组合数少于 `150` 个。
+
+```java
+class Solution {
+    List<List<Integer>> ans = new ArrayList<List<Integer>>();
+    List<Integer> path = new ArrayList<>();
+    public void dfs(int[] candidates,int target,int value){
+        if (value == target){
+            ans.add(new ArrayList<>(path));
+            return ;
+        }
+        for (int i = 0;i < candidates.length;i++){
+            //防止出现[2,2,3] [2,3,2] [3,2,2]
+            if (path.size() > 0 && candidates[i] < path.get(path.size()-1)) continue; //如果没有此行，会出现元素集合相同的列表
+            if (value + candidates[i] > target) break;
+            path.add(candidates[i]);
+            dfs(candidates,target,value+candidates[i]);
+            path.remove(path.size()-1);
+        }
+    }
+    public List<List<Integer>> combinationSum(int[] candidates, int target) {
+        Arrays.sort(candidates);
+        dfs(candidates,target,0);
         return ans;
     }
 }
