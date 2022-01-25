@@ -6707,11 +6707,166 @@ class Solution {
 }
 ```
 
-
-
-#### 第一百三十七剑式：允许重复选择元素的组合
+#### 第一百三十七剑式：链表排序
 
 > 题目来源：LeetCode 剑指 Offer II 077
+>
+> 标签：排序、链表
+
+给定链表的头结点 `head` ，请将其按 **升序** 排列并返回 **排序后的链表** 。
+
+```java
+//链表->数组->排序->数组
+class Solution {
+    public ListNode sortList(ListNode head) {
+        List<Integer> arr = new ArrayList<>();
+        ListNode node = head;
+        while (node != null){
+            arr.add(node.val);
+            node = node.next;
+        }
+        arr.sort(new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return o1 - o2;
+            }
+        });
+        node = head;
+        int idx = 0;
+        while (node != null){
+            node.val = arr.get(idx++);
+            node = node.next;
+        }
+        return head;
+    }
+}
+```
+
+#### 第一百三十八剑式：合并排序链表
+
+> 题目来源：LeetCode 剑指 Offer II 078
+>
+> 标签：排序、链表
+
+给定一个链表数组，每个链表都已经按升序排列。请将所有链表合并到一个升序链表中，返回合并后的链表。
+
+```java
+
+class Solution {
+    public ListNode merge(ListNode a,ListNode b){
+        //设置链表 a 的 头节点是小于 b 的
+        if (a.val > b.val){
+            return merge(b,a);
+        }
+        ListNode node_a = a;
+        ListNode node_b = b;
+        ListNode pre_a = null;
+        while (node_a != null && node_b != null){
+            ListNode next_b = node_b.next;
+            while (node_a != null && node_a.val <= node_b.val){
+                pre_a = node_a;
+                node_a = node_a.next;
+            }
+            if (node_a != null){
+                node_b.next = pre_a.next;
+                pre_a.next = node_b;
+                node_b = next_b;
+                pre_a = pre_a.next;
+            }
+        }
+        if (node_a == null){
+            pre_a.next = node_b;
+        }
+        return a;
+    }
+    public ListNode mergeKLists(ListNode[] lists) {
+        if (lists.length == 0) return null;
+        ListNode head = null;
+        for (int i = 0;i < lists.length;i++){
+            if (lists[i] != null){
+                head = lists[i];
+                break;
+            }
+        }
+        if (head == null) return head;
+        for (int i = 0;i <  lists.length;i++){
+            if (lists[i] == null || lists[i] == head) continue;
+            head = merge(head,lists[i]);
+        }
+        return head;
+    }
+}
+```
+
+#### 第一百三十九剑式：允许重复选择元素的组合
+
+> 题目来源：LeetCode 剑指 Offer II 079
+>
+> 标签：回溯（递归）
+
+给定一个整数数组 `nums` ，数组中的元素 **互不相同** 。返回该数组所有可能的子集（幂集）。
+
+解集 **不能** 包含重复的子集。你可以按 **任意顺序** 返回解集。
+
+```java
+class Solution {
+    List<List<Integer>> ans = new ArrayList<List<Integer>>();
+    List<Integer> path = new ArrayList<>();
+    public void dfs(int [] nums,int idx){
+        if (idx == nums.length){
+            ans.add(new ArrayList<>(path));
+            return ;
+        }
+        //不选择当前元素
+        dfs(nums,idx+1);
+        //选择当前元素
+        path.add(nums[idx]);
+        dfs(nums,idx+1);
+        path.remove(path.size()- 1);
+        
+    }
+    public List<List<Integer>> subsets(int[] nums) {
+        dfs(nums,0);
+        return ans;
+    }
+}
+```
+
+#### 第一百四十剑式：含有K个元素的组合
+
+> 题目来源：LeetCode 剑指 Offer II 080
+>
+> 标签：回溯（递归）
+
+给定两个整数 `n` 和 `k`，返回 `1 ... n` 中所有可能的 `k` 个数的组合。
+
+```java
+class Solution {
+    List<List<Integer>> ans = new ArrayList<List<Integer>>();
+    List<Integer> path = new ArrayList<>();
+    boolean [] used ;
+    public void dfs(int n,int k,int num){
+        if (path.size() == k){
+            ans.add(new ArrayList<>(path));
+            return ;
+        }
+        for (int i = num;i <= n;i++){
+            path.add(i);
+            dfs(n,k,i+1);
+            path.remove(path.size()-1);
+        }
+    }
+    public List<List<Integer>> combine(int n, int k) {
+        used = new boolean [n+1];
+        dfs(n,k,1);
+        return ans;
+    }
+}
+```
+
+#### 第一百四十一剑式：允许重复选择元素的组合
+
+> 题目来源：LeetCode 剑指 Offer II 081
 >
 > 标签：排序、回溯（递归）
 
@@ -6743,6 +6898,328 @@ class Solution {
         Arrays.sort(candidates);
         dfs(candidates,target,0);
         return ans;
+    }
+}
+```
+
+#### 第一百四十二剑式：含有重复元素集合的组合
+
+> 题目来源：LeetCode 剑指 Offer II 082
+>
+> 标签：排序、回溯（递归）
+
+给定一个可能有重复数字的整数数组 `candidates` 和一个目标数 `target` ，找出 `candidates` 中所有可以使数字和为 `target` 的组合。
+
+`candidates` 中的每个数字在每个组合中只能使用一次，解集不能包含重复的组合。 
+
+```java
+class Solution {
+    List<List<Integer>> ans = new ArrayList<List<Integer>>();
+    List<Integer> path = new ArrayList<>();
+    boolean [] used ;
+    public void dfs(int [] candidates,int target,int val,int idx){
+        if (idx == candidates.length || val == target){
+            if (val == target){
+                ans.add(new ArrayList<>(path));
+            }
+            return ;
+        }
+        for (int i = idx;i < candidates.length;i++){
+            //这行代码很重要哦
+            if (i > 0 && candidates[i] == candidates[i-1] && !used[i-1]) continue;
+            if (val + candidates[i] > target) break;
+            path.add(candidates[i]);
+            used[i] = true;
+            dfs(candidates,target,val+candidates[i],i+1);
+            used[i] = false;
+            path.remove(path.size()-1);
+        }
+    }
+    public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+        used = new boolean[candidates.length];
+        Arrays.sort(candidates);
+        dfs(candidates,target,0,0);
+        return ans;
+    }
+}
+```
+
+#### 第一百四十三剑式：没有重复元素集合的全排列
+
+> 题目来源：LeetCode 剑指 Offer II 083
+>
+> 标签：排序、回溯（递归）
+
+给定一个不含重复数字的整数数组 `nums` ，返回其 **所有可能的全排列** 。可以 **按任意顺序** 返回答案。
+
+ ```java
+class Solution {
+    List<List<Integer>> ans = new ArrayList<List<Integer>>();
+    List<Integer> path = new ArrayList<>();
+    boolean [] used ;
+    public void dfs(int [] nums){
+        if (path.size() == nums.length){
+            ans.add(new ArrayList<>(path));
+            return ;
+        }
+        for (int i = 0;i < nums.length;i++){
+            if (used[i]) continue;
+            used[i] = true;
+            path.add(nums[i]);
+            dfs(nums);
+            used[i] = false;
+            path.remove(path.size()-1);
+        }
+    }
+    public List<List<Integer>> permute(int[] nums) {
+        used = new boolean[nums.length];
+        dfs(nums);
+        return ans;
+    }
+}
+ ```
+
+#### 第一百四十四剑式：含有重复元素集合的全排列
+
+> 题目来源：LeetCode 剑指 Offer II 084
+>
+> 标签：排序、回溯（递归）
+
+给定一个可包含重复数字的整数集合 `nums` ，**按任意顺序** 返回它所有不重复的全排列。
+
+```java
+class Solution {
+    List<List<Integer>> ans = new ArrayList<List<Integer>>();
+    List<Integer> path = new ArrayList<>();
+    boolean [] used ;
+    public void dfs(int [] nums,int idx){
+        if (path.size() == nums.length){
+            ans.add(new ArrayList<>(path));
+            return ;
+        }
+        for (int i = 0;i < nums.length;i++){
+            if (i > 0 && nums[i] == nums[i-1] && !used[i-1]) continue;
+            if (used[i]) continue;
+            used[i] = true;
+            path.add(nums[i]);
+            dfs(nums,i+1);
+            used[i] = false;
+            path.remove(path.size()-1);
+        }
+    }
+    public List<List<Integer>> permuteUnique(int[] nums) {
+        used = new boolean[nums.length];
+        Arrays.sort(nums);
+        dfs(nums,0);
+        return ans;
+    }
+}
+```
+
+
+
+#### 第一百四十五剑式：生成匹配的括号
+
+> 题目来源：LeetCode 剑指 Offer II 085
+>
+> 标签：回溯（递归）
+
+正整数 `n` 代表生成括号的对数，请设计一个函数，用于能够生成所有可能的并且 **有效的** 括号组合。
+
+```
+输入：n = 3
+输出：["((()))","(()())","(())()","()(())","()()()"]
+```
+
+```java
+class Solution {
+    List<String> ans = new ArrayList<>();
+    StringBuilder sb ;
+    public void dfs(int n,int lcnt,int rcnt){
+        if (lcnt == rcnt && n == lcnt){//如果左右括号个数都等于n，则存储当前结果
+            ans.add(new String(sb.toString()));
+            return ;
+        }
+        //只有左括号个数大于右括号个数时才可以添加右括号
+        if (lcnt > rcnt){
+            sb.append(')');
+            dfs(n,lcnt,rcnt+1);
+            sb.deleteCharAt(sb.length()-1);
+        }
+        //如果左括号个数小于要求的个数，可以添加左括号
+        if (lcnt < n){
+            sb.append('(');
+            dfs(n,lcnt+1,rcnt);
+            sb.deleteCharAt(sb.length()-1);
+        }
+    }
+    public List<String> generateParenthesis(int n) {
+        sb = new StringBuilder(n * 2);
+        dfs(n,0,0);
+        return ans;
+    }
+}
+```
+
+
+
+#### 第一百四十六剑式：分割回文子字符串
+
+> 题目来源：LeetCode 剑指 Offer II 086
+>
+> 标签：回溯（递归）
+
+给定一个字符串 `s` ，请将 `s` 分割成一些子串，使每个子串都是 **回文串** ，返回 s 所有可能的分割方案。**回文串** 是正着读和反着读都一样的字符串。
+
+```java
+class Solution {
+    boolean[][] dp;
+    List<List<String>> ans = new ArrayList<List<String>>();
+    List<String> path = new ArrayList<>();
+
+    public String[][] partition(String s) {
+        int n = s.length();
+        char [] arr = s.toCharArray();
+        dp = new boolean[n][n];//初始化dp[][]
+        for (int i = 0;i < n;i++){
+            for (int j = 0;j < n;j++){
+                dp[i][j] = true;
+            }
+        }
+        //动态规划方法存储字符串的[i,j]子串是否时回文串
+        for (int i = n-1;i >= 0;i--){
+            for (int j = i + 1;j < n;j++){
+                dp[i][j] = (arr[i] == arr[j] && dp[i+1][j-1]);
+            }
+        }
+        //递归
+        dfs(s,0);
+        String [][] finalAns = new String[ans.size()][];
+        for (int i = 0;i < ans.size();i++){
+            finalAns[i] = new String[ans.get(i).size()];
+            for (int j = 0;j < finalAns[i].length;j++){
+                finalAns[i][j] = ans.get(i).get(j);
+            }
+        }
+        return finalAns;
+    }
+    public void dfs(String s,int idx){
+        if (idx == s.length()){
+            ans.add(new ArrayList<>(path));
+            return ;
+        }
+        for (int i = idx;i < s.length();i++){
+            //如果
+            if (dp[idx][i] == true){
+                path.add(s.substring(idx,i+1));
+                dfs(s,i+1);
+                path.remove(path.size()-1);
+            }
+        }
+    }
+}
+```
+
+
+
+#### 第一百四十七剑式：复原IP
+
+> 题目来源：LeetCode 剑指 Offer II 087
+>
+> 标签：回溯（递归）
+
+给定一个只包含数字的字符串 `s` ，用以表示一个 IP 地址，返回所有可能从 `s` 获得的 **有效 IP 地址** 。你可以按任何顺序返回答案。
+
+**有效 IP 地址** 正好由四个整数（每个整数位于 0 到 255 之间组成，且不能含有前导 `0`），整数之间用 `'.'` 分隔。
+
+例如："0.1.2.201" 和 "192.168.1.1" 是 **有效** IP 地址，但是 "0.011.255.245"、"192.168.1.312" 和 "192.168@1.1" 是 **无效** IP 地址。
+
+ ```java
+class Solution {
+    List<String> ans = new ArrayList<>();
+    StringBuilder sb ;
+    public void dfs(String s,int idx,int seg){
+        if(seg == 4){
+            if (idx == s.length())
+                ans.add(new String(sb.toString()));
+            return ;
+        }
+        for (int i = idx;i < idx+3 && i < s.length();i++){
+            String tmp = s.substring(idx,i+1);
+            if (tmp.length() > 1 && tmp.charAt(0) == '0') continue;
+            if (Integer.parseInt(tmp) > 255) continue;
+            if (seg < 3){
+                tmp = tmp + ".";
+            }
+            sb.append(tmp);
+            dfs(s,i+1,seg+1);
+            sb.delete(sb.length()-tmp.length(),sb.length());
+        }
+    }
+    public List<String> restoreIpAddresses(String s) {
+        sb = new StringBuilder(s.length()+3);
+        dfs(s,0,0);
+        return ans;
+    }
+}
+ ```
+
+
+
+#### 第一百四十八剑式：爬楼梯的最少成本
+
+> 题目来源：LeetCode 剑指 Offer II 088
+>
+> 标签：动态规划
+
+数组的每个下标作为一个阶梯，第 `i` 个阶梯对应着一个非负数的体力花费值 `cost[i]`（下标从 `0` 开始）。
+
+每当爬上一个阶梯都要花费对应的体力值，一旦支付了相应的体力值，就可以选择向上爬一个阶梯或者爬两个阶梯。
+
+请找出达到楼层顶部的最低花费。在开始时，你可以选择从下标为 0 或 1 的元素作为初始阶梯。
+
+```java
+class Solution {
+    public int minCostClimbingStairs(int[] cost) {
+        int n = cost.length;
+        int [] dp = new int[n+1];
+        for (int i = 2;i <= n;i++){
+            dp[i] = Math.min(dp[i-1]+cost[i-1],dp[i-2]+cost[i-2]);
+        }
+        return dp[n];
+    }
+}
+```
+
+
+
+
+
+#### 第一百四十九剑式：房屋偷盗
+
+> 题目来源：LeetCode 剑指 Offer II 089
+>
+> 标签：动态规划
+
+一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响小偷偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。
+
+给定一个代表每个房屋存放金额的非负整数数组 nums ，请计算 不触动警报装置的情况下 ，一夜之内能够偷窃到的最高金额。
+
+```java
+class Solution {
+    public int rob(int[] nums) {
+        int n = nums.length;
+        /*
+           dp[i][0]: 当前不偷获得的最大利润
+           dp[i][1]: 当前偷获得的最大利润
+         */
+        int [][]dp = new int[n][2];
+        dp[0][1] = nums[0];
+        for (int i = 1;i < n;i++){
+            dp[i][0] = Math.max(dp[i-1][0],dp[i-1][1]);
+            dp[i][1] = Math.max(dp[i-1][0]+nums[i],dp[i-1][1]);
+        }
+        return Math.max(dp[n-1][0],dp[n-1][1]);
     }
 }
 ```
