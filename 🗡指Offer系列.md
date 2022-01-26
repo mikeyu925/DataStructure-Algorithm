@@ -7224,3 +7224,217 @@ class Solution {
 }
 ```
 
+
+
+#### 第一百五十剑式：环形房屋偷盗
+
+> 题目来源：LeetCode 剑指 Offer II 090
+>
+> 标签：动态规划
+
+一个专业的小偷，计划偷窃一个环形街道上沿街的房屋，每间房内都藏有一定的现金。这个地方所有的房屋都 围成一圈 ，这意味着第一个房屋和最后一个房屋是紧挨着的。同时，相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警 。
+
+给定一个代表每个房屋存放金额的非负整数数组 nums ，请计算 在不触动警报装置的情况下 ，今晚能够偷窃到的最高金额。
+
+```java
+class Solution {
+    public int rob_home(int [] nums,int l,int r){
+        int [] dp = new int[r-l+1];
+        dp[0] = nums[l];
+        dp[1] = Math.max(nums[l],nums[l+1]);
+        for (int i = l + 2;i <= r;i++){
+            dp[i-l] = Math.max(dp[i-l-1],dp[i-l-2] + nums[i]);
+        }
+        return dp[r-l];
+    }
+    public int rob(int[] nums) {
+        int n = nums.length;
+        if (n == 1) return nums[0];
+        else if (n == 2) return Math.max(nums[0],nums[1]);
+        return Math.max(rob_home(nums,0,n-2),rob_home(nums,1,n-1));
+    }
+}
+```
+
+
+
+#### 剑指 Offer II 105. 岛屿的最大面积
+
+给定一个由 `0` 和 `1` 组成的非空二维数组 `grid` ，用来表示海洋岛屿地图。
+
+一个 **岛屿** 是由一些相邻的 `1` (代表土地) 构成的组合，这里的「相邻」要求两个 `1` 必须在水平或者竖直方向上相邻。你可以假设 `grid` 的四个边缘都被 `0`（代表水）包围着。
+
+找到给定的二维数组中最大的岛屿面积。如果没有岛屿，则返回面积为 `0` 。
+
+<img src="🗡指Offer系列.assets/1626667010-nSGPXz-image.png" alt="img" style="zoom:50%;" />
+
+```
+输入: grid = [[0,0,1,0,0,0,0,1,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,1,0,0,0],[0,1,1,0,1,0,0,0,0,0,0,0,0],[0,1,0,0,1,1,0,0,1,0,1,0,0],[0,1,0,0,1,1,0,0,1,1,1,0,0],[0,0,0,0,0,0,0,0,0,0,1,0,0],[0,0,0,0,0,0,0,1,1,1,0,0,0],[0,0,0,0,0,0,0,1,1,0,0,0,0]]
+输出: 6
+```
+
+```java
+class mapNode{
+    int x,y;
+    public mapNode(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+class Solution {
+    int [][] dirs = new int[][] {{-1,0},{1,0},{0,1},{0,-1}};
+    public int maxAreaOfIsland(int[][] grid) {
+        int m = grid.length,n = grid[0].length;
+        int ans = 0;
+        for (int i = 0;i < m;i++){
+            for (int j = 0;j < n;j++){
+                if (grid[i][j] == 1){
+                    Queue<mapNode> q = new ArrayDeque<>();
+                    q.offer(new mapNode(i,j));
+                    grid[i][j] = -1; //标记遍历过
+                    int area = 1;
+                    while (!q.isEmpty()){
+                        mapNode node = q.poll();
+                        for (int k = 0;k < 4;k++){
+                            int nx = node.x + dirs[k][0];
+                            int ny = node.y + dirs[k][1];
+                            if (nx < 0 || nx >= m || ny < 0 || ny >= n) continue;
+                            if (grid[nx][ny] == 1){
+                                grid[nx][ny] = -1;//标记
+                                q.offer(new mapNode(nx,ny));
+                                area += 1;
+                            }
+                        }
+                    }
+                    ans = Math.max(area,ans);
+                }
+            }
+        }
+        return ans;
+    }
+}
+```
+
+#### 剑指 Offer II 106. 二分图
+
+存在一个 无向图 ，图中有 n 个节点。其中每个节点都有一个介于 0 到 n - 1 之间的唯一编号。
+
+给定一个二维数组 graph ，表示图，其中 graph[u] 是一个节点数组，由节点 u 的邻接节点组成。形式上，对于 graph[u] 中的每个 v ，都存在一条位于节点 u 和节点 v 之间的无向边。该无向图同时具有以下属性：
+
+- 不存在自环（graph[u] 不包含 u）。
+- 不存在平行边（graph[u] 不包含重复值）。
+- 如果 v 在 graph[u] 内，那么 u 也应该在 graph[v] 内（该图是无向图）
+- 这个图可能不是连通图，也就是说两个节点 u 和 v 之间可能不存在一条连通彼此的路径。
+
+二分图 定义：如果能将一个图的节点集合分割成两个独立的子集 A 和 B ，并使图中的每一条边的两个节点一个来自 A 集合，一个来自 B 集合，就将这个图称为 二分图 。
+
+如果图是二分图，返回 true ；否则，返回 false 。
+
+![img](🗡指Offer系列.assets/bi2.jpg)
+
+```
+输入：graph = [[1,2,3],[0,2],[0,1,3],[0,2]]
+输出：false
+解释：不能将节点分割成两个独立的子集，以使每条边都连通一个子集中的一个节点与另一个子集中的一个节点。
+```
+
+
+
+```java
+class Solution {
+    int [] colors ;
+    public boolean isBipartite(int[][] graph) {
+        int n = graph.length;
+        colors = new int[n];
+        Queue<Integer> q = new ArrayDeque<>();
+        for (int i = 0;i < n;i++){
+            if (colors[i] != 0) continue;
+            colors[i] = 1;
+            q.offer(i);
+            while (!q.isEmpty()){
+                int now = q.poll();
+                for (int j = 0;j < graph[now].length;j++){
+                    int another = graph[now][j];
+                    if (colors[another] == 0){
+                        q.offer(another);
+                        if (colors[now] == 1){
+                            colors[another] = -1;
+                        }else{
+                            colors[another] = 1;
+                        }
+                    }else{
+                        if (colors[another] == colors[now]){
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+}
+```
+
+
+
+
+
+#### [542. 01 矩阵](https://leetcode-cn.com/problems/01-matrix/)
+
+难度中等586
+
+给定一个由 `0` 和 `1` 组成的矩阵 `mat` ，请输出一个大小相同的矩阵，其中每一个格子是 `mat` 中对应位置元素到最近的 `0` 的距离。
+
+两个相邻元素间的距离为 `1` 。
+
+![img](🗡指Offer系列.assets/1626667205-xFxIeK-image.png)
+
+```
+输入：mat = [[0,0,0],[0,1,0],[1,1,1]]
+输出：[[0,0,0],[0,1,0],[1,2,1]]
+```
+
+
+
+```java
+class mapNode{
+    int x,y;
+    int dist;
+    public mapNode(int x, int y,int d) {
+        this.x = x;
+        this.y = y;
+        this.dist = d;
+    }
+}
+class Solution {
+    int [][] dirs = new int[][] {{-1,0},{1,0},{0,1},{0,-1}};
+    public int[][] updateMatrix(int[][] mat) {
+        Queue<mapNode> q = new ArrayDeque<>();
+        int m = mat.length,n = mat[0].length;
+        boolean [][] used = new boolean[m][n];
+        int [][] ans = new int[m][n];
+        for (int i = 0;i < m;i++){
+            for (int j = 0;j < n;j++){
+                if (mat[i][j] == 0){
+                    used[i][j] = true;
+                    q.offer(new mapNode(i,j,0));
+                }
+            }
+        }
+        while (!q.isEmpty()){
+            mapNode tmp = q.poll();
+            ans[tmp.x][tmp.y] = tmp.dist;
+            for (int i = 0;i < 4;i++){
+                int nx = tmp.x + dirs[i][0];
+                int ny = tmp.y + dirs[i][1];
+                if (nx < 0 || nx >= m || ny < 0 || ny >= n || used[nx][ny]) continue;
+                used[nx][ny] = true;
+                q.offer(new mapNode(nx,ny,tmp.dist+1));
+            }
+        }
+        return ans;
+    }
+}
+```
+
