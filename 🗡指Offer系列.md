@@ -7380,9 +7380,7 @@ class Solution {
 
 
 
-#### [542. 01 矩阵](https://leetcode-cn.com/problems/01-matrix/)
-
-难度中等586
+#### 剑指 Offer II 107. 矩阵中的距离
 
 给定一个由 `0` 和 `1` 组成的矩阵 `mat` ，请输出一个大小相同的矩阵，其中每一个格子是 `mat` 中对应位置元素到最近的 `0` 的距离。
 
@@ -7433,6 +7431,437 @@ class Solution {
                 q.offer(new mapNode(nx,ny,tmp.dist+1));
             }
         }
+        return ans;
+    }
+}
+```
+
+#### 剑指 Offer II 108. 单词演变
+
+字典 wordList 中从单词 beginWord 和 endWord 的 转换序列 是一个按下述规格形成的序列：
+
+- 序列中第一个单词是 beginWord 。
+- 序列中最后一个单词是 endWord 。
+- 每次转换只能改变一个字母。
+- 转换过程中的中间单词必须是字典 wordList 中的单词。
+
+给你两个单词 beginWord 和 endWord 和一个字典 wordList ，找到从 beginWord 到 endWord 的 最短转换序列 中的 单词数目 。如果不存在这样的转换序列，返回 0。
+
+```java
+class mapNode{
+    String str;
+    int floor;
+    public mapNode(String str, int floor) {
+        this.str = str;
+        this.floor = floor;
+    }
+}
+class Solution {
+    public int ladderLength(String beginWord, String endWord, List<String> wordList) {
+        Set<String > wordset = new HashSet<>(wordList);
+        //判断结束字符是否在单词集合中
+        if (!wordset.contains(endWord) || wordset.size() <= 0){
+            return 0;
+        }
+        wordset.remove(beginWord);  //移除beginword,wordList中的beginWord存在没必要
+        Set<String> used = new HashSet<>();
+        Queue<mapNode> q = new ArrayDeque<>();
+        q.offer(new mapNode(beginWord,1));
+        while (!q.isEmpty()){
+            mapNode node = q.poll();
+            if (node.str.equals(endWord)){
+                return node.floor;
+            }
+            Iterator<String> iter = wordset.iterator();
+            while (iter.hasNext()){
+                String word = iter.next();
+                if (compare(word,node.str)){
+                    q.offer(new mapNode(word,node.floor+1));
+                    iter.remove();
+                }
+            }
+        }
+        return 0;
+    }
+    public boolean compare(String a,String b){
+        int cnt = 0;
+        for (int i = 0;i < a.length();i++){
+            if (a.charAt(i) != b.charAt(i)){
+                cnt += 1;
+            }
+            if (cnt > 1) break;
+        }
+        return cnt == 1;
+    }
+}
+```
+
+#### 剑指 Offer II 109. 开密码锁
+
+一个密码锁由 4 个环形拨轮组成，每个拨轮都有 10 个数字： '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' 。每个拨轮可以自由旋转：例如把 '9' 变为 '0'，'0' 变为 '9' 。每次旋转都只能旋转一个拨轮的一位数字。
+
+锁的初始数字为 '0000' ，一个代表四个拨轮的数字的字符串。
+
+列表 deadends 包含了一组死亡数字，一旦拨轮的数字和列表里的任何一个元素相同，这个锁将会被永久锁定，无法再被旋转。
+
+字符串 target 代表可以解锁的数字，请给出解锁需要的最小旋转次数，如果无论如何不能解锁，返回 -1 。
+
+```java
+class mapNode{
+    String str;
+    int floor;
+    public mapNode(String str, int floor) {
+        this.str = str;
+        this.floor = floor;
+    }
+}
+class Solution {
+    public int openLock(String[] deadends, String target) {
+        Queue<mapNode> q = new ArrayDeque<>();
+        q.offer(new mapNode("0000",0));
+        Set<String> deadsets = new HashSet<>();
+        for (String str : deadends){
+            deadsets.add(str);
+        }
+        if (deadsets.contains("0000") == true) return -1;
+        Set<String> used = new HashSet<>();
+        used.add("0000");
+        while (!q.isEmpty()){
+            mapNode node = q.poll();
+//            System.out.println(node.str);
+            if(node.str.equals(target)){
+                return node.floor;
+            }
+            for (int i = 0;i < 4;i++){
+                //add
+                int val = node.str.charAt(i) - '0';
+                val = (val + 1) % 10;
+                String nval = node.str.substring(0,i) + Integer.toString(val) + node.str.substring(i+1,4);
+                if (!deadsets.contains(nval) && !used.contains(nval)){
+                    used.add(nval);
+                    q.offer(new mapNode(nval,node.floor+1));
+                }
+                //sub
+                val = node.str.charAt(i) - '0';
+                if (val == 0){
+                    val = 9;
+                }else{
+                    val = val - 1;
+                }
+                nval = node.str.substring(0,i) + Integer.toString(val) + node.str.substring(i+1,4);
+                if (!deadsets.contains(nval) && !used.contains(nval)){
+                    used.add(nval);
+                    q.offer(new mapNode(nval,node.floor+1));
+                }
+            }
+        }
+        return -1;
+    }
+}
+```
+
+
+
+
+
+#### 剑指 Offer II 110. 所有路径
+
+给定一个有 n 个节点的有向无环图，用二维数组 graph 表示，请找到所有从 0 到 n-1 的路径并输出（不要求按顺序）。
+
+graph 的第 i 个数组中的单元都表示有向图中 i 号节点所能到达的下一些结点（译者注：有向图是有方向的，即规定了 a→b 你就不能从 b→a ），若为空，就是没有下一个节点了。
+
+```java
+class Solution {
+    List<List<Integer>> ans = new ArrayList<List<Integer>>();
+    List<Integer> path = new ArrayList<>();
+    boolean [] used;
+    public void dfs(int node,int n,int [][] graph){
+        if (node == n-1){
+            ans.add(new ArrayList<>(path));
+            return ;
+        }
+        for (int i = 0;i < graph[node].length;i++){
+            int next = graph[node][i];
+            if (!used[next]){
+                used[next] = true;
+                path.add(next);
+                dfs(next,n,graph);
+                path.remove(path.size()-1);
+                used[next] = false;
+            }
+        }
+    }
+    public List<List<Integer>> allPathsSourceTarget(int[][] graph) {
+        int n = graph.length;
+        if (n == 0) return null;
+        used = new boolean[n];
+        used[0] = true;
+        path.add(0);
+        dfs(0,n,graph);
+        return ans;
+    }
+}
+```
+
+
+
+
+
+#### 剑指 Offer II 111. 计算除法
+
+给定一个变量对数组 `equations` 和一个实数值数组 `values` 作为已知条件，其中 `equations[i] = [Ai, Bi]` 和 `values[i]` 共同表示等式 `Ai / Bi = values[i]` 。每个 `Ai` 或 `Bi` 是一个表示单个变量的字符串。
+
+另有一些以数组 `queries` 表示的问题，其中 `queries[j] = [Cj, Dj]` 表示第 `j` 个问题，请你根据已知条件找出 `Cj / Dj = ?` 的结果作为答案。
+
+返回 **所有问题的答案** 。如果存在某个无法确定的答案，则用 `-1.0` 替代这个答案。如果问题中出现了给定的已知条件中没有出现的字符串，也需要用 `-1.0` 替代这个答案。
+
+**注意：**输入总是有效的。可以假设除法运算中不会出现除数为 0 的情况，且不存在任何矛盾的结果。
+
+```java
+class mapNode{
+    int id;
+    double val;
+    public mapNode(int id, double val) {
+        this.id = id;
+        this.val = val;
+    }
+}
+class Solution {
+     public double[] calcEquation(List<List<String>> equations, double[] values, List<List<String>> queries) {
+        Map<String,Integer> m = new HashMap<>();
+        int idx = 0;
+        // 统计有多少个有效的 node
+        for (int i = 0;i < equations.size();i++){
+            if (m.get(equations.get(i).get(0)) == null){
+                m.put(equations.get(i).get(0),idx++);
+            }
+            if (m.get(equations.get(i).get(1)) == null){
+                m.put(equations.get(i).get(1),idx++);
+            }
+        }
+        // 创建一个图
+        double [][] graph = new double[idx][idx];
+        boolean [][] connect = new boolean[idx][idx];
+        // 建图
+        for (int i = 0;i < equations.size();i++){
+            int start = m.get(equations.get(i).get(0));
+            int end = m.get(equations.get(i).get(1));
+            graph[start][end] = values[i];
+            graph[end][start] = 1.0 / values[i];
+            graph[start][start] = 1.0;
+            graph[end][end] = 1.0;
+            connect[start][end] = connect[end][start] = true;
+            connect[start][start] = connect[end][end] = true;
+        }
+        double [] ans = new double[queries.size()]; //存放结果的数组
+        for (int i = 0;i < queries.size();i++){  //遍历
+            //获取起始点的 id
+            int start = m.getOrDefault(queries.get(i).get(0),-1);
+            int end   = m.getOrDefault(queries.get(i).get(1),-1);
+            //如果结点不在图中，直接返回false
+            if (start == -1 || end == -1){
+                ans[i] = -1.0;
+            }else{
+                //如果在图中，开始准备BFS
+                Queue<mapNode> q = new ArrayDeque<>();
+                q.offer(new mapNode(start,1.0));
+                boolean [] used = new boolean[idx];  //标记列表
+                used[start] = true;
+                boolean find = false;  //标记是否找到了 end
+                while (!q.isEmpty()){
+                    mapNode node = q.poll();
+                    //如果到达了目标点，直接得到答案
+                    if (node.id == end){
+                        ans[i] = node.val;
+                        find = true;
+                        break;
+                    }
+                    //遍历所有可能与 node 相连的结点
+                    for (int j = 0;j < idx;j++){
+                        //如果 j是node本身 或者 node和j不相连 或者 j已经被使用了
+                        if (node.id == j || connect[node.id][j] == false || used[j]) continue;
+                        used[j] = true;
+                        q.offer(new mapNode(j,node.val * graph[node.id][j]));
+                    }
+                }
+                if (!find){
+                    ans[i] = -1.0;
+                }
+            }
+        }
+        return ans;
+    }
+}
+```
+
+
+
+
+
+#### 剑指 Offer II 112. 最长递增路径
+
+给定一个 `m x n` 整数矩阵 `matrix` ，找出其中 **最长递增路径** 的长度。
+
+对于每个单元格，你可以往上，下，左，右四个方向移动。 **不能** 在 **对角线** 方向上移动或移动到 **边界外**（即不允许环绕）。
+
+```java
+//内存超了 ...
+class mapNode{
+    int id;
+    int floor;
+
+    public mapNode(int id, int val) {
+        this.id = id;
+        this.floor = val;
+    }
+}
+class Solution {
+    int [][] dirs = new int[][] {{-1,0},{1,0},{0,1},{0,-1}};
+    int m,n;
+   public int getId(int x,int j){
+        return x * n + j;
+    }
+    public int longestIncreasingPath(int[][] matrix) {
+        m = matrix.length;  //行数
+        n = matrix[0].length;   //列数
+        Map<Integer, ArrayList<Integer>> map = new HashMap<>(); //哈希表建图
+       for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                int id = i * n + j;
+                ArrayList<Integer> tmp = new ArrayList<>();
+                for (int k = 0; k < 4; k++) {
+                    int nx = i + dirs[k][0];
+                    int ny = j + dirs[k][1];
+                    if (nx < 0 || ny < 0 || nx >= m || ny >= n) continue;
+                    if (matrix[nx][ny] > matrix[i][j]){ //只有可以走才加入
+                        tmp.add(getId(nx,ny));
+                    }
+                }
+                map.put(id,tmp);
+            }
+        }
+        int maxLen = 0;  //整个图的最长路径
+        Map<Integer,Integer> entry = new HashMap<>();  //记录每个从每个点走的最长路径
+        for (int i = 0;i < m * n;i++){ //遍历每个点 0 ~ m*n-1
+            Queue<mapNode> q = new ArrayDeque<>();
+            q.offer(new mapNode(i,1)); //队列加入起始点
+            int curMax = 0;  //当前点的最长路径
+            while (!q.isEmpty()){
+                mapNode node = q.poll(); //弹出队头元素
+                maxLen = Math.max(maxLen,node.floor); //更新两个最长路径
+                curMax = Math.max(curMax,node.floor);
+                List<Integer> select = map.get(node.id);  //获取当前点可选择的 下一个点的列表
+                for (int j = 0;j < select.size();j++){
+                    int next =select.get(j);
+                    if (entry.get(next) != null){  //如果该点的最长路径已经求过，直接更新答案并跳过
+                        maxLen = Math.max(maxLen,node.floor + entry.get(next));
+                        curMax = Math.max(curMax,node.floor + entry.get(next));
+                        continue;
+                    }
+                    q.offer(new mapNode(next,node.floor+1));
+                }
+            }
+            entry.put(i,curMax);
+        }
+
+        return maxLen;
+    }
+}
+```
+
+
+
+
+
+#### 剑指 Offer II 113. 课程顺序
+
+现在总共有 `numCourses` 门课需要选，记为 `0` 到 `numCourses-1`。
+
+给定一个数组 `prerequisites` ，它的每一个元素 `prerequisites[i]` 表示两门课程之间的先修顺序。 例如 `prerequisites[i] = [ai, bi]` 表示想要学习课程 `ai` ，需要先完成课程 `bi` 。
+
+请根据给出的总课程数  `numCourses` 和表示先修顺序的 `prerequisites` 得出一个可行的修课序列。
+
+可能会有多个正确的顺序，只要任意返回一种就可以了。如果不可能完成所有课程，返回一个空数组。
+
+ ```java
+class Solution {
+    public int[] findOrder(int numCourses, int[][] prerequisites) {
+        List<Integer> ans = new ArrayList<>();
+        Map<Integer,List<Integer>> m = new HashMap<>();
+        int [] in_degree = new int[numCourses];
+        for (int i = 0;i < prerequisites.length;i++){
+            int preClass = prerequisites[i][1];
+            int afterClass = prerequisites[i][0];
+            in_degree[afterClass] += 1;
+            List<Integer> t = m.getOrDefault(preClass,new ArrayList<>());
+            t.add(afterClass);
+            m.put(preClass,t);
+        }
+        Queue<Integer> q = new ArrayDeque<>();
+        boolean [] used = new boolean[numCourses];
+        for (int i = 0;i < numCourses;i++){
+            if (in_degree[i] == 0){
+                q.add(i);
+            }
+        }
+        while (!q.isEmpty()){
+            int now = q.poll();
+            ans.add(now);
+            List<Integer> edgeNodes = m.get(now);
+            if (edgeNodes == null) continue;
+            for (int i = 0;i < edgeNodes.size();i++){
+                int next = edgeNodes.get(i);
+                in_degree[next] -= 1;
+                if (used[next] || in_degree[next] > 0) continue;
+                used[next] = true;
+                q.offer(next);
+            }
+        }
+        if (ans.size() == numCourses)
+            return ans.stream().mapToInt(Integer::valueOf).toArray();
+        else
+            return new int[0];
+    }
+}
+ ```
+
+
+
+
+
+#### 剑指 Offer II 116. 省份数量
+
+有 `n` 个城市，其中一些彼此相连，另一些没有相连。如果城市 `a` 与城市 `b` 直接相连，且城市 `b` 与城市 `c` 直接相连，那么城市 `a` 与城市 `c` 间接相连。
+
+**省份** 是一组直接或间接相连的城市，组内不含其他没有相连的城市。
+
+给你一个 `n x n` 的矩阵 `isConnected` ，其中 `isConnected[i][j] = 1` 表示第 `i` 个城市和第 `j` 个城市直接相连，而 `isConnected[i][j] = 0` 表示二者不直接相连。
+
+返回矩阵中 **省份** 的数量。
+
+```java
+class Solution {
+    public int findCircleNum(int[][] isConnected) {
+        int n = isConnected.length;
+        boolean [] used = new boolean[n];
+        int ans = 0;
+        for (int i = 0;i < n;i++){
+            Queue<Integer> q = new ArrayDeque<>();
+            if (used[i]) continue;
+            q.offer(i);
+            used[i] = true;
+            ans += 1;
+            while (!q.isEmpty()){
+                int now = q.poll();
+                for (int j = 0;j < n;j++){
+                    if (now == j) continue;
+                    if(isConnected[now][j] == 1 && !used[j]){
+                        used[j] = true;
+                        q.offer(j);
+                    }
+                }
+            }
+        } 
         return ans;
     }
 }
