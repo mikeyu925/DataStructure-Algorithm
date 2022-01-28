@@ -7292,7 +7292,7 @@ class Solution {
 
 
 
-####  第一百五十一剑式：翻转字符
+####  第一百五十二剑式：翻转字符
 
 > 题目来源：LeetCode 剑指 Offer II 092
 
@@ -7325,7 +7325,60 @@ class Solution {
 }
 ```
 
+####  第一百五十三剑式：最长斐波那契数列
 
+> 题目来源：LeetCode 剑指 Offer II 093
+
+> 标签：动态规划
+
+如果序列 X_1, X_2, ..., X_n 满足下列条件，就说它是 斐波那契式 的：
+
+- n >= 3
+- 对于所有 i + 2 <= n，都有 X_i + X_{i+1} = X_{i+2}
+  给定一个严格递增的正整数数组形成序列 arr ，找到 arr 中最长的斐波那契式的子序列的长度。如果一个不存在，返回  0 。
+
+（子序列是从原序列 arr 中派生出来的，它从 arr 中删掉任意数量的元素（也可以不删），而不改变其余元素的顺序。例如， [3, 5, 8] 是 [3, 4, 5, 6, 7, 8] 的一个子序列）
+
+题目解析：
+
+**状态定义**：
+
+$dp[i][j]$：表示以$A[i],A[j]$结尾的斐波那契数列的最大长度:$dp[i][j] = Len(......, A[i],A[j])$
+
+**状态转移方程**：
+$$
+dp[i][j] = Max(dp[i][j],dp[k][i]) + 1,\text{if A[k] + A[i] = A[j] && k is exit}
+$$
+
+```java
+class Solution {
+    public int lenLongestFibSubseq(int[] arr) {
+        int n = arr.length;
+        Map<Integer,Integer> m = new HashMap<>();
+        for(int i = 0;i < n;i++){
+            m.put(arr[i],i);
+        }
+        int [][] dp = new int[n][n];
+        for (int i = 0;i < n;i++){
+            for (int j = i + 1;j < n;j++){
+                dp[i][j] = 2;
+            }
+        }
+        int ans = 0;
+        for (int i = 0;i < n;i++){
+            for (int j = i + 1; j < n;j++){
+                int diff = arr[j] - arr[i];
+                int idx = m.getOrDefault(diff,-1);
+                if (idx >= 0 && idx < i){
+                    dp[i][j] = Math.max(dp[i][j],dp[idx][i]) + 1;
+                }
+                ans = Math.max(dp[i][j],ans);
+            }
+        }
+        return ans >= 3 ? ans : 0;
+    }
+}
+```
 
 
 
