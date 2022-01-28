@@ -7867,3 +7867,88 @@ class Solution {
 }
 ```
 
+
+
+#### 剑指 Offer II 117. 相似的字符串
+
+如果交换字符串 X 中的两个不同位置的字母，使得它和字符串 Y 相等，那么称 X 和 Y 两个字符串相似。如果这两个字符串本身是相等的，那它们也是相似的。
+
+例如，"tars" 和 "rats" 是相似的 (交换 0 与 2 的位置)； "rats" 和 "arts" 也是相似的，但是 "star" 不与 "tars"，"rats"，或 "arts" 相似。
+
+总之，它们通过相似性形成了两个关联组：{"tars", "rats", "arts"} 和 {"star"}。注意，"tars" 和 "arts" 是在同一组中，即使它们并不相似。形式上，对每个组而言，要确定一个单词在组中，只需要这个词和该组中至少一个单词相似。
+
+给定一个字符串列表 strs。列表中的每个字符串都是 strs 中其它所有字符串的一个 字母异位词 。请问 strs 中有多少个相似字符串组？
+
+字母异位词（anagram），一种把某个字符串的字母的位置（顺序）加以改换所形成的新词。
+
+```java
+class UnionFind{
+    public int[] parent ;
+    public int[] rank ; //集合中元素的个数
+    int count; // 集合的数量
+    UnionFind(int n){
+        parent = new int[n];
+        rank = new int[n];
+        for (int i = 0;i < n;i++){
+            parent[i] = i;
+            rank[i] = 1;
+        }
+        count = n;
+    }
+
+    public boolean union(int x,int y){
+        int px = find(x);
+        int py = find(y);
+        if (px == py) return false;
+        if (rank[px] == rank[py]){
+            parent[px] = py;
+            rank[py] += 1;
+        }else if(rank[px] < rank[py]){
+            parent[px] = py;
+        }else{
+            parent[py] = px;
+        }
+        count -= 1;
+        return true;
+    }
+    public int find(int x){
+        return parent[x] == x ? x : (parent[x] = find(parent[x]));
+    }
+}
+
+public class Solution {
+    public boolean compare(String s1,String s2){
+        int cnt = 0;
+        int id1 = -1,id2 = -1;
+        for (int i = 0;i < s1.length();i++){
+            if (s1.charAt(i) != s2.charAt(i)){
+                cnt += 1;
+                if (cnt == 1){
+                    id1 = i;
+                }else if (cnt == 2){
+                    id2 = i;
+                }
+            }
+            if (cnt > 2) return false;
+        }
+        if(cnt == 0) return true;
+        if(cnt != 2) return false;
+        return s1.charAt(id1) == s2.charAt(id2) && s1.charAt(id2) == s2.charAt(id1);
+    }
+    public int numSimilarGroups(String[] strs) {
+        int n = strs.length;
+        UnionFind uf = new UnionFind(n);
+
+        for (int i = 0;i < strs.length;i++){
+            for (int j = 0;j < strs.length;j++){
+                if (i == j) continue;
+                if (compare(strs[i],strs[j])){
+                    uf.union(i,j);
+                }
+            }
+        }
+        return uf.count;
+    }
+}
+```
+
