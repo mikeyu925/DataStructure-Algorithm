@@ -7482,7 +7482,50 @@ class Solution {
 }
 ```
 
+####  第一百六十一剑式：分割等和子集
 
+> 题目来源：LeetCode 剑指 Offer II 101
+
+> 标签：动态规划
+
+给定一个非空的正整数数组 `nums` ，请判断能否将这些数字分成元素和相等的两部分。
+
+题目解析：
+
+
+
+```java
+public class Solution {
+    public boolean canPartition(int[] nums) {
+        int n = nums.length;
+        int sum = 0;
+        int max_num = Integer.MIN_VALUE;
+        for (int num : nums){
+            sum += num;
+            max_num = Math.max(max_num,num);
+        }
+        if (sum % 2 == 1) return false;
+        int target = sum / 2;
+        if (max_num > target) return false;
+        boolean [][] dp = new boolean[n][target+1];
+        dp[0][nums[0]] = true;
+        for (int i = 0;i < n;i++){
+            dp[i][0] = true;
+        }
+        for (int i = 1;i < n;i++){
+            int num = nums[i];
+            for (int j = 1; j <= target;j++){
+                if (j >= num){
+                    dp[i][j] = dp[i-1][j] || dp[i-1][j-num];
+                }else{
+                    dp[i][j] = dp[i-1][j];
+                }
+            }
+        }
+        return dp[n-1][target];
+    }
+}
+```
 
 
 
