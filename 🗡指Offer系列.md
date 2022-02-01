@@ -4,7 +4,13 @@
 
 - 数据结构：链表（单向、双向、循环）、队列（双端队列、优先级队列）、栈（单调栈）、堆（大顶堆、小顶堆）、二叉树（二叉搜索树）、图（最小生成树）
 - 算法：排序（自定义排序、快排、桶排序）、二分法（二分搜索、二分答案）、分治、递归、搜索（A*、BFS、DFS)、KMP、滑动窗口、双指针、位运算（快速幂）、贪心（证明）、动态规划（状态压缩）、前缀树
-- 数学：约瑟夫环问题、剪绳子问题、
+- 数学：约瑟夫环问题、剪绳子问题
+
+自己认为的一些难点：
+
+- 二分法：二分函数的细节、二分方法中check函数
+- 图：如何将问题转化为一个可以用图结构解决、搜索过程
+- 排序：自定义排序方法、
 
 > 讲一些自己感悟吧...感觉坚持刷题真的有效果，刷offer的时候感觉许多题之前都刷到过类似的，然后很快就有思路。
 >
@@ -7529,9 +7535,121 @@ public class Solution {
 
 
 
+####  第一百六十二剑式：加减的目标值
+
+> 题目来源：LeetCode 剑指 Offer II 102
+
+> 标签：动态规划
+
+给定一个正整数数组 nums 和一个整数 target 。
+
+向数组中的每个整数前添加 '+' 或 '-' ，然后串联起所有整数，可以构造一个 表达式 ：
+
+例如，nums = [2, 1] ，可以在 2 之前添加 '+' ，在 1 之前添加 '-' ，然后串联起来得到表达式 "+2-1" 。
+返回可以通过上述方法构造的、运算结果等于 target 的不同 表达式 的数目。
+
+```java
+class Solution {
+   public int findTargetSumWays(int[] nums, int target) {
+        int n = nums.length;
+        int sum = 0;
+        for (int num : nums){
+            sum += num;
+        }
+        int neg = (sum - target) ;
+        if (neg < 0 || neg % 2 != 0) return 0;
+        neg = neg / 2;
+        int [][] dp = new int[n+1][neg+1];
+        dp[0][0] = 1;
+        for (int i = 1;i < dp.length;i++){
+            int num = nums[i-1];
+            for (int j = 0;j <= neg;j++){
+                dp[i][j] = dp[i-1][j];
+                if (j >= num){
+                    dp[i][j] += dp[i-1][j-num];
+                }
+            }
+        }
+        return dp[n][neg];
+    }
+}
+```
+
+####  第一百六十三剑式：最少的硬币数目
+
+> 题目来源：LeetCode 剑指 Offer II 103
+
+> 标签：动态规划
+
+给定不同面额的硬币 `coins` 和一个总金额 `amount`。编写一个函数来计算可以凑成总金额所需的最少的硬币个数。如果没有任何一种硬币组合能组成总金额，返回 `-1`。
+
+你可以认为每种硬币的数量是无限的。
+
+```java
+class Solution {
+    public int coinChange(int[] coins, int amount) {
+        int n = coins.length;
+        int [] dp = new int[amount+1];
+        dp[0] = 0;
+        for (int i = 1;i <= amount;i++){
+            dp[i] = -1;
+        }
+        for (int i = 1;i <= amount;i++){
+            for (int j = 0;j < coins.length;j++){
+                if (coins[j] > i) continue;
+                if (dp[i-coins[j]] == -1) continue;
+                if (dp[i] == -1){
+                    dp[i] = dp[i-coins[j]] + 1;
+                }else{
+                    dp[i] = Math.min(dp[i - coins[j]] + 1,dp[i]);
+                }
+            }
+        }
+        return dp[amount];
+    }
+}
+```
+
+####  第一百六十四剑式：排列的数目
+
+> 题目来源：LeetCode 剑指 Offer II 104
+
+> 标签：动态规划
+
+给定一个由 **不同** 正整数组成的数组 `nums` ，和一个目标整数 `target` 。请从 `nums` 中找出并返回总和为 `target` 的元素组合的个数。数组中的数字可以在一次排列中出现任意次，但是顺序不同的序列被视作不同的组合。
+
+题目数据保证答案符合 32 位整数范围。
+
+```java
+class Solution {
+    public int combinationSum4(int[] nums, int target) {
+        int n = nums.length;
+        int [] dp = new int[target+1];
+        dp[0] = 1;
+        for (int val = 1;val <= target;val++){
+            int tmp = 0;
+            for (int i = 0;i < nums.length;i++){
+                if (nums[i] > val) continue;
+                int diff = val - nums[i];
+                if (dp[diff] == 0) continue;
+                tmp += dp[diff];
+            }
+            dp[val] = tmp;
+        }
+        return dp[target];
+    }
+}
+```
 
 
-#### 剑指 Offer II 105. 岛屿的最大面积
+
+
+
+####  第一百六十五剑式：岛屿的最大面积
+
+> 题目来源：LeetCode 剑指 Offer II 105
+
+> 标签：搜索
 
 给定一个由 `0` 和 `1` 组成的非空二维数组 `grid` ，用来表示海洋岛屿地图。
 
@@ -7589,7 +7707,13 @@ class Solution {
 }
 ```
 
-#### 剑指 Offer II 106. 二分图
+
+
+####  第一百六十五剑式：二分图
+
+> 题目来源：LeetCode 剑指 Offer II 105
+
+> 标签：搜索
 
 存在一个 无向图 ，图中有 n 个节点。其中每个节点都有一个介于 0 到 n - 1 之间的唯一编号。
 
@@ -7651,9 +7775,11 @@ class Solution {
 
 
 
+####  第一百六十七剑式：矩阵中的距离
 
+> 题目来源：LeetCode 剑指 Offer II 107
 
-#### 剑指 Offer II 107. 矩阵中的距离
+> 标签：BFS广度优先搜索
 
 给定一个由 `0` 和 `1` 组成的矩阵 `mat` ，请输出一个大小相同的矩阵，其中每一个格子是 `mat` 中对应位置元素到最近的 `0` 的距离。
 
@@ -7709,7 +7835,11 @@ class Solution {
 }
 ```
 
-#### 剑指 Offer II 108. 单词演变
+####  第一百六十八剑式：单词演变
+
+> 题目来源：LeetCode 剑指 Offer II 108
+
+> 标签：图、搜索
 
 字典 wordList 中从单词 beginWord 和 endWord 的 转换序列 是一个按下述规格形成的序列：
 
@@ -7769,7 +7899,11 @@ class Solution {
 }
 ```
 
-#### 剑指 Offer II 109. 开密码锁
+####  第一百六十九剑式：开密码锁
+
+> 题目来源：LeetCode 剑指 Offer II 109
+
+> 标签：图、搜索BFS
 
 一个密码锁由 4 个环形拨轮组成，每个拨轮都有 10 个数字： '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' 。每个拨轮可以自由旋转：例如把 '9' 变为 '0'，'0' 变为 '9' 。每次旋转都只能旋转一个拨轮的一位数字。
 
@@ -7833,11 +7967,11 @@ class Solution {
 }
 ```
 
+####  第一百七十剑式：所有路径
 
+> 题目来源：LeetCode 剑指 Offer II 110
 
-
-
-#### 剑指 Offer II 110. 所有路径
+> 标签：图、深度优先搜索
 
 给定一个有 n 个节点的有向无环图，用二维数组 graph 表示，请找到所有从 0 到 n-1 的路径并输出（不要求按顺序）。
 
@@ -7878,9 +8012,11 @@ class Solution {
 
 
 
+####  第一百七十一剑式：计算除法
 
+> 题目来源：LeetCode 剑指 Offer II 111
 
-#### 剑指 Offer II 111. 计算除法
+> 标签：图、BFS广度优先搜索
 
 给定一个变量对数组 `equations` 和一个实数值数组 `values` 作为已知条件，其中 `equations[i] = [Ai, Bi]` 和 `values[i]` 共同表示等式 `Ai / Bi = values[i]` 。每个 `Ai` 或 `Bi` 是一个表示单个变量的字符串。
 
@@ -7967,11 +8103,11 @@ class Solution {
 }
 ```
 
+####  第一百七十二剑式：最长递增路径
 
+> 题目来源：LeetCode 剑指 Offer II 112
 
-
-
-#### 剑指 Offer II 112. 最长递增路径
+> 标签：图、搜索
 
 给定一个 `m x n` 整数矩阵 `matrix` ，找出其中 **最长递增路径** 的长度。
 
@@ -8044,9 +8180,11 @@ class Solution {
 
 
 
+####  第一百七十三剑式：课程顺序
 
+> 题目来源：LeetCode 剑指 Offer II 113
 
-#### 剑指 Offer II 113. 课程顺序
+> 标签：图、拓扑排序、广度优先搜索
 
 现在总共有 `numCourses` 门课需要选，记为 `0` 到 `numCourses-1`。
 
@@ -8098,11 +8236,101 @@ class Solution {
 }
  ```
 
+####  第一百六十四剑式：外星文字典
+
+> 题目来源：LeetCode 剑指 Offer II 114
+
+> 标签：图、
+
+现有一种使用英语字母的外星文语言，这门语言的字母顺序与英语顺序不同。
+
+给定一个字符串列表 `words` ，作为这门语言的词典，`words` 中的字符串已经 **按这门新语言的字母顺序进行了排序** 。
+
+请你根据该词典还原出此语言中已知的字母顺序，并 **按字母递增顺序** 排列。若不存在合法字母顺序，返回 `""` 。若存在多种可能的合法字母顺序，返回其中 **任意一种** 顺序即可。
+
+字符串 `s` **字典顺序小于** 字符串 `t` 有两种情况：
+
+- 在第一个不同字母处，如果 `s` 中的字母在这门外星语言的字母顺序中位于 `t` 中字母之前，那么 `s` 的字典顺序小于 `t` 。
+- 如果前面 `min(s.length, t.length)` 字母都相同，那么 `s.length < t.length` 时，`s` 的字典顺序也小于 `t` 。
+
+```java
+class Solution {
+    public boolean check(String a,String b){
+        int m = a.length(),n = b.length();
+        if (m < n) return false;
+        int i = 0,j = 0;
+        while (i < m && j < n){
+            if (a.charAt(i++) != b.charAt(j++)) return false;
+        }
+        return true;
+    }
+    public String alienOrder(String[] words) {
+        Map<Character,Set<Character>> graph = new HashMap<>();
+        int [] indegree = new int[26];
+        Queue<Character> q = new ArrayDeque<>();
+        StringBuilder sb = new StringBuilder();
+        // 将出现的字符保存在HashMap中，key:ch val:可到达的另一个字符
+        for (String word : words){
+            for (char ch : word.toCharArray()){
+                graph.putIfAbsent(ch,new HashSet<>());
+            }
+        }
+        // 逐个比较相邻字符串的关系,如果出现不合法输入直接返回false
+        for (int i = 1;i < words.length;i++){
+            String a = words[i-1];
+            String b = words[i];
+            if (check(a,b) && !a.equals(b)) return "";
+            int limit = Math.min(a.length(),b.length());
+            for (int j = 0;j < limit;j++){
+                char cha = a.charAt(j);
+                char chb = b.charAt(j);
+                if (cha != chb){
+                    if (!graph.get(cha).contains(chb)){
+                        graph.get(cha).add(chb);
+                        indegree[chb-'a'] += 1;
+                    }
+                    break;
+                }
+            }
+        }
+        // 入度为0的字符先加入队列，准备拓扑排序
+        for (char ch: graph.keySet()){
+            if (indegree[ch-'a'] == 0){
+                q.offer(ch);
+            }
+        }
+        while (!q.isEmpty()){
+            char node = q.poll();
+            sb.append(node);
+            for (char next : graph.get(node)){
+                indegree[next-'a'] -= 1;
+                if (indegree[next-'a'] == 0){
+                    q.offer(next);
+                }
+            }
+        }
+        return sb.length() == graph.size() ? sb.toString() : "";
+    }
+}
+```
+
+
+
+####  第一百六十五剑式：重建序列
+
+> 题目来源：LeetCode 剑指 Offer II 115
+
+> 标签：图、
 
 
 
 
-#### 剑指 Offer II 116. 省份数量
+
+####  第一百七十六剑式：省份数量
+
+> 题目来源：LeetCode 剑指 Offer II 116
+
+> 标签：并查集
 
 有 `n` 个城市，其中一些彼此相连，另一些没有相连。如果城市 `a` 与城市 `b` 直接相连，且城市 `b` 与城市 `c` 直接相连，那么城市 `a` 与城市 `c` 间接相连。
 
@@ -8142,7 +8370,11 @@ class Solution {
 
 
 
-#### 剑指 Offer II 117. 相似的字符串
+####  第一百六十七剑式：相似的字符串
+
+> 题目来源：LeetCode 剑指 Offer II 117
+
+> 标签：并查集
 
 如果交换字符串 X 中的两个不同位置的字母，使得它和字符串 Y 相等，那么称 X 和 Y 两个字符串相似。如果这两个字符串本身是相等的，那它们也是相似的。
 
