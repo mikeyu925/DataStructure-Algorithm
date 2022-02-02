@@ -1,4 +1,4 @@
-插个眼！截至目前`2021年12月8日`，自己已经坚持刷题9个月了！已经在LeetCode做了大约300道题目了，因此想着**尝试不看任何题解**把剑指Offer系列的题目全做一遍，看看自己的水平如何。祝自己顺利！
+插个眼！截至目前`2021年12月16日`，自己已经坚持刷题9个月了！已经在LeetCode做了大约300道题目了，因此想着**尝试不看任何题解**把剑指Offer系列的题目全做一遍，看看自己的水平如何。祝自己顺利！
 
 总结一下你可能需要掌握的知识点：
 
@@ -15,6 +15,8 @@
 > 讲一些自己感悟吧...感觉坚持刷题真的有效果，刷offer的时候感觉许多题之前都刷到过类似的，然后很快就有思路。
 >
 > 所谓真正扎实的武功ጿ ኈ ቼ ዽ ጿ ኈ ቼ ዽ ጿ ኈ ቼ ዽ ጿ ኈ ቼ ዽ ጿ ኈ ቼ ዽ ጿ，都是在不断地训练中出来地！天才也需要99的汗水才能成功呢！
+
+注：**开始时间：2021年12月16日**
 
 #### 第一剑式：用两个栈实现队列
 
@@ -8322,6 +8324,71 @@ class Solution {
 
 > 标签：图、
 
+请判断原始的序列 org 是否可以从序列集 seqs 中唯一地 重建 。
+
+序列 org 是 1 到 n 整数的排列，其中 1 ≤ n ≤ 104。重建 是指在序列集 seqs 中构建最短的公共超序列，即  seqs 中的任意序列都是该最短序列的子序列。
+
+```java
+class Solution {
+    public boolean sequenceReconstruction(int[] org, List<List<Integer>> seqs) {
+        // 查看序列集合中的元素是否完整
+        Set<Integer> set = new HashSet<>();
+        Map<Integer,Integer> indegree = new HashMap<>();
+        int n = org.length;
+        for (List<Integer> seq : seqs){
+            for (int num : seq){
+                set.add(num);
+                indegree.put(num,0);
+            }
+        }
+        if (n == 1 && !set.contains(n)) return false; // ?
+        if (set.size() != n) return false; // 序列集合不完整
+        Map<Integer,Set<Integer>> graph = new HashMap<>();
+        for (int i = 1;i <= n;i++){
+            graph.put(i,new HashSet<>());
+        }
+        for (int i = 0;i < seqs.size();i++){
+            for (int j = 0;j < seqs.get(i).size()-1;j++){
+                int first = seqs.get(i).get(j);
+                int seconde = seqs.get(i).get(j+1);
+                if (!graph.get(first).contains(seconde)){
+                    graph.get(first).add(seconde);
+                    indegree.put(seconde,indegree.getOrDefault(seconde,0) + 1);
+                }
+            }
+        }
+        //准备拓扑排序，入度为0的元素入队
+        Queue<Integer> q = new ArrayDeque<>();
+        Iterator<Map.Entry<Integer,Integer>> iter = indegree.entrySet().iterator();
+        while (iter.hasNext()){
+            Map.Entry<Integer,Integer> entry = iter.next();
+            if (entry.getValue() == 0){
+                q.offer(entry.getKey());
+            }
+        }
+        List<Integer> ans = new ArrayList<>();
+        while (!q.isEmpty()){
+            if (q.size() != 1) return false;
+            int now = q.poll();
+            ans.add(now);
+            if (graph.get(now) == null) continue;
+            for (int next : graph.get(now)){
+                int in = indegree.get(next);
+                indegree.put(next,in-1);
+                if (in == 1){
+                    q.offer(next);
+                }
+            }
+        }
+        if (ans.size() != n) return false;
+        for (int i = 0;i < ans.size();i++){
+            if (ans.get(i) != org[i]) return false;
+        }
+        return true;
+    }
+}
+```
+
 
 
 
@@ -8457,3 +8524,146 @@ public class Solution {
 }
 ```
 
+
+
+####  第一百六十八剑式：多余的边
+
+> 题目来源：LeetCode 剑指 Offer II 118
+
+> 标签：并查集
+
+树可以看成是一个连通且 **无环** 的 **无向** 图。
+
+给定往一棵 `n` 个节点 (节点值 `1～n`) 的树中添加一条边后的图。添加的边的两个顶点包含在 `1` 到 `n` 中间，且这条附加的边不属于树中已存在的边。图的信息记录于长度为 `n` 的二维数组 `edges` ，`edges[i] = [ai, bi]` 表示图中在 `ai` 和 `bi` 之间存在一条边。
+
+请找出一条可以删去的边，删除后可使得剩余部分是一个有着 `n` 个节点的树。如果有多个答案，则返回数组 `edges` 中最后出现的边。
+
+**题目解析**：
+
+逐个合并两个结点，如果两个结点是同一个集合中，则说明当前边是多余的边
+
+```java
+class UnionFind{
+    public int [] parent;
+    public int [] rank;
+    UnionFind(int n){
+        parent = new int[n+1];
+        rank = new int[n+1];
+        for (int i = 0;i <= n;i++){
+            parent[i] = i;
+            rank[i] = 1;
+        }
+    }
+    public boolean union(int x,int y){
+        int px = find(x);
+        int py = find(y);
+        if (px == py) return false;
+        if (rank[px] == rank[py]){
+            parent[px] = py;
+            rank[py] += 1;
+        }else if (rank[px] < rank[py]){
+            parent[px] = py;
+        }else{
+            parent[py] = px;
+        }
+        return true;
+    }
+    public int find(int x){
+        return parent[x] == x ? x : (parent[x] = find(parent[x]));
+    }
+}
+
+class Solution {
+    public int[] findRedundantConnection(int[][] edges) {
+        int n = edges.length;
+        UnionFind uf = new UnionFind(n);
+        for (int i = 0;i < edges.length;i++){
+            int x = edges[i][0];
+            int y = edges[i][1];
+            if (uf.union(x,y) == false){
+                return new int[]{x,y};
+            }
+        }
+        return null;
+    }
+}
+```
+
+
+
+####  第一百六十九剑式：最长的连续序列
+
+> 题目来源：LeetCode 剑指 Offer II 119
+
+> 标签：并查集
+
+给定一个未排序的整数数组 `nums` ，找出数字连续的最长序列（不要求序列元素在原数组中连续）的长度。
+
+```
+输入：nums = [100,4,200,1,3,2]
+输出：4
+解释：最长数字连续序列是 [1, 2, 3, 4]。它的长度为 4。
+```
+
+```java
+class UnionFind{
+    public Map<Integer,Integer> parent ;
+    public Map<Integer,Integer> rank ; //集合中元素的个数
+    UnionFind(int n){
+        parent = new HashMap<>();
+        rank = new HashMap<>();
+    }
+    public void add(int x){
+        if (parent.get(x) != null) return ;
+        parent.put(x,x);
+        rank.put(x,1);
+    }
+    public boolean union(int x,int y){
+        int px = find(x);
+        int py = find(y);
+        if (px == py) return false;
+        if (rank.get(px) <= rank.get(py)){
+            parent.put(px,py);
+            rank.put(py,rank.get(px) + rank.get(py));
+        }else{
+            parent.put(py,px);
+            rank.put(px,rank.get(px) + rank.get(py));
+        }
+        return true;
+    }
+    public int find(int x){
+        int val = 0;
+        if (parent.get(x) == x){
+            val = x;
+        }else{
+            val = find(parent.get(x));
+        }
+        return val;
+    }
+}
+
+public class Solution {
+    public int longestConsecutive(int[] nums) {
+        if (nums.length == 0) return 0;
+        UnionFind uf = new UnionFind(100005);
+        for (int num:nums){
+            uf.add(num);
+        }
+        int ans = Integer.MIN_VALUE;
+        for (int i = 0;i < nums.length;i++){
+            if (uf.parent.get(nums[i]-1) != null){
+                uf.union(nums[i]-1,nums[i]);
+            }
+            if (uf.parent.get(nums[i]+1) != null){
+                uf.union(nums[i]+1,nums[i]);
+            }
+            ans = Math.max(ans,uf.rank.get(uf.find(nums[i])));
+        }
+        return ans;
+    }
+}
+```
+
+**结束时间：2022年2月2日**
+
+完结撒花，后续开始写一些关于刷这些题的解析! 
