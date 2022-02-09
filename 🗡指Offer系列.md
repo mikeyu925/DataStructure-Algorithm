@@ -852,6 +852,8 @@ class Solution {
 #### 第十八剑式：对称的二叉树
 
 > 题目来源：LeetCode 剑指 Offer 28
+>
+> 标签：深度优先搜索、树的遍历
 
 请实现一个函数，用来判断一棵二叉树是不是对称的。如果一棵二叉树和它的镜像一样，那么它是对称的。
 
@@ -872,7 +874,7 @@ class Solution {
 
 **题目解析**：
 
-其实就是对照着示例给的这个就可以理解比如当前是结点1，将左子结点2和右子结点对比，然后递归将(1)的左子结点(2)的左子结点(3)和(1)的右子结点(2)的右子节点(3)对比，将(1)的左子结点(2)的右子结点(4)和(1)的右子结点(2)的左子节点(4)对比
+其实就是对照着示例给的这个就可以理解：比如当前是结点1，将左子结点2和右子结点对比，然后递归将(1)的左子结点(2)的左子结点(3)和(1)的右子结点(2)的右子节点(3)对比，将(1)的左子结点(2)的右子结点(4)和(1)的右子结点(2)的左子节点(4)对比
 
 ```java
 /**
@@ -886,14 +888,14 @@ class Solution {
  */
 class Solution {
     public boolean dfs(TreeNode A,TreeNode B){
-        if(A == null && B == null) return true;
-        else if ((A == null && B != null) || (A != null && B == null)) return false;
-        else if(A.val == B.val) return dfs(A.left,B.right) && dfs(A.right,B.left);
-        else return false;
+        if(A == null && B == null) return true; //两个都是空结点，返回true
+        else if ((A == null && B != null) || (A != null && B == null)) return false; //一个空，另外一个不空，返回false
+        else if(A.val == B.val) return dfs(A.left,B.right) && dfs(A.right,B.left); // 如果A，B两个结点值相同，比较A的左和B的右，A的右和B的左
+        else return false;  //两个结点值不相等，返回false
     }
     public boolean isSymmetric(TreeNode root) {
         if(root == null) return true;
-        return dfs(root.left,root.right);
+        return dfs(root.left,root.right);  //递归比较
     }
 }
 ```
@@ -903,6 +905,8 @@ class Solution {
 #### 第十九剑式：连续子数组的最大和
 
 > 题目来源：LeetCode 剑指 Offer 42
+>
+> 标签：动态规划
 
 输入一个整型数组，数组中的一个或连续多个整数组成一个子数组。求所有子数组的和的最大值。
 
@@ -914,7 +918,7 @@ class Solution {
 解释: 连续子数组 [4,-1,2,1] 的和最大，为 6。
 ```
 
-题目解析：
+**题目解析**：
 
 定义一个dp[]，并规定dp[i]表示以 nums[i]结尾的子数组的最大和是多少。
 
