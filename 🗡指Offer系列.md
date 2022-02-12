@@ -7428,6 +7428,167 @@ class Solution {
 }
 ```
 
+####  第一百五十四剑式：最少回文分割
+
+> 题目来源：LeetCode 剑指 Offer II 094
+
+> 标签：动态规划
+
+给定一个字符串 `s`，请将 `s` 分割成一些子串，使每个子串都是回文串。
+
+返回符合要求的 **最少分割次数** 。
+
+```java
+   public int minCut(String s) {
+        // 预处理，g[i][j] 快速判断s[i~j]是否是回文串 也是动态规划的方法
+        int n = s.length();
+        boolean [][] g = new boolean[n][n];
+        for (int i = 0;i < n;i++){
+            Arrays.fill(g[i],true);
+        }
+        for (int i = n-1;i >= 0;i--){
+            for (int j = i + 1;j < n;j++){
+                g[i][j] = g[i+1][j-1] && s.charAt(i) == s.charAt(j);
+            }
+        }
+        // 动态规划 判断dp[i]即s[0 ~ i]的最少剪切次数使得所有字符串都为回文串
+        int [] dp = new int[n];
+        Arrays.fill(dp,Integer.MAX_VALUE);
+        for (int i = 0;i < n;i++){
+            if (g[0][i] == true){ //如果s[0~i]本身就是回文串
+                dp[i] = 0;
+            }else{ //遍历所有分割结点，判断最少分割次数可以使得所有子串都是回文串
+                for (int j = 0;j < i;j++){
+                    if (g[j+1][i]){ //如果s[j+1 ~ i]是回文串，则分割s[0,j]的最少次数dp[j]+1就是dp[i]的最少分割次数
+                        dp[i] = Math.min(dp[i],dp[j]+1);
+                    }
+                }
+            }
+        }
+        return dp[n-1];
+    }
+```
+
+####  第一百五十五剑式：最长公共子序列
+
+> 题目来源：LeetCode 剑指 Offer II 095
+
+> 标签：动态规划
+
+给定两个字符串 `text1` 和 `text2`，返回这两个字符串的最长 **公共子序列** 的长度。如果不存在 **公共子序列** ，返回 `0` 。
+
+一个字符串的 **子序列** 是指这样一个新的字符串：它是由原字符串在不改变字符的相对顺序的情况下删除某些字符（也可以不删除任何字符）后组成的新字符串。
+
+- 例如，`"ace"` 是 `"abcde"` 的子序列，但 `"aec"` 不是 `"abcde"` 的子序列。
+
+两个字符串的 **公共子序列** 是这两个字符串所共同拥有的子序列。
+
+```java
+class Solution {
+    public int longestCommonSubsequence(String text1, String text2) {
+        int m = text1.length(),n = text2.length();
+        int [][] dp = new int[m+1][n+1];
+        //dp[i][j] 表示 text1[0~i]和text2[0~j]的最长公共子序列是多少
+        for (int i = 0;i <= m;i++){
+            for (int j = 0;j <= n;j++){
+                if (i == 0 || j == 0){ //空串和任何字符串的公共子序列长度都为0
+                     dp[i][j] = 0;
+                     continue;
+                }
+                if (text1.charAt(i-1) == text2.charAt(j-1)){ //如果当前两个字符相等，则根据前面的状态+1即可得到当前状态
+                    dp[i][j] = dp[i-1][j-1] + 1;
+                }else{
+                    dp[i][j] = Math.max(dp[i-1][j],dp[i][j-1]); 
+                }
+            }
+        }
+        return dp[m][n];
+    }
+}
+```
+
+
+
+####  第一百五十六剑式：字符串交织
+
+> 题目来源：LeetCode 剑指 Offer II 096
+
+> 标签：动态规划
+
+给定三个字符串 s1、s2、s3，请判断 s3 能不能由 s1 和 s2 交织（交错） 组成。
+
+两个字符串 s 和 t 交织 的定义与过程如下，其中每个字符串都会被分割成若干 非空 子字符串：
+
+-  $ s = s_1 + s_2 + ... + s_n$
+- $ t = t_1 + t_2 + ... + t_m $
+- |n - m| <= 1
+- **交织** 是$ s_1 + t_1 + s_2 + t_2 + s_3 + t_3 + ... $或者$ t_1 + s_1 + t_2 + s_2 + t_3 + s_3 + ...$
+
+提示：a + b 意味着字符串 a 和 b 连接。
+
+```java
+class Solution {
+    public boolean isInterleave(String s1, String s2, String s3) {
+        int m = s1.length(),n = s2.length(), p = s3.length();
+        if (m + n != p) return false;
+        boolean [][] dp = new boolean[m+1][n+1];
+        // dp[i][j] 表示s1前i个字符和s2前j个字符能否 交织 成s3
+        dp[0][0] = true;
+        for (int i = 0;i <= m;i++){
+            for (int j = 0;j <= n;j++){
+                int t = i + j - 1;
+                if (i > 0){
+                    dp[i][j] |= (s1.charAt(i-1) == s3.charAt(t) && dp[i-1][j]);  //注意是 |= 而不是 = 是为了防止在当前条件语句中dp[i][j] = true;后，在下一个 j > 0的条件语句中被赋值为false
+                }
+                if (j > 0){
+                    dp[i][j] |= (s2.charAt(j-1) == s3.charAt(t) && dp[i][j-1]);
+                }
+            }
+        }
+        return dp[m][n];
+    }
+}
+```
+
+
+
+####  第一百五十七剑式：不同的子序列
+
+> 题目来源：LeetCode 剑指 Offer II 097
+
+> 标签：动态规划
+
+给定一个字符串 `s` 和一个字符串 `t` ，计算在 `s` 的子序列中 `t` 出现的个数。
+
+字符串的一个 **子序列** 是指，通过删除一些（也可以不删除）字符且不干扰剩余字符相对位置所组成的新字符串。（例如，`"ACE"` 是 `"ABCDE"` 的一个子序列，而 `"AEC"` 不是）
+
+题目数据保证答案符合 32 位带符号整数范围。
+
+```java
+class Solution {
+    public int numDistinct(String s, String t) {
+        int m = s.length(),n = t.length();
+        if (m < n) return 0;
+        int [][] dp = new int[m+1][n+1];
+        for(int i = 0;i <= m;i++){
+            dp[i][n] = 1;
+        }
+        for (int i = m-1;i >= 0;i--){
+            char chs = s.charAt(i);
+            for (int j = n-1;j >= 0;j--){
+                char cht = t.charAt(j);
+                if (cht == chs){
+                    dp[i][j] = dp[i+1][j+1] + dp[i+1][j];
+                }else {
+                    dp[i][j] = dp[i+1][j];
+                }
+            }
+        }
+        return dp[0][0];
+    }
+}
+```
+
 
 
 ####  第一百五十八剑式：路径的数目
