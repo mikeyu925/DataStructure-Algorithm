@@ -151,13 +151,9 @@ class SectionSum{
 
 块状数组，即把一个数组分为几个块，块内信息整体保存，若查询时遇到两边不完整的块直接暴力查询。一般情况下，块的长度为$O(\sqrt n)$
 
-### 怎么建立一个块状数组
-
-```java
-
-```
-
 再给一个示例：
+
+### 示例-区间修改，区间查询
 
 给定一个长度为 n 的序列$(a_i)$ ，需要执行$n$次操作。操作分为两种:
 
@@ -167,4 +163,196 @@ class SectionSum{
 解析：
 
 我们要询问一个块内大于等于一个数的数的个数，所以需要一个 `t` 数组对块内排序，`a` 为原来的（未被排序的）数组。对于整块的修改，使用类似于标记永久化的方式，用 `delta` 数组记录现在块内整体加上的值。设$q$为查询和修改的操作次数总和，则时间复杂度$O(q\sqrt n \log n)$ 。
+
+```java
+class BlockArr {
+    int [] arr;   //存储元素的数组
+    int block_num; // 分块的数量
+    int [] start;  // 每个块的起始索引
+    int [] end;  //每个块的结束索引
+    int [] belong;   // arr[i] 属于哪个块
+    int [] size;   //每个块的size大小
+    int [] delat;  //记录每个块的整体赋值情况  好像有问题
+    int [] sort_arr;  // 对 每个块 排序后的 arr
+    BlockArr(int [] nums){
+        int n = nums.length;
+        // Init Memory Space
+        this.arr = new int[n+1];
+        this.block_num = (int)Math.sqrt(n);  
+        this.delat = new int[this.block_num+1];  
+        this.start = new int[this.block_num + 1]; 
+        this.end = new int[this.block_num + 1];  
+        this.belong = new int[n+1]; 
+        this.size = new int[this.block_num+1]; 
+        this.sort_arr = new int[n+1]; 
+        // Init Value
+        for (int i = 0;i < nums.length;i++){
+            this.arr[i+1] = nums[i];
+            this.sort_arr[i+1] = nums[i];
+        }
+        for (int i = 1;i <= this.block_num ;i++){
+            this.start[i] = n / this.block_num * (i-1) + 1;
+            this.end[i] = n / this.block_num * i;
+        }
+        this.end[this.block_num] = n;
+        for (int i = 1;i <= this.block_num;i++){
+            for (int j = this.start[i];j <= this.end[i];j++){
+                this.belong[j] = i;
+            }
+            this.size[i] = this.end[i] - this.start[i] + 1;
+        }
+    }
+    public void inSort(int block_id){
+        for (int i = this.start[block_id];i <= this.end[block_id];i++){
+            this.sort_arr[i] = this.arr[i];
+        }
+        Arrays.sort(this.sort_arr,this.start[block_id],this.end[block_id]+1);
+    }
+    //修改操作
+    public void Modify(int l,int r,int c){
+        int x = this.belong[l];
+        int y = this.belong[r];
+        if (x == y){ // 区间在一个块内的话直接修改
+            for (int i = l;i <= r;i++){
+                this.arr[i] += c;
+            }
+            // 对该区间进行排序修改
+            inSort(x);
+        }
+        // 不在同一个区间
+        for (int i = l; i <= this.end[x];i++) this.arr[i] += c;
+        for (int i = this.start[y];i <= r;i++) this.arr[i] += c;
+        for (int i = x + 1;i < y;i++) this.delat[i] += c;
+        inSort(x);
+        inSort(y);
+    }
+    //查询操作
+    public int Answer(int l,int r,int c){
+        int ans = 0,x = this.belong[l],y = this.belong[r];
+        if (x == y){
+            for (int i = l; i <= r;i++) if (this.arr[i] + this.delat[x] >= c) ans+=1;
+            return ans;
+        }
+        for (int i = l;i <= this.end[x];i++){
+            if (this.arr[i] + this.delat[x] >= c) ans += 1;
+        }
+        for (int i = this.start[y];i <= r;i++){
+            if (this.arr[i] + this.delat[y] >= c) ans += 1;
+        }
+        for (int i = x + 1;i <= y-1;i++){
+            int idx = lower_bound(i,c-this.delat[i]);
+            ans += this.end[i] - idx + 1;
+        }
+        return ans;
+    }
+    public int lower_bound(int x,int c){
+        int l = this.start[x],r = this.end[x];
+        while (l < r){
+            int m = l + ((r - l) >> 1);
+            if (this.sort_arr[m] < c){
+                l = m + 1;
+            }else{
+                r = m;
+            }
+        }
+        return l;
+    }
+    public void print(){
+        for (int i = 1;i < this.arr.length;i++){
+            System.out.print((this.arr[i] + this.delat[this.belong[i]]) + " ");
+        }
+        System.out.println();
+    }
+}
+```
+
+测试：
+
+```java
+    public static void main(String [] args){
+        BlockArr br = new BlockArr(new int[]{1,1,1,1,1,1,1,1,1,1});
+        br.Modify(1,4,2);
+        br.print();
+        br.Modify(2,7,1);
+        br.print();
+        br.Modify(5,9,1);
+        br.print();
+        System.out.println(br.Answer(3,6,4));
+    }
+```
+
+```
+3 3 3 3 1 1 1 1 1 1 
+3 4 4 4 2 2 2 1 1 1 
+3 4 4 4 3 3 3 2 2 1 
+2
+```
+
+## 分块链表
+
+块状链表就是，每个链表的结点还包括一个 数组 的元素
+
+数据结构形式如下：
+
+```java
+class node{
+    node next;
+    int size;
+    char [] arr;
+    node(){
+        this.size = 0;
+        this.next = null;
+        arr = new char[(int)Math.sqrt(1000000)];
+    }
+    public void push_(char ch){
+        this.arr[this.size++] = ch;
+    }
+}
+```
+
+块状链表应该至少支持：分裂、插入、查找。 什么是分裂？分裂就是分裂一个 `node`，变成两个小的 `node`，以保证每个 `node` 的大小都接近$\sqrt{n}$ （否则可能退化成普通数组）。当一个 `node` 的大小超过$2\sqrt{n}$时执行分裂操作。
+
+分裂操作怎么做呢？先新建一个节点，再把被分裂的节点的后$\sqrt{n}$个值 `copy` 到新节点，然后把被分裂的节点的后 个值删掉$\sqrt{n}$（`size--`），最后把新节点插入到被分裂节点的后面即可。
+
+块状链表的所有操作的复杂度都是$\sqrt{n}$ 的。
+
+还有一个要说的。 随着元素的插入（或删除），${n}$ 会变，$\sqrt{n}$ 也会变。这样块的大小就会变化，我们难道还要每次维护块的大小？
+
+其实不然，把$\sqrt{n}$ 设置为一个定值即可。比如题目给的范围是$10^6$ ，那么$\sqrt{n}$就设置为大小为 的常量$10^3$，不用更改它。
+
+### 示例-Big String
+
+你得到一个字符串并且应该做一些字符串操作。
+
+输入的第一行包含初始字符串。您可以假设它是非空的，并且它的长度不超过 1,000,000。
+
+第二行包含操作命令的数量*N* (0 < *N* ≤ 2,000)。以下*N*行每行描述一个命令。命令采用以下两种格式之一：
+
+1. `I ch p` ：在当前字符串的第 p个字符之前插入一个字符*ch 。*如果p大于字符串的长度，则将字符附加到字符串的末尾。
+2. `Q p`：查询当前字符串的第 p个字符。输入确保第p个字符存在。
+
+输入中的所有字符都是英文字母的数字或小写字母。
+
+```
+输入：
+ab 
+7 
+Q 1 
+I c 2 
+I d 4 
+I e 2 
+Q 5 
+I f 1 
+Q 3
+输出：
+a
+d
+e
+```
+
+
+
+```java
+
+```
 
