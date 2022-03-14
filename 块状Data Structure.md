@@ -350,9 +350,100 @@ d
 e
 ```
 
-
+下面只是写了比较重要的部分的代码，没有写`main()`函数，如果想要取提交此题需要再稍微写个main读取函数就可以啦
 
 ```java
+// 块状链表中的结点类
+class node{
+    static final int limit = (int)Math.sqrt(1000000); // 每个结点的arr最多存储的元素数，超过需要进行分裂
+    node next; //指向下一个结点
+    int size; // arr当前的size
+    char [] arr; // arr:存储元素
+    node(){
+        this.size = 0;
+        this.next = null;
+        arr = new char[(int)Math.sqrt(limit) + 5];
+    }
+    // 向 arr 压入元素
+    public void push_(char ch){
+        this.arr[this.size++] = ch;
+    }
+}
 
+class BlockLink{
+    node head; // 链表的头节点
+    int n;  // 存储的
+    BlockLink(char [] str_arr){
+        this.n = str_arr.length;  // 初始化字符串的长度
+        head = new node(); // 创建一个头节点
+        node now = head;
+        for (int i = 0;i < this.n;i++){
+            if (i % node.limit == 0)  { // 如果当前结点已经到达插入数量的上限
+                now.next = new node(); // 创建一个新的结点
+                now = now.next; // 更新当前结点
+            }
+            now.push_(str_arr[i]); // 插入字符
+        }
+    }
+    public void insert(char ch,int pos){
+        node t = this.head;
+        if (pos > this.n){ //如果插入位置是在最后一个位置或者超过索引范围，则插入在最后
+            while (t.next != null){ //找到最后一个结点
+                t = t.next;
+            }
+            t.push_(ch); // 插入字符
+            check(t); // 检查是否需要分裂
+            return;
+        }
+        int tot;  // 记录已经经过几个字符
+        for (tot = head.size;t != null && tot < pos;){ // t != null && tot < pos时说明还没找到哪个范围
+            t = t.next;  //后移至另外一个结点
+            tot += t.size; //增加增量 t.size 个字符数
+        }
+        tot -= t.size; // 过界了， 因此减去当前的数量，然后开始逐个寻找
+        int cnt = pos - tot - 1; //
+        for (int i = t.size - 1;i >= cnt;i--){
+            t.arr[i+1] = t.arr[i]; // 后移元素，为插入位置空出位置
+        }
+        t.arr[cnt] = ch;
+        t.size += 1;
+        check(t); // 如果超过界限就分裂
+        n += 1;  // 总元素个数 + 1
+    }
+    public char query(int pos){
+        node p = head;
+        int tot;
+        for (tot = head.size;p != null && tot < pos;){
+            p = p.next;
+            tot += p.size;
+        }
+        tot -= p.size;
+        return p.arr[pos - tot - 1];
+    }
+    // 判断 是否超出界限，进行分裂
+    public void check(node t){
+        if (t.size >= node.limit){  // 如果当前结点中数组的元素个数超过上线，则加一个新结点
+            node add = new node();
+            for (int i = node.limit;i < t.size;i++){
+                add.push_(t.arr[i]);  // 添加结点
+            }
+            // 将新分裂的结点添加到当前结点后面
+            t.size = node.limit;
+            add.next = t.next;
+            t.next = add;
+        }
+    }
+
+    public void print(){
+        node t = this.head;
+        while (t != null){
+            for (int i = 0;i < t.size;i++){
+                System.out.print(t.arr[i]);
+            }
+            t = t.next;
+        }
+        System.out.println();
+    }
+}
 ```
 
