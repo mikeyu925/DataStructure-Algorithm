@@ -5183,3 +5183,46 @@ struct node{
 sort(nodes.begin(),nodes.end());
 ```
 
+快速排序
+
+```java
+public void quickSort(int [] nums,int l,int r){
+    if(l >= r) return;
+    int x = nums[l],i =l - 1,j = r + 1;
+    while(i < j){
+        do i++;while(nums[i] < x);
+        do j--;while(nums[i] > y);
+        if(i < j){
+            swap(nums[i],nums[j]);
+        }
+    }
+    quickSort(nums,l,j);
+    quickSort(nums,j+1,r);
+}
+```
+
+分治排序
+
+```java
+public void mergeSort(int []nums,int l,int  r){
+    if (l >= r) return ;
+    // 获取中间点
+    int mid = l + ((r - l) >> 1);
+    // 递归
+    mergeSort(nums,l,mid);
+    mergeSort(nums,mid+1,r);
+    // 合并
+    int [] t = new int[r-l+1];
+    int idx = 0,i = l,j = mid + 1;
+    while (i <= mid && j <= r){
+        if (nums[i] <= nums[j]) t[idx++] = nums[i++];
+        else t[idx++] = nums[j++];
+    }
+    while (i <= mid) t[idx++] = nums[i++];
+    while (j <= r) t[idx++] = nums[j++];
+    for (idx = 0,i = l;i <= r;i++,idx++){
+        nums[i] = t[idx];
+    }
+}
+```
+
