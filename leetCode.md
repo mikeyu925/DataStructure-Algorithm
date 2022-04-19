@@ -5070,6 +5070,48 @@ int main(){
 }
 ```
 
+#### 减法
+
+要点：
+
+- 借位
+- 结果为负数(A-B <0  ===> -(B-A) )?
+
+```java
+class Solution{
+	public List<Integer> bigSub(String A,String B){
+        int [] a = new int[A.length()];
+        int [] b = new int[B.length()];
+        // 转换为逆序
+        for (int i = A.length()-1,j = 0;i >= 0;i--,j++){
+            a[j] = A.charAt(i) - '0';
+        }
+        for (int i = B.length()-1,j = 0;i >= 0;i--,j++){
+            b[j] = B.charAt(i) - '0';
+        }
+        return Sub(a,b);
+    }
+
+    public List<Integer> Sub(int []A, int B[]){
+        int n = A.length;
+        List<Integer> C = new ArrayList<>();
+        for (int i = 0,t = 0;i < n;i++){
+            t = A[i] - t; // 先减去上一位的借位
+            if (i < B.length)  t -= B[i]; // 减去 减数
+            C.add((t + 10) % 10); // 获得当前位的结果
+            if (t < 0) t = 1; //说明下一位运算需要借位
+            else t = 0; // 下一位运算不需要借位
+        }
+        while (C.size() > 1 && C.get(C.size()-1) == 0){
+            C.remove(C.size()-1);
+        }
+        return C;
+    }
+}
+```
+
+
+
 
 
 #### 乘法
@@ -5093,7 +5135,7 @@ int main(){
 
 令 m 和 n 分别表示 $\textit{num}_1$  和$ \textit{num}_2 $的长度，并且它们均不为 0，则 $\textit{num}_1$和$ \textit{num}_2$的乘积的长度为 $m+n-1$或 $m+n$。
 
-由于$ \textit{num}_1$和 $\textit{num}_2$的乘积的最大长度为$ m+n$，因此创建长度为 $m+n$的数组 $\textit{ansArr}$用于存储乘积。对于任意 $0 \le i < m$ 和 $0 \le j < n$，$\textit{num}_1[i] \times \textit{num}_2[j]$ 的结果位于$ \textit{ansArr}[i+j+1]$，如果 $\textit{ansArr}[i+j+1] \ge 10$，则将进位部分加到 $\textit{ansArr}[i+j]$。
+由于$ \textit{num}_1$和 $\textit{num}_2$的乘积的最大长度为$ m+n$，因此创建长度为 $m+n$的数组 $\textit{ansArr}$用于存储乘积。对于任意 $0 \le i < m$ 和 $0 \le j < n$，$\textit{num}_1[i] \times \textit{num}_2[j]$ **的结果位于**$ \textit{ansArr}[i+j+1]$，如果 $\textit{ansArr}[i+j+1] \ge 10$，则将进位部分加到 $\textit{ansArr}[i+j]$。
 
 最后，将数组 $\textit{ansArr}$ 转成字符串，如果最高位是 0 则舍弃最高位。
 
@@ -5101,14 +5143,17 @@ int main(){
 public String multiply(String num1, String num2) {
     if (num1.equals("0") || num2.equals("0")) return "0";
     int m = num1.length(),n = num2.length();
-    int [] ans = new int[m+n];
+    int [] ans = new int[m+n]; // 最多的长度为 m + n
+    // 低位开始运算
     for (int i = m-1;i >= 0;i--){
         int x = num1.charAt(i) - '0';
         for (int j = n-1;j>=0;j--){
             int y = num2.charAt(j) - '0';
+            // nums[i] * nums[j] 的结果在 ans[i+j+1]
             ans[i+j+1] += x*y;
         }
     }
+    // 对每位的结果进行计算和进位
     for (int i = m+n-1;i > 0;i--){
         ans[i-1] += ans[i] / 10;
         ans[i] %= 10;
@@ -5122,6 +5167,30 @@ public String multiply(String num1, String num2) {
 }
 ```
 
+方法2：
+
+![2022-04-18_185834](leetCode.assets/2022-04-18_185834.jpg)
+
+背景：一个很大的数A乘以一个不是很大的数B
+
+```java
+    public List<Integer> Mul(int [] A,int b){
+        List<Integer> C = new ArrayList<>();
+        int t = 0; // 进位
+        // 注意下面for循环的条件 i < A.length || t != 0，主要是为了存储剩下的进位数
+        for (int i = 0;i < A.length || t != 0;i++){
+            if (i < A.length) t += A[i] * b;
+            C.add(t % 10);
+            t /= 10;
+        }
+        return C;
+    }
+```
+
+
+
+
+
 
 
 #### 除法
@@ -5133,14 +5202,56 @@ public String multiply(String num1, String num2) {
   - 小于补结果补0并更新待除数
 - 剩下的是余数
 
+<img src="leetCode.assets/2022-04-18_195913.jpg" alt="2022-04-18_195913" style="zoom:50%;" />
+
+背景：高精度整数 / 低精度整数
+
+```java
+class DivNode{
+    List<Integer> Quotient;  // 商
+    int remainder; // 余数
+
+    public DivNode(List<Integer> quotient, int remainder) {
+        Quotient = new ArrayList<>();
+        for (int i = 0;i < quotient.size();i++){
+            Quotient.add(quotient.get(i));
+        }
+        this.remainder = remainder;
+    }
+
+}
+class Solution{
+    public DivNode div(int [] A,int b){
+
+        List<Integer> q = new ArrayList<>();
+        int r = 0;
+        for (int i = A.length-1;i >= 0;i--){
+            r = r * 10 + A[i]; //上次的余数 * 10 + 当前位值
+            q.add(r / b); //此次的商值
+            r = r % b; //此次的余数
+        }
+        // 去除前导零
+        int idx = 0;
+        List<Integer> finalq = new ArrayList<>();
+        for (int i = 0;i < q.size();i++){
+            if (q.get(i) == 0){
+                idx = i;
+            }else{
+                break;
+            }
+        }
+        for (int i = q.size()-1;i > idx;i--){
+            finalq.add(q.get(i));
+        }
+        DivNode ans = new DivNode(finalq,r);
+        return ans;
+    }
+}
+```
 
 
-#### 减法
 
-要点：
 
-- 借位
-- 结果为负数
 
 
 
