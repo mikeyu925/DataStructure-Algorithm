@@ -8,16 +8,30 @@
 
 - 数据结构部分：
 
-  - 字符串
+  - 
+
+    [字符串]: https://github.com/mikeyu925/DataStructure-Algorithm/blob/master/%E5%AD%97%E7%AC%A6%E4%B8%B2.md
+
+    
+
   - 栈
+
   - 链表
+
   - 队列
+
   - 二叉树
+
   - 堆
+
   - 图
+
   - 并查集
+
   - 树状数组
+
   - 线段树
+
   - 前缀树
 
 - 算法部分：
