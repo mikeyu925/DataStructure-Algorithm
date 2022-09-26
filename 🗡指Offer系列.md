@@ -8881,6 +8881,121 @@ public class Solution {
 }
 ```
 
-**结束时间：2022年2月2日**
-
 完结撒花，后续开始写一些关于刷这些题的解析! 
+
+
+
+继续...
+
+####  第一百七十剑式：消失的两个数字
+
+> 题目来源：LeetCode 面试题17.19
+
+> 标签：位运算、等差数列求和
+
+给定一个数组，包含从 1 到 N 所有的整数，但其中缺了两个数字。你能在 O(N) 时间内只用 O(1) 的空间找到它们吗？
+
+以任意顺序返回这两个数字均可。
+
+```
+输入: [2,3]
+输出: [1,4]
+```
+
+**题目解析**：
+
+方法一：位运算（异或）
+
+由题可知，原本数组长度为 N = n + 2，现在缺失了两个数字，通过异或的性质，如果我们将这N个数字都异或两次，最后的结果是0，现在缺少两个，那么我们异或后的结果就是缺失的两个数字$x_1$和$x_2$的异或结果。
+
+> 因此第一步就是先分别对[1,N]内的数字进行异或运算，然后再对 nums 中的元素进行异或运算，最终结果就是两个缺失数字的异或和运算。
+
+那么如何将这两个数字分离出来，即确定两个数字是分别是哪个呢？
+
+我们找到异或结果最低位为1的位lowbit，该位为1说明两个缺失的数字分别在这一位上一个是0 一个是1，因此可以用此性质将[1,N]内的数字分成两类，即在lowbit位为1的分为一类，在lowbit位为2的分为一类。然后对这两类的异或结果分别在 nums 中划分两类进行一次异或运算就可以分离出来两位缺失的数字了。
+
+> 有没有可能两个缺失的数字异或和为0呢？（即每一位都是0）不可能，因为如果异或结果为0，说明两个数字相等，不符合题目要求。
+
+```java
+class Solution {
+    public int[] missingTwo(int[] nums) {
+        int n = nums.length + 2; // 补上两个缺失数字后的长度
+        int xorsum = 0;
+        for(int i = 1;i <= n;i++){
+            xorsum ^= i;
+        }
+        // 再对nums进行一个异或和，结果就是缺失的两个数字的异或和
+        for(int v : nums){
+            xorsum ^= v;
+        }
+        // 求取为1的最低位 (注意防止溢出)
+        int lowbit = xorsum == Integer.MIN_VALUE ? xorsum : xorsum & (-xorsum);
+        // 将两个数分隔出来
+        int c1 = 0,c2 = 0;
+        for(int i = 1;i <= n;i++){
+            if((i & lowbit) != 0){
+                c1 ^= i;
+            }else{
+                c2 ^= i;
+            }
+        }
+        for(int num : nums){
+            if((num & lowbit) != 0){
+                c1 ^= num;
+            }else{
+                c2 ^= num;
+            }
+        }
+        return new int[]{c1,c2};
+    }
+}
+```
+
+方法2：求和
+
+```java
+class Solution {
+    public int[] missingTwo(int[] nums) {
+        int n = nums.length + 2; // 补上两个缺失数字后的长度
+        int sum = 0;
+        for(int v : nums){
+            sum += v;
+        }
+        int diff = n * (n+1) / 2 - sum;
+        int m = diff / 2; // 相当于一个分界线，因为两个数一定不等，因此一个小于等于该数，一个大于该数
+        sum = 0;
+        for(int v : nums){
+            if(v <= m) sum += v;
+        }
+        int a1 = (m + 1) * m / 2 - sum;
+        int a2 = diff - a1;
+        return new int[]{a1,a2};
+    }
+}
+```
+
+方法3：原地hash
+
+```cpp
+class Solution {
+public:
+    vector<int> missingTwo(vector<int>& nums) {
+        for(int i = 0;i < 3;i++){
+            nums.push_back(-1);
+        }
+        for(int i = 0;i < nums.size();i++){
+            while(i != nums[i] && nums[i] != -1){
+                swap(nums[i],nums[nums[i]]);
+            }
+        }
+        vector<int> ans;
+        for(int i = 1;i < nums.size();i++){
+            if(nums[i] == -1){
+                ans.push_back(i);
+            }
+        }
+        return ans;
+    }
+};
+```
+
