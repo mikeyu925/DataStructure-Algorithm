@@ -251,7 +251,7 @@ class Solution {
 输出："We%20are%20happy."
 ```
 
-题目很简单，就当回顾一下`StringBuilder`吧
+方法一：正序遍历  时间O(n) 空间O(n)
 
 ```java
 class Solution {
@@ -269,6 +269,38 @@ class Solution {
 }
 ```
 
+方法二：两次遍历
+
+先正序遍历一遍计算有多少个需要被替换的字符 x ，然后在后面添加 2x 个空格。再来一遍逆序遍历进行填补。
+
+> 此方法适合c++，不适合java
+
+```cpp
+class Solution {
+public:
+    string replaceSpace(string s) {
+        int n = s.size();
+        int cnt = 0;
+        for(char c : s){
+            if(c == ' ') cnt ++;
+        }
+        s.resize(n + 2 * cnt);
+        for(int i = n-1,j = s.size() - 1;i >= 0 && j >= 0;i--){
+            if(s[i] != ' '){
+                s[j] = s[i];
+                j --;
+            }else{
+                s[j] = '0';
+                s[j-1] = '2';
+                s[j-2] = '%';
+                j -= 3;
+            }
+        }
+        return s;
+    }
+};
+```
+
 
 
 #### 第七剑式：左旋转字符串
@@ -282,7 +314,7 @@ class Solution {
 输出: "cdefgab"
 ```
 
-采样`StringBuilder + substring()`直接解决。
+方法一：采用`StringBuilder + substring()`直接解决。
 
 ```java
 class Solution {
@@ -425,13 +457,17 @@ class Solution {
 
 **题目解析**：
 
-从二维数组的右上角开始查找（因为这样的话就是**向左递减、向下递增**的状态）。如果当前元素等于目标值，则返回 `true`。如果当前元素大于目标值，则移到左边一列。如果当前元素小于目标值，则移到下边一行。
+从二维数组的右上角开始查找（因为这样的话就是**向左递减、向下递增**的状态）。
+
+> 为什么要从一边递减、一边递增的点找呢？这样可以把矩阵看成一颗二叉搜索树，一边小于、一边大于，类似二叉搜索树的查找
+
+如果当前元素等于目标值，则返回 `true`。如果当前元素大于目标值，则移到左边一列。如果当前元素小于目标值，则移到下边一行。
 
 ```java
 class Solution {
     public boolean findNumberIn2DArray(int[][] matrix, int target) {
         if(matrix == null || matrix.length == 0) return false;
-        int row = 0,col = matrix[0].length-1;
+        int row = 0,col = matrix[0].length-1; // 起始点左下角
         while(row < matrix.length && col >= 0){
             if(matrix[row][col] == target) return true;
             else if(matrix[row][col] > target) col -= 1;
@@ -8997,5 +9033,70 @@ public:
         return ans;
     }
 };
+```
+
+
+
+####  第一百七十一剑式：数组中重复的数字
+
+> 题目来源：剑指offer 03
+
+> 标签：哈希、原地交换
+
+在一个长度为 n 的数组 nums 里的所有数字都在 0～n-1 的范围内。数组中某些数字是重复的，但不知道有几个数字重复了，也不知道每个数字重复了几次。请找出数组中任意一个重复的数字。
+
+方法1:原地交换 时间复杂度 O(n) 空间复杂度O(1)
+
+```java
+class Solution {
+    public int findRepeatNumber(int[] nums) {
+        int n = nums.length;
+        for(int i = 0;i < n;i++){
+            while(nums[i] != i){
+                if(nums[i] == nums[nums[i]]) return nums[i]; // 发现了重复元素
+                int t = nums[i];
+                nums[i] = nums[t];
+                nums[t] = t;
+            }
+        }
+        return -1;
+    }
+}
+```
+
+####  第一百七十二剑式：从尾到头打印链表
+
+> 标签：链表
+
+输入一个链表的头节点，从尾到头反过来返回每个节点的值（用数组返回）。
+
+方法1:递归 或者 栈存储
+
+```java
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    List<Integer> list = new LinkedList<>();
+    public void f(ListNode node){
+        if(node == null) return ;
+        f(node.next);
+        list.add(node.val);
+    }
+    public int[] reversePrint(ListNode head) {
+        f(head);
+        int n = list.size();
+        int [] ans = new int [n];
+        for(int i = 0;i < n;i++){
+            ans[i] = list.get(i);
+        }
+        return ans;
+    }
+}
 ```
 
