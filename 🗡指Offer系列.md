@@ -497,7 +497,7 @@ class Solution {
 
 二分 最重要的是找到一个条件能将当前区间划分为两部分，其中一部分全部对于的条件，另外一部分不满足。本题可以看到一个可以划分的点是 最小值左边的元素一定是大于等于它的，如果右边的元素小于最小值，那么当前元素一定在最小值左边，否则当前值可能是最小值或者是最小值右边的点。
 
-  ![旋转数组的最小数字](🗡指Offer系列.assets/旋转数组的最小数字.jpg)
+![旋转数组的最小数字](🗡指Offer系列.assets/旋转数组的最小数字.jpg)
 
 ```java
 class Solution {
@@ -517,6 +517,144 @@ class Solution {
     }
 }
 ```
+
+方法二：二段性分析
+
+> **「二分」的本质是二段性，并非单调性。只要一段满足某个性质，另外一段不满足某个性质，就可以用「二分」。**
+
+```java
+class Solution {
+    public int minArray(int[] nums) {
+        int n = nums.length;
+        int l = 0, r = n-1;
+        while(l < r && nums[0] == nums[r]) r--; // 恢复二段性
+        while(l < r){
+            int mid = l + ((r - l + 1) >> 1);
+            if(nums[mid] >= nums[0]){
+                l = mid;
+            }else{
+                r = mid - 1;
+            }
+        }
+        return r + 1 < n ? nums[r+1] : nums[0];
+    }
+}
+```
+
+**相关题：搜索旋转数组**
+
+搜索旋转数组。给定一个排序后的数组，包含n个整数，但这个数组已被旋转过很多次了，次数不详。请编写代码找出数组中的某个元素，假设数组元素原先是按升序排列的。若有多个相同元素，返回索引值最小的一个。
+
+```
+ 输入: arr = [15, 16, 19, 20, 25, 1, 3, 4, 5, 7, 10, 14], target = 5
+ 输出: 8（元素5在该数组中的索引）
+```
+
+依然采用二段性分析，我们先找到最低点，然后判断目标点在左边还是右边，再进行一次二分搜索。
+
+```java
+class Solution {
+    public int search(int[] nums, int target) {
+        int n = nums.length;
+        int l = 0, r = n-1;
+        while(l < r && nums[r] == nums[0]) r--;
+        while(l < r){
+            int mid = l + ((r - l + 1)>>1);
+            if(nums[mid] >= nums[0]){
+                l = mid;
+            }else{
+                r = mid - 1;
+            }
+        }
+        if(r + 1 == n) { // 特判  本身就是升序 比如【1，3】 找 0
+            if(target >= nums[0]){
+                l = 0;
+            }else{
+                return -1;
+            }
+        }else{
+          // 最低点是 r + 1
+          if(target >= nums[0]){ // 下一步的搜索区间为 [0,r]
+              l = 0;
+          }else{ // 下一步搜索区间为 [r+1.n-1]
+              l = r + 1;
+              r = n-1;
+          }
+        }
+        while(l < r){
+            int mid = l + ((r - l) >> 1);
+            if(nums[mid] >= target){
+                r = mid;
+            }else{
+                l = mid + 1;
+            }
+        }
+        return nums[l] == target ? l : -1;
+    }
+}
+```
+
+相关题目：搜索旋转排序数组II
+
+已知存在一个按非降序排列的整数数组 nums ，数组中的值不必互不相同。
+
+在传递给函数之前，nums 在预先未知的某个下标 k（0 <= k < nums.length）上进行了 旋转 ，使数组变为 [nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]]（下标 从 0 开始 计数）。例如， [0,1,2,4,4,4,5,6,6,7] 在下标 5 处经旋转后可能变为 [4,5,6,6,7,0,1,2,4,4] 。
+
+给你 旋转后 的数组 nums 和一个整数 target ，请你编写一个函数来判断给定的目标值是否存在于数组中。如果 nums 中存在这个目标值 target ，则返回 true ，否则返回 false 。
+
+你必须尽可能减少整个操作步骤。
+
+```
+输入：nums = [2,5,6,0,0,1,2], target = 0
+输出：true
+```
+
+```java
+class Solution {
+    public boolean search(int[] nums, int target) {
+        int n = nums.length;
+        if(n == 1) return target == nums[0];
+        int l = 0,r = n-1;
+        while(l < r && nums[r] == nums[0]) r--; // 如果题目没有说有重复元素，则去掉这一步即可
+        while(l < r){
+            int mid = l + ((r - l + 1)>>1);
+            if(nums[mid] >= nums[0]){
+                l = mid;
+            }else{
+                r = mid - 1;
+            }
+        }
+        if(r + 1 == n) { // 特判  本身就是升序 比如【1，3】 找 0
+            if(target >= nums[0]){
+                l = 0;
+            }else{
+                return false;
+            }
+        }else{
+            if(target >= nums[0]){
+                l = 0;
+            }else{
+                l = r + 1;
+                r = n - 1;
+            }
+        }
+
+        while(l < r){
+            int mid = l + ((r-l)>>1);
+            if(nums[mid] >= target){
+                r = mid;
+            }else{
+                l = mid + 1;
+            }
+        }
+        return nums[l] == target;
+    }
+}
+```
+
+
+
+
 
 #### 第十二剑式：第一个只出现一次的字符
 
@@ -2134,7 +2272,7 @@ class Solution {
 
 假设输入的前序遍历和中序遍历的结果中都不含重复的数字。
 
-题目解析：
+**题目解析**：
 
 采用递归 + 分治的解题思路。
 
@@ -2151,14 +2289,13 @@ class Solution {
 ```java
 class Solution {
     Map<Integer,Integer> m = new HashMap<>();
+  	// 根据前序和中序遍历建树
     public TreeNode preInBuildTree(int[] preorder,int preleft,int preright,int[] inorder,int inleft,int inright){
         if(preleft > preright) return null;
         TreeNode node = new TreeNode(preorder[preleft]);
-        int inNodeIndex = m.get(node.val);
-
-        int leftNum = inNodeIndex - inleft;
-        int rightMum = inright - inNodeIndex;
-
+        int inNodeIndex = m.get(node.val); // 获得中序遍历中的下标
+        int leftNum = inNodeIndex - inleft; // 通过中序遍历划分左右子树，求取左子树结点个数
+      	// 递归建树
         node.left = preInBuildTree(preorder,preleft+1,preleft+leftNum,inorder,inleft,inNodeIndex - 1);
         node.right = preInBuildTree(preorder,preleft+ leftNum + 1,preright,inorder,inNodeIndex + 1,inright);
         return node;
@@ -2166,6 +2303,7 @@ class Solution {
     public TreeNode buildTree(int[] preorder, int[] inorder) {
         int n = preorder.length;
         if (n == 0) return null;
+      	// 记录中序遍历中每个值的下标
         for(int i = 0;i < inorder.length;i++){
             m.put(inorder[i],i);
         }
@@ -2456,6 +2594,14 @@ class Solution {
     }
 }
 ```
+
+相关题目：剪绳子II
+
+
+
+
+
+
 
 #### 第五十一剑式：和为s的连续正数序列
 
