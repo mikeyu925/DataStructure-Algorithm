@@ -969,6 +969,23 @@ class Solution {
 }
 ```
 
+简化版：
+
+```java
+class Solution {
+    private boolean recurv(TreeNode A, TreeNode B){
+        if(B == null) return true;
+        if(A == null) return false;
+        return A.val == B.val && recurv(A.left,B.left) && recurv(A.right,B.right);
+    }
+    public boolean isSubStructure(TreeNode A, TreeNode B) {
+        return (A != null && B != null && (recurv(A,B) || isSubStructure(A.left,B) || isSubStructure(A.right,B)));
+    }
+}
+```
+
+
+
 #### 第十七剑式： 二叉树的镜像
 
 > 题目来源：LeetCode 剑指 Offer 27
@@ -1494,6 +1511,8 @@ public class Solution {
 #### 第二十七剑式：调整数组顺序使奇数位于偶数前面
 
 > 题目来源：LeetCode 剑指 Offer 21
+>
+> 标签：双指针
 
 输入一个整数数组，实现一个函数来调整该数组中数字的顺序，使得所有奇数在数组的前半部分，所有偶数在数组的后半部分。
 
@@ -1508,15 +1527,22 @@ class Solution {
     public int[] exchange(int[] nums) {
         int left = 0,right = nums.length - 1;
         while(left < right){
+          	// 遇到偶数停止
             while(left < right && nums[left] % 2 == 1){
                 left += 1;
             }
+          // 遇到奇数停止
             while(left < right && nums[right] % 2 == 0){
                 right -= 1;
             }
-            int tmp = nums[left];
-            nums[left] = nums[right];
-            nums[right] =tmp;
+          // 交换
+          	if(left < right){
+              int tmp = nums[left];
+              nums[left] = nums[right];
+              nums[right] =tmp;
+              left ++;
+              right --;
+            }
         }
         return nums;
     }
@@ -2552,12 +2578,6 @@ class Solution {
 }
 ```
 
-
-
-
-
-
-
 #### 第五十剑式：剪绳子
 
 > 题目来源：LeetCode 剑指 Offer  14-I
@@ -2565,6 +2585,8 @@ class Solution {
 给你一根长度为 n 的绳子，请把绳子剪成整数长度的 m 段（m、n都是整数，n>1并且m>1），每段绳子的长度记为 k[0],k[1]...k[m-1] 。请问 k[0]k[1]...k[m-1] 可能的最大乘积是多少？例如，当绳子的长度是8时，我们把它剪成长度分别为2、3、3的三段，此时得到的最大乘积是18。
 
 **题目解析**：
+
+方法1:数学 时间复杂度O(1)
 
 1. **尽可能的将绳子等长切分**
 2. **并且使得每段绳子长度尽量为3**
@@ -2576,6 +2598,12 @@ $$
 设绳子长度为$n$,等分为$a$段，每段长为$x$则可知$n = ax$，则乘积为$x^a = x^{\frac{n}{x}} = (x^{\frac{1}{x}})^n $，由于n为常熟，因此当$x^{\frac{1}{x}}$取最大值时，乘积达到最大值。
 
 令 $y = x^{\frac{1}{x}}$ ，对其求导，最终可以得到当$x = 3$时有最大值。
+
+因此可以得到如下切分规则：
+
+- 最优： 3 。把绳子尽可能切为多个长度为 3 的片段，留下的最后一段绳子的长度可能为 0,1,2 三种情况。
+- 次优： 2 。若最后一段绳子长度为 2 ；则保留，不再拆为 1+1 。
+- 最差： 1 。若最后一段绳子长度为 1 ；则应把一份 3 + 1 替换为 2 + 2，因为 2×2>3×1。
 
 ```java
 class Solution {
@@ -2594,6 +2622,29 @@ class Solution {
     }
 }
 ```
+
+方法2:动态规划. 时间复杂度O(n^2)
+
+定义dp[i] 表示： 将长度为i 的绳子进行剪切可以得到的乘积最大值，对于一段长度为 i 的绳子，假设拆分为长度 j 和 i - j，那么 i -j 可以单独作为一段，也可以继续拆分dp[i-j]。因此得到状态转移方程：dp[i] = max(i * (i-j), i * dp[i- j])，其中j的范围[1,i-1]
+
+```java
+class Solution {
+    public int cuttingRope(int n) {
+        int [] dp = new int[n+1];
+        dp[0] = dp[1] = 0;
+        for(int i = 2;i <= n;i++){
+            int max = 0;
+            for(int j = 1;j < i;j++){
+                max = Math.max(max,Math.max(j * (i-j),j * dp[i-j]));
+            }
+            dp[i] = max;
+        }
+        return dp[n];
+    }
+}
+```
+
+
 
 相关题目：剪绳子II
 
@@ -2650,7 +2701,7 @@ class Solution {
 
 **题目解析**：
 
-就是一道简单的模拟类题目..相信大家都能直接秒了
+方法1:模拟 时间复杂度O(nm)  空间复杂度O(1) 如果不能修改矩阵的值的话，则空间复杂度为O(mn)
 
 ```java
 class Solution {
@@ -2664,15 +2715,17 @@ class Solution {
         int x = 0,y = 0;
         int Didx = 0;
         for (;cnt < m * n;){
+          	// 如果不能修改矩阵的值的话，则空间复杂度为O(mn)
             if (x >= 0 && x < m && y >= 0 && y < n && matrix[x][y] != Integer.MIN_VALUE){
                 ans[cnt++] = matrix[x][y];
                 matrix[x][y] = Integer.MIN_VALUE;
             }else{
+              // 先回退一步 再改变方向
                 x = x - dirs[Didx][0];
                 y = y - dirs[Didx][1];
                 Didx = (Didx + 1) % 4;
             }
-
+						// 朝着指定方向步进一步
             x = x + dirs[Didx][0];
             y = y + dirs[Didx][1];
         }
@@ -2680,6 +2733,45 @@ class Solution {
     }
 }
 ```
+
+方法2:按层模拟 时间复杂度O(nm)  空间复杂度O(1)
+
+![fig1](https://assets.leetcode-cn.com/solution-static/jianzhi_29/jianzhi_29_fig1.png)
+
+```java
+class Solution {
+    public int[] spiralOrder(int[][] matrix) {
+        if(matrix == null || matrix.length == 0 || matrix[0].length == 0) return new int[0];
+        int n = matrix.length, m = matrix[0].length;
+        int top = 0, left = 0,right =  m - 1,bottom = n-1;
+        int [] ans = new int[n * m];
+        int idx = 0;
+        while(left <= right && top <= bottom){
+            for(int i = left;i <= right;i++){
+                ans[idx++] = matrix[top][i];
+            }
+            for(int i = top + 1;i <= bottom;i++){
+                ans[idx++] = matrix[i][right];
+            }
+            if(left < right && top < bottom){
+                for(int i = right - 1;i >= left;i--){
+                    ans[idx++] = matrix[bottom][i];
+                }
+                for(int i = bottom - 1;i > top;i--){
+                    ans[idx++] = matrix[i][left];
+                }
+            }
+            left++;
+            top++;
+            right--;
+            bottom--;
+        }
+        return ans;
+    }
+}
+```
+
+
 
 #### 第五十三剑式：栈的压入、弹出序列
 
