@@ -667,24 +667,19 @@ class Solution {
 输出：'b'
 ```
 
-方法一：哈希表 + 遍历
+方法一：有序哈希表 + 遍历
 
 ```java
 class Solution {
     public char firstUniqChar(String s) {
-        Map<Character,Integer> m = new HashMap<>();
-        for(int i = 0;i < s.length();i++){
-            if(m.get(s.charAt(i)) == null){
-                m.put(s.charAt(i),1);
-            }else{
-                int cnt = m.get(s.charAt(i));
-                m.put(s.charAt(i),cnt+1);
-            }
+        Map<Character,Integer> map = new LinkedHashMap<>();
+        char [] sc = s.toCharArray();
+        for(char c : sc){
+            map.put(c,map.getOrDefault(c,0) + 1);
         }
-        for(int i = 0; i < s.length();i++){
-            if(m.get(s.charAt(i)) < 2){
-                return s.charAt(i);
-            }
+     		// 由于哈希表中元素数一定小于等于 s.length() 因此采用有序哈希表
+        for(Character c : map.keySet()){
+            if(map.get(c) == 1) return c;
         }
         return ' ';
     }
@@ -1009,12 +1004,6 @@ class Solution {
 输出：[4,7,2,9,6,3,1]
 ```
 
-**题目解析**：
-
-个人感觉就是递归搜索A树的同时，创建B树的结点，将A的左节点作为B的右节点，将A的右节点作为B的左节点。
-
-![二叉树的镜像](🗡指Offer系列.assets/二叉树的镜像.jpg)
-
 ```java
 /**
  * Definition for a binary tree node.
@@ -1026,27 +1015,35 @@ class Solution {
  * }
  */
 class Solution {
-    public void dfs(TreeNode A,TreeNode B){
-        //如果A是空结点，直接返回
-        if(A == null) return ;
-        //A 的左子树不空则创建该结点作为B的右节点，然后递归
-        if(A.left != null){
-            B.right = new TreeNode(A.left.val);
-            dfs(A.left,B.right); //注意是递归A的左 和 B的右
-        }
-        //A 的右子树不空则创建该结点作为B的左节点，然后递归
-        if(A.right != null){
-            B.left = new TreeNode(A.right.val);
-            dfs(A.right,B.left); //注意是递归A的右 和 B的左
-        }
-    }
     public TreeNode mirrorTree(TreeNode root) {
-        //如果root空，直接返回null
         if(root == null) return null;
-        //先创建一个根结点
-        TreeNode ans = new TreeNode(root.val);
-        dfs(root, ans);
-        return ans;
+        TreeNode t = root.left;
+        root.left = root.right;
+        root.right = t;
+        mirrorTree(root.left);
+        mirrorTree(root.right);
+        return root;
+    }
+}
+
+// 另外一种写法
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    public TreeNode mirrorTree(TreeNode root) {
+        if(root == null) return null;
+        TreeNode leftnode = mirrorTree(root.left);
+        TreeNode rightnode = mirrorTree(root.right);
+        root.left = rightnode;
+        root.right = leftnode;
+        return root;
     }
 }
 ```
@@ -1092,8 +1089,7 @@ class Solution {
     public boolean dfs(TreeNode A,TreeNode B){
         if(A == null && B == null) return true; //两个都是空结点，返回true
         else if ((A == null && B != null) || (A != null && B == null)) return false; //一个空，另外一个不空，返回false
-        else if(A.val == B.val) return dfs(A.left,B.right) && dfs(A.right,B.left); // 如果A，B两个结点值相同，比较A的左和B的右，A的右和B的左
-        else return false;  //两个结点值不相等，返回false
+        return (A.val == B.val)  && dfs(A.left,B.right) && dfs(A.right,B.left); // 如果A，B两个结点值相同，比较A的左和B的右，A的右和B的左 同时满足的话返回true
     }
     public boolean isSymmetric(TreeNode root) {
         if(root == null) return true;
@@ -1212,26 +1208,45 @@ class Solution {
 ```java
 class Solution {
     public int translateNum(int num) {
-        String strNum = String.valueOf(num);
-        if (strNum.length() == 0) return 0;
-        else if(strNum.length() == 1) return 1;
-        int[] dp = new int[strNum.length()];
+        String str = Integer.toString(num);
+        int n = str.length();
+        int [] dp = new int[n+1];
         dp[0] = 1;
-        int tmp = Integer.parseInt(strNum.substring(0,2)) ;
-        if(tmp >= 10 && tmp < 26){
-            dp[1] = dp[0] + 1;
-        }else{
-            dp[1] = dp[0];
-        }
-        for(int i = 2;i < strNum.length();i++){
-            tmp = Integer.parseInt(strNum.substring(i-1,i+1)) ;
-            if(tmp >= 10 && tmp < 26){
-                dp[i] = dp[i-1] + dp[i-2];
-            }else{
-                dp[i] = dp[i-1];
+        dp[1] = 1;
+        for(int i = 2;i <= n;i++){
+            dp[i] = dp[i-1];
+            int pre = str.charAt(i-2) - '0';
+            int now = str.charAt(i-1) - '0';
+            if(pre != 0 && pre * 10 + now <= 25){
+                dp[i] += dp[i-2];
             }
         }
-        return dp[strNum.length()-1];
+        return dp[n];
+    }
+}
+```
+
+空间优化：
+
+```java
+class Solution {
+    public int translateNum(int num) {
+        String str = Integer.toString(num);
+        int n = str.length();
+        int [] dp = new int[n+1];
+        int dp0 = 1;
+        int dp1 = 1;
+        for(int i = 2;i <= n;i++){
+            int t = dp1;
+            int pre = str.charAt(i-2) - '0';
+            int now = str.charAt(i-1) - '0';
+            if(pre != 0 && pre * 10 + now <= 25){
+                t += dp0;
+            }
+            dp0 = dp1;
+            dp1 = t;
+        }
+        return dp1;
     }
 }
 ```
@@ -1254,7 +1269,8 @@ class Solution {
 
 **题目解析**：
 
-动态规划
+方法1:动态规划。时间复杂度O(n) 空间复杂度O(k)
+
 状态定义： 设动态规划列表 dp[j] 代表以字符 s[j] 为结尾的 “最长不重复子字符串” 的长度。
 
 转移方程： 固定右边界 j，设字符 s[j] 左边距离最近的相同字符为 s[i]。
@@ -1293,9 +1309,10 @@ class Solution {
 }
 ```
 
-**双指针**：
+**双指针**：时间复杂度O(n) 空间复杂度O(1)
 
 哈希表 dic 统计： 指针 j 遍历字符 s ，哈希表统计字符 s[j] 最后一次出现的索引 。
+
 更新左指针 i ： 根据上轮左指针 i 和 dic[s[j]] ，每轮更新左边界 i ，保证区间`[i+1,j] `内无重复字符且最大。
 `i=max(dic[s[j]],i)`
 
@@ -1805,6 +1822,7 @@ class Solution {
 class Solution {
     List<List<Integer>> ans = new ArrayList<List<Integer>>();
     List<Integer> path = new ArrayList<>();
+  
     public void dfs(TreeNode node,int val,int target){
         if(node == null){
             return ;
@@ -1820,6 +1838,7 @@ class Solution {
         dfs(node.right,val+ node.val,target);
         path.remove(path.size()-1);
     }
+  
     public List<List<Integer>> pathSum(TreeNode root, int target) {
         if (root == null) return ans;
         dfs(root,0,target);
@@ -1903,7 +1922,7 @@ class Solution {
     }
     public Node treeToDoublyList(Node root) {
         if(root == null) return null; //特殊情况，特殊处理
-        dfs(root); //遍历
+        dfs(root); //遍历 此时pre指向的是尾部结点
         /*修改头节点和尾结点的指针*/
         head.left = pre; 
         pre.right = head;
@@ -2370,13 +2389,15 @@ class Solution {
 
 
 
-#### 第四十五剑式：数值的整数次方
+#### 第四十五剑式：二叉搜索树的后序遍历序列
 
 > 题目来源：LeetCode 剑指 Offer  33
 
 输入一个整数数组，判断该数组是不是某二叉搜索树的后序遍历结果。如果是则返回 `true`，否则返回 `false`。假设输入的数组的任意两个数字都互不相同。
 
 **题目解析**：
+
+方法1:递归 时间复杂度O(n ^ 2) 空间复杂度O(n)
 
 根据二叉搜索树的定义，可以通过递归，判断所有子树的 **正确性** （即其后序遍历是否满足二叉搜索树的定义） ，若所有子树都正确，则此序列为二叉搜索树的后序遍历。
 
@@ -2387,7 +2408,7 @@ class Solution {
 
 1. ​	划分左右子树： 遍历后序遍历的` [i,j] `区间元素，寻找 第一个大于根节点 的节点，索引记为 m 。此时，可划分出左子树区间` [i,m−1] `、右子树区间` [m,j−1] `、根节点索引 j 。
 2. 判断是否为二叉搜索树：
-   - 左子树区间` [i,m−1] `内的所有节点都应 <postorder[j] 。而第 1.划分左右子树 步骤已经保证左子树区间的正确性，因此只需要判断右子树区间即可。
+   - 左子树区间` [i,m−1] `内的所有节点都应 < postorder[j] 。而第 1.划分左右子树 步骤已经保证左子树区间的正确性，因此只需要判断右子树区间即可。
    - 右子树区间` [m,j−1] `内的所有节点都应 > postorder[j] 。实现方式为遍历，当遇到 ≤postorder[j] 的节点则跳出；则可通过 p=j 判断是否为二叉搜索树。
 
 返回值： 所有子树都需正确才可判定正确，因此使用 与逻辑符 && 连接。
@@ -2402,13 +2423,43 @@ class Solution {
         if(left >= right) return true;
         int p = left;
         while(postorder[p] < postorder[right]) p++;
-        int m = p;
+        int m = p; // 右子树的第一个节点
         while(postorder[p] > postorder[right]) p++;
+      	// 当前区间可以划分为左右两个子树，且左右子树也是二叉搜索树
         return p == right && func(postorder,left,m-1) && func(postorder,m,right-1);
     }
 
     public boolean verifyPostorder(int[] postorder) {
         return func(postorder,0,postorder.length-1);
+    }
+}
+```
+
+方法：单调栈
+
+将后序遍历逆序得到 s[n] s[n-1] ... s[k] ... s[1] s[0]，我们可以看到如下性质：
+
+- 对于索引 i ，如果 s[i+1] < s[i]，i+1 一定是 i 的右子节点
+- 如果 s[i + 1] > s[i]，则从i+1开始向左最接近 s[i]并且大于 s[i] 的结点是当前结点 i 的父结点，同时 i 右边的所有结点值一定都小于根结点
+
+<img src="https://pic.leetcode-cn.com/23c8b1910f4cfbb8406844f909561a24e8d375fd2d648ea69ee5f1b641a60013-Picture11.png" alt="Picture11.png" style="zoom:48%;" />
+
+> 因此，比如按照上图所示，如果此时结点是2，然后通过不断弹出栈中元素确定2的父结点为5 那么，2后面的所有元素都应该小于5，如果大于5说明不是二叉搜索树
+
+```java
+class Solution {
+    public boolean verifyPostorder(int[] postorder) {
+        int n = postorder.length;
+        Stack<Integer> st = new Stack<>();
+        int root = Integer.MAX_VALUE;
+        for(int i = n-1;i >=0;i--){
+            if(postorder[i] > root) return false;  // 如果此时有元素大于当前子树的根结点，那么不是二叉搜索树
+            while(!st.isEmpty() && postorder[i] < st.peek()){
+                root = st.pop(); // 寻找当前结点的父结点
+            }
+            st.push(postorder[i]);
+        }
+        return true;
     }
 }
 ```
@@ -2786,26 +2837,21 @@ class Solution {
 ```java
 class Solution {
     public boolean validateStackSequences(int[] pushed, int[] popped) {
-        Deque<Integer> dq = new ArrayDeque<>();
-        int pushIdx = 0;
-        int popIdx = 0;
-        while(pushIdx < pushed.length){
-
-            dq.offerLast(pushed[pushIdx]);
-            while(!dq.isEmpty() && dq.peekLast() == popped[popIdx]){
-                popIdx += 1;
-                dq.pollLast();
+        int n = pushed.length;
+        Stack<Integer> st = new Stack<>();
+        int idx = 0;
+        for(int i = 0;i < n;i++){
+            st.push(pushed[i]);
+            while(!st.isEmpty() && st.peek() == popped[idx]){
+                st.pop();
+                idx++;
             }
-            pushIdx += 1;
         }
-        while(!dq.isEmpty()){
-            if (dq.peekLast() != popped[popIdx]){
-                return false;
-            }
-            dq.pollLast();
-            popIdx += 1;
+        while(!st.isEmpty() && st.peek() == popped[idx]){
+            st.pop();
+            idx++;
         }
-        return true;
+        return st.isEmpty();
     }
 }
 ```
@@ -3034,6 +3080,13 @@ class Codec {
         dfs_serialize(root);
         return serializeStr;
     }
+
+    // Decodes your encoded data to tree.
+    public TreeNode deserialize(String data) {
+        String [] nodes = data.split(",");
+        List<String > arrayNodes = new LinkedList<>(Arrays.asList(nodes));
+        return buildTree(arrayNodes);
+    }
     public TreeNode buildTree(List<String> nodes){
         if (nodes.get(0).equals("null")){
             nodes.remove(0);
@@ -3044,12 +3097,6 @@ class Codec {
         node.left = buildTree(nodes);
         node.right = buildTree(nodes);
         return node;
-    }
-    // Decodes your encoded data to tree.
-    public TreeNode deserialize(String data) {
-        String [] nodes = data.split(",");
-        List<String > arrayNodes = new LinkedList<>(Arrays.asList(nodes));
-        return buildTree(arrayNodes);
     }
 }
 ```
@@ -3077,11 +3124,12 @@ class Solution {
             return ;
         }
         for (int i = 0; i < characters.length;i++){
-            if (used[i]) continue;
-            if (i > 0 && !used[i-1] && characters[i] == characters[i-1]) continue;
+            if (used[i]) continue;  
+            if (i > 0 && !used[i-1] && characters[i] == characters[i-1]) continue; // 剪枝优化
             used[i] = true;
             sb.append(characters[i]);
             dfs(characters,idx+1);
+          	// 恢复现场
             sb.deleteCharAt(sb.length()-1);
             used[i] = false;
         }
@@ -3090,7 +3138,7 @@ class Solution {
         used = new boolean[s.length()];
         sb = new StringBuilder(s.length());
         char[] characters =  s.toCharArray();
-        Arrays.sort(characters);
+        Arrays.sort(characters); // 现排序，这样相同的字符会排在一起
         dfs(characters,0);
         String [] res = new String[ans.size()];
         for (int i = 0; i < ans.size();i++){
@@ -3205,7 +3253,13 @@ class Solution {
 
 题目解析：
 
-归并排序
+归并排序：时间复杂度o(n log n) 空间复杂度O(n)
+
+L = [8, 12, 16, 22, 100]   R = [9, 26, 55, 64, 91]  M = [8, 9]
+        |                          |
+       lPtr                       rPtr
+
+归并排序的合并过程就可以计算 逆序对贡献值
 
 ```java
 class Solution {
@@ -3263,6 +3317,8 @@ class Solution {
 }
 ```
 
+
+
 #### 第六十二剑式：1～n 整数中 1 出现的次数
 
 > 题目来源：LeetCode 剑指 Offer 43
@@ -3310,19 +3366,22 @@ class Solution {
 输出：3
 ```
 
+时间复杂度 O(log n) 空间复杂度O(1)
+
 ```java
 class Solution {
     public int findNthDigit(int n) {
-        int digit= 1;
-        long start= 1;
-        long cnt = 9;
-        while (n > cnt){ //确定digit
+        int digit= 1; // 位数
+        long start= 1;// 位数为digit的第一个数
+        long cnt = 9; // 位数为digit的总共位数
+        //确定位数digit
+        while (n > cnt){
             n -= cnt;
             digit += 1;
-            start *= 10;
+            start *= 10; 
             cnt = digit * start * 9;
         }
-        long num = start + (n - 1) / digit;//确定数字
+        long num = start + (n - 1) / digit;//确定所在的数字
         return Long.toString(num).charAt((n-1) % digit) - '0'; //确定在该数字的第几个数上
     }
 }
@@ -9382,6 +9441,70 @@ class Solution {
             }
         }
         return dp[k-1];
+    }
+}
+```
+
+
+
+
+
+####  第一百七十四剑式：数组中出现次数超过一半的数字
+
+> 标签：排序
+
+数组中有一个数字出现的次数超过数组长度的一半，请找出这个数字。
+
+你可以假设数组是非空的，并且给定的数组总是存在多数元素。
+
+方法1:排序
+
+如果将数组 nums 中的所有元素按照单调递增或单调递减的顺序排序，那么下标为 $\lfloor \dfrac{n}{2} \rfloor$ 元素（下标从 0 开始）一定是众数
+
+```java
+class Solution {
+    public int majorityElement(int[] nums) {
+        Arrays.sort(nums);
+        return nums[nums.length / 2];
+    }
+}
+```
+
+方法2:Boyer-Moore 投票算法
+
+Boyer-Moore 算法的本质和方法四中的分治十分类似。我们首先给出 Boyer-Moore 算法的详细步骤：
+
+我们维护一个候选众数 candidate 和它出现的次数 count。初始时 candidate 可以为任意值，count 为 0；
+
+我们遍历数组 nums 中的所有元素，对于每个元素 x，在判断 x 之前，如果 count 的值为 0，我们先将 x 的值赋予 candidate，随后我们判断 x：
+
+- 如果 x 与 candidate 相等，那么计数器 count 的值增加 1；
+
+- 如果 x 与 candidate 不等，那么计数器 count 的值减少 1。
+
+在遍历完成后，candidate 即为整个数组的众数。
+
+例子：
+
+```
+nums:      [7, 7, 5, 7, 5, 1 | 5, 7 | 5, 5, 7, 7 | 7, 7, 7, 7]
+candidate:  7  7  7  7  7  7   5  5   5  5  5  5   7  7  7  7
+count:      1  2  1  2  1  0   1  0   1  2  1  0   1  2  3  4
+```
+
+```java
+class Solution {
+    public int majorityElement(int[] nums) {
+        int n = nums.length;
+        Integer candidate = null;
+        int count = 0;
+        for(int i = 0;i < n;i++){
+            if(count == 0){
+                candidate = nums[i];
+            }
+            count += candidate == nums[i] ? 1 : -1;
+        }
+        return candidate;
     }
 }
 ```
