@@ -9509,3 +9509,387 @@ class Solution {
 }
 ```
 
+#### 第一百七十五剑式：零矩阵
+
+编写一种算法，若M × N矩阵中某个元素为0，则将其所在的行与列清零。
+
+```
+输入：
+[
+  [1,1,1],
+  [1,0,1],
+  [1,1,1]
+]
+输出：
+[
+  [1,0,1],
+  [0,0,0],
+  [1,0,1]
+]
+```
+
+我们可以用矩阵的第一行和第一列代替方法一中的两个标记数组，以达到 O(1) 的额外空间。但这样会导致原数组的第一行和第一列被修改，无法记录它们是否原本包含 0。因此我们需要额外使用两个标记变量分别记录第一行和第一列是否原本包含 0。
+
+在实际代码中，我们首先预处理出两个标记变量，接着使用其他行与列去处理第一行与第一列，然后反过来使用第一行与第一列去更新其他行与列，最后使用两个标记变量更新第一行与第一列即可。
+
+```java
+class Solution {
+    public void setZeroes(int[][] matrix) {
+        if(matrix == null || matrix.length == 0 || matrix[0].length == 0) return ;
+        int n = matrix.length, m = matrix[0].length;
+        boolean row0_flag = false, col0_flag = false;
+        for(int i = 0;i < n;i++){
+            if(matrix[i][0] == 0) {
+                col0_flag = true;
+                break;
+            }
+        }
+        for(int i = 0;i < m;i++){
+            if(matrix[0][i] == 0){
+                row0_flag = true;
+                break;
+            }
+        }
+        // 遍历非第一行和第一列，如果是0，则分别在第一行和第一列标记
+        for(int i = 1;i < n;i++){
+            for(int j = 1;j < m;j++){
+                if(matrix[i][j] == 0){
+                    matrix[i][0] = 0;
+                    matrix[0][j] = 0;
+                }
+            }
+        }
+        // 再遍历一遍，如果对应的行列为0，则修改为0
+        for(int i = 1;i < n;i++){
+            for(int j = 1;j < m;j++){
+                if(matrix[i][0] == 0 || matrix[0][j] == 0){
+                    matrix[i][j] = 0;
+                }
+            }
+        }
+        // 判断第一行和第一列是否要修改为0
+        if(row0_flag){
+            for(int i = 0;i < m;i++){
+                matrix[0][i] = 0;
+            }
+        }
+        if(col0_flag){
+            for(int i = 0;i < n;i++){
+                matrix[i][0] = 0;
+            }
+        }
+    }
+}
+```
+
+#### 第一百七十六剑式：旋转矩阵
+
+给你一幅由 `N × N` 矩阵表示的图像，其中每个像素的大小为 4 字节。请你设计一种算法，将图像旋转 90 度。
+
+不占用额外内存空间能否做到？
+
+```
+给定 matrix = 
+[
+  [1,2,3],
+  [4,5,6],
+  [7,8,9]
+],
+
+原地旋转输入矩阵，使其变为:
+[
+  [7,4,1],
+  [8,5,2],
+  [9,6,3]
+]
+```
+
+![image-20220930182005801](/Users/ywh/Library/Application Support/typora-user-images/image-20220930182005801.png)
+
+当 n为奇数时，由于中心的位置经过旋转后位置不变，换一种划分的方式，以 5×5 的矩阵为例：
+
+![2.png](https://pic.leetcode-cn.com/1608308534-KjMVCn-2.png)
+
+```java
+class Solution {
+    public void rotate(int[][] matrix) {
+        if(matrix == null || matrix.length == 0) return ;
+        int n = matrix.length;
+        for(int i = 0;i < n / 2;i++){
+            for(int j = 0;j < (n + 1) / 2;j++){
+                int tmp = matrix[n-j-1][i];
+                matrix[n-j-1][i] = matrix[n-i-1][n-j-1];
+                matrix[n-i-1][n-j-1] =matrix[j][n-i-1];
+                matrix[j][n-i-1] = matrix[i][j];
+                matrix[i][j] = tmp;
+            }
+        }
+    }
+}
+```
+
+#### 第一百七十七剑式：移除重复结点
+
+编写代码，移除未排序链表中的重复节点。保留最开始出现的节点。
+
+```
+ 输入：[1, 2, 3, 3, 2, 1]
+ 输出：[1, 2, 3]
+```
+
+```java
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    public ListNode removeDuplicateNodes(ListNode head) {
+        if(head == null || head.next == null) return head;
+        Set<Integer> set = new HashSet<>();
+        ListNode pre = null;
+        ListNode now = head;
+        while(now != null){
+            ListNode next = now.next;
+            if(pre != null && set.contains(now.val)){
+                pre.next = now.next;
+            }else{
+                pre = now;
+            }
+            set.add(now.val);
+            now = next;
+        }
+        return head;
+    }
+}
+```
+
+
+
+#### 第一百七十八剑式：分割链表
+
+给你一个链表的头节点 head 和一个特定值 x ，请你对链表进行分隔，使得所有 小于 x 的节点都出现在 大于或等于 x 的节点之前。
+
+你不需要 保留 每个分区中各节点的初始相对位置。
+
+```
+输入：head = [1,4,3,2,5,2], x = 3
+输出：[1,2,2,4,3,5]
+```
+
+```java
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    public ListNode partition(ListNode head, int x) {
+        ListNode small = new ListNode(-1);
+        ListNode big = new ListNode(-1);
+        ListNode now = head;
+        ListNode sh = small;
+        ListNode bh = big;
+        while(now != null){
+            ListNode next = now.next;
+            if(now.val < x){
+                sh.next = now;
+                sh = sh.next;
+            }else{
+                bh.next = now;
+                bh = bh.next;
+            }
+            now = next;
+        }
+        sh.next = big.next;
+        bh.next = null;
+        return small.next;
+    }
+}
+```
+
+#### 第一百七十九剑式：链表求和
+
+给定两个用链表表示的整数，每个节点包含一个数位。
+
+这些数位是反向存放的，也就是个位排在链表首部。
+
+编写函数对这两个整数求和，并用链表形式返回结果。
+
+```
+输入：(7 -> 1 -> 6) + (5 -> 9 -> 2)，即617 + 295
+输出：2 -> 1 -> 9，即912
+```
+
+```java
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        ListNode head = new ListNode(-1);
+        ListNode now = head;
+        int carry = 0;
+        while(l1 != null || l2 != null){
+            int a = l1 == null ? 0 : l1.val;
+            int b = l2 == null ? 0 : l2.val;
+            int sum = (a + b) + carry;
+            carry = sum / 10;
+            ListNode add = new ListNode(sum % 10);
+            now.next = add;
+            now = now.next;
+            if(l1 != null) l1 = l1.next;
+            if(l2 != null) l2 = l2.next;
+        }
+        if(carry != 0){
+            now.next = new ListNode(carry);
+        }
+        return head.next;
+    }
+}
+```
+
+假设这些数位是正向存放的，又该如何解决呢?
+
+- 反转链表后再进行上述操作（如果可以修改原链表）
+- 将两个数字的链表分别压入栈中，然后依次进行添加操作
+
+```java
+class Solution {
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        Deque<Integer> stack1 = new ArrayDeque<Integer>();
+        Deque<Integer> stack2 = new ArrayDeque<Integer>();
+        while (l1 != null) {
+            stack1.push(l1.val);
+            l1 = l1.next;
+        }
+        while (l2 != null) {
+            stack2.push(l2.val);
+            l2 = l2.next;
+        }
+        int carry = 0;
+        ListNode ans = null;
+        while (!stack1.isEmpty() || !stack2.isEmpty() || carry != 0) {
+            int a = stack1.isEmpty() ? 0 : stack1.pop();
+            int b = stack2.isEmpty() ? 0 : stack2.pop();
+            int cur = a + b + carry;
+            carry = cur / 10;
+            cur %= 10;
+            ListNode curnode = new ListNode(cur);
+            curnode.next = ans;
+            ans = curnode;
+        }
+        return ans;
+    }
+}
+```
+
+
+
+#### 第一百八十剑式：回文链表
+
+编写一个函数，检查输入的链表是否是回文的。
+
+时间复杂度O(n)  空间复杂度O(n)
+
+- 用一个数组寸所有的结点值，然后用双指针判断
+
+- 递归
+
+  ```java
+  class Solution {
+      private ListNode frontPointer;
+  
+      private boolean recursivelyCheck(ListNode currentNode) {
+          if (currentNode != null) {
+              if (!recursivelyCheck(currentNode.next)) { // 如果在深层递归中 c.val != f.val, 说明不是会问链表
+                  return false;
+              }
+              if (currentNode.val != frontPointer.val) {
+                  return false;
+              }
+              frontPointer = frontPointer.next; // 头指针后移一个
+          }
+          return true;
+      }
+  
+      public boolean isPalindrome(ListNode head) {
+          frontPointer = head;
+          return recursivelyCheck(head);
+      }
+  }
+  ```
+
+时间复杂度O(n) 空间复杂度O(1)
+
+- 快慢指针
+
+  将链表的后半部分反转（修改链表结构），然后将前半部分和后半部分进行比较。比较完成后我们应该将链表恢复原样。虽然不需要恢复也能通过测试用例，但是使用该函数的人通常不希望链表结构被更改。
+
+  1. 找到前半部分链表的尾节点。(快慢指针)
+  2. 反转后半部分链表。（链表反转）
+  3. 判断是否回文。
+  4. 恢复链表。
+  5. 返回结果。
+
+  ```java
+  /**
+   * Definition for singly-linked list.
+   * public class ListNode {
+   *     int val;
+   *     ListNode next;
+   *     ListNode(int x) { val = x; }
+   * }
+   */
+  class Solution {
+      private ListNode findMidNode(ListNode head){
+          ListNode fast = head.next;
+          ListNode slow = head;
+          while(fast != null && fast.next != null){
+              fast = fast.next.next;
+              slow = slow.next;
+          }
+          return slow;
+      }
+      private ListNode reverse(ListNode head){
+          ListNode pre = null;
+          ListNode now = head;
+          while(now != null){
+              ListNode next = now.next;
+              now.next = pre;
+              pre = now;
+              now = next;
+          }
+          return pre;
+      }
+      public boolean isPalindrome(ListNode head) {
+          if(head == null || head.next == null) return true;
+          ListNode mid = findMidNode(head);
+          ListNode head2 = reverse(mid.next);
+          ListNode h1 = head;
+          ListNode h2 = head2;
+          while(h2 != null){
+              if(h1.val != h2.val) return false;
+              h1 = h1.next;
+              h2 = h2.next;
+          }
+          ListNode t =  reverse(h2);
+          mid.next = t;
+          return true;
+      }
+  }
+  ```
+
+  
+
