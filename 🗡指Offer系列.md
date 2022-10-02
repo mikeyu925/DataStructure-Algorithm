@@ -2154,6 +2154,8 @@ class Solution {
 
 > 题目来源：LeetCode 剑指 Offer  55-II
 
+方法1:自顶向下 时间复杂度O(n^2) 空间复杂度O(n)
+
 定义函数 height，用于计算二叉树中的任意一个节点 p 的高度：
 
 $$
@@ -2180,24 +2182,36 @@ public boolean isBalanced(TreeNode root) {
 }
 ```
 
-方法一：由于是自顶向下递归，因此对于同一个节点，函数height 会被重复调用，导致时间复杂度较高。如果使用自底向上的做法，则对于每个节点，函数 height 只会被调用一次。
+方法2：由于是自顶向下递归，因此对于同一个节点，函数height 会被重复调用，导致时间复杂度较高。如果使用自底向上的做法，则对于每个节点，函数 height 只会被调用一次。 
 
 **自底向上递归的做法类似于后序遍历**，对于当前遍历到的节点，先递归地判断其左右子树是否平衡，再判断以当前节点为根的子树是否平衡。如果一棵子树是平衡的，则返回其高度（高度一定是非负整数），否则返回 −1。如果存在一棵子树不平衡，则整个二叉树一定不平衡。
 
+自底向下 时间复杂度O(n) 空间复杂度O(n)
+
 ```java
 //自底向上遍历
-    public int getDepth(TreeNode node){
-        if(node == null) return 0;
-        int leftDep = getDepth(node.left);
-        int rightDep = getDepth(node.right);
-        if(leftDep == -1 || rightDep == -1 || Math.abs(leftDep-rightDep) > 1) return -1;
-        return Math.max(leftDep,rightDep)+1;
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    private int height(TreeNode root){
+        if(root == null) return 0;
+        int leftheight = height(root.left);
+        if(leftheight == -1) return -1;
+        int rightheight = height(root.right);
+        if(rightheight == -1 || Math.abs(leftheight - rightheight) > 1) return -1;
+        return Math.max(leftheight,rightheight) + 1;
     }
-
     public boolean isBalanced(TreeNode root) {
-        if (root == null) return true;
-        return getDepth(root) >= 0;
+        return height(root) >= 0;
     }
+}
 ```
 
 
@@ -2261,41 +2275,36 @@ class Solution {
 
 题目解析：
 
-方法一：
+方法一：递归 
 
-和上题的大体思路是一样的，只不过不能用二叉搜索树的性质了，需要我们自己寻找目标结点在左子树还是右子树。如果两个目标结点分别在当前结点的左右子树中，则当前结点是最近公共祖先，如果都在右子树或左子树，则递归搜索。
+如果两个目标结点分别在当前结点的左右子树中，则当前结点是最近公共祖先。
 
 ```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
 class Solution {
-    
-    public TreeNode dfs(TreeNode root,TreeNode p,TreeNode q){
-        if(root == null) return null;
-        if(root.val == p.val || root.val == q.val) return root;
-        boolean pinleft = hasNode(root.left,p);
-        boolean qinleft = hasNode(root.left,q);
-        if(pinleft && qinleft){
-            return dfs(root.left,p,q);
-        }else if(!pinleft && !qinleft ){
-            return dfs(root.right,p,q);
-        }
-        return root; // pinleft && !qinleft || !pinleft && qinleft
-    }
-
-    public boolean hasNode(TreeNode root,TreeNode target){
-        if(root == null) return false;
-        if(root.val == target.val) return true;
-        return hasNode(root.left,target) || hasNode(root.right,target);
-    }
-
-
+  // 返回的就是lca
     public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
         if(root == null) return null;
-        return dfs(root,p,q);  
+        // 如果当前结点是p 或 q 直接返回root
+        if(root == p || root == q) return root;
+        TreeNode left = lowestCommonAncestor(root.left,p,q);
+        TreeNode right = lowestCommonAncestor(root.right,p,q);
+        // 如果p 和 q 分别在左右两个子树中，则当前结点为lca
+        if(left != null && right != null) return root;
+        return left != null ? left : right;
     }
 }
 ```
 
-方法二：
+方法二：哈希表
 
 可以用哈希表存储所有节点的父节点，然后我们就可以利用节点的父节点信息从 p 结点开始不断往上跳，并记录已经访问过的节点，再从 q 节点开始不断往上跳，如果碰到已经访问过的节点，那么这个节点就是我们要找的最近公共祖先。
 
@@ -2304,7 +2313,32 @@ class Solution {
 3. 同样，我们再从 q 节点开始不断往它的祖先移动，如果有祖先已经被访问过，即意味着这是 p 和 q 的深度最深的公共祖先，即 LCA 节点。
 
 ```java
-//利用java的HashMap解决问题，方法比较简单，自己尝试呀~
+class Solution {
+    Map<TreeNode,TreeNode> map = new HashMap<>();
+    private void dfs(TreeNode node,TreeNode p){
+        if(node == null) return ;
+        map.put(node,p);
+        dfs(node.left,node);
+        dfs(node.right,node);
+    }
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        dfs(root,null);
+        TreeNode pp = p;
+        Set<TreeNode> set = new HashSet<>();
+        while(pp != null){
+            set.add(pp);
+            pp = map.get(pp);
+        }
+        TreeNode qp = q;
+        while(qp != null){
+            if(set.contains(qp)){
+                break;
+            }
+            qp = map.get(qp);
+        }
+        return qp;
+    }
+}
 ```
 
 
@@ -9891,5 +9925,128 @@ class Solution {
   }
   ```
 
-  
+
+
+
+#### 第一百八十一剑式：栈排序
+
+栈排序。 编写程序，对栈进行排序使最小元素位于栈顶。最多只能使用一个其他的临时栈存放数据，但不得将元素复制到别的数据结构（如数组）中。该栈支持如下操作：push、pop、peek 和 isEmpty。当栈为空时，peek 返回 -1。
+
+```java
+class SortedStack {
+    Stack<Integer> st1,st2;
+
+    public SortedStack() {
+        st1 = new Stack<>();
+        st2 = new Stack<>();
+    }
+    
+    public void push(int val) {
+        while(!st1.isEmpty() && val > st1.peek()){
+            st2.push(st1.pop());
+        }
+        while(!st2.isEmpty() && val <= st2.peek()){
+            st1.push(st2.pop());
+        }
+        st1.push(val);
+    }
+    
+    public void pop() {
+        while(!st2.isEmpty()){
+            st1.push(st2.pop());
+        }
+        if(!st1.isEmpty())
+            st1.pop();
+    }
+    
+    public int peek() {
+        while(!st2.isEmpty()){
+            st1.push(st2.pop());
+        }
+        if(!st1.isEmpty())
+            return st1.peek();
+        else
+            return -1;
+    }
+    
+    public boolean isEmpty() {
+        return st1.isEmpty() && st2.isEmpty();
+    }
+}
+
+/**
+ * Your SortedStack object will be instantiated and called as such:
+ * SortedStack obj = new SortedStack();
+ * obj.push(val);
+ * obj.pop();
+ * int param_3 = obj.peek();
+ * boolean param_4 = obj.isEmpty();
+ */
+```
+
+
+
+
+#### 第一百八十二剑式：二叉搜索树序列
+
+从左向右遍历一个数组，通过不断将其中的元素插入树中可以逐步地生成一棵二叉搜索树。
+
+给定一个由**不同节点**组成的二叉搜索树 `root`，输出所有可能生成此树的数组。
+
+
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    List<Integer> path = new ArrayList<>();
+    List<List<Integer>> ans = new ArrayList<>();
+    private void dfs(Deque<TreeNode> dq){
+        if(dq.isEmpty()){
+            ans.add(new ArrayList<>(path));
+            return ;
+        }
+        int size = dq.size();
+        while(size -- > 0){
+            TreeNode top = dq.pollFirst();
+            int children = 0;
+            if(top.left != null){
+                children += 1;
+                dq.offerLast(top.left);
+            }
+            if(top.right != null){
+                children += 1;
+                dq.offerLast(top.right);
+            }
+            path.add(top.val);
+            dfs(dq);
+            // 还原现场
+            path.remove(path.size() - 1);
+            while(children > 0){
+                children --;
+                dq.pollLast();
+            }
+            dq.offerLast(top);
+        }
+    }
+    public List<List<Integer>> BSTSequences(TreeNode root) {
+        if(root == null){
+            ans.add(new ArrayList<>());
+            return ans;
+        }
+        Deque<TreeNode> dq = new ArrayDeque<>();
+        dq.offerLast(root);
+        // path.add(root.val);
+        dfs(dq);
+        return ans;
+    }
+}
+```
 
