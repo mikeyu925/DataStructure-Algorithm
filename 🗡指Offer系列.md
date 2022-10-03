@@ -1847,6 +1847,23 @@ class Solution {
 }
 ```
 
+相关题目：求和路径
+
+给定一棵二叉树，其中每个节点都含有一个整数数值(该值或正或负)。设计一个算法，打印节点数值总和等于某个给定值的所有路径的数量。注意，路径不一定非得从二叉树的根节点或叶节点开始或结束，但是其方向必须向下(只能从父节点指向子节点方向)。
+
+示例:
+给定如下二叉树，以及目标和 sum = 22
+
+              5
+             / \
+            4   8
+           /   / \
+          11  13  4
+         /  \    / \
+        7    2  5   1
+返回:   3
+解释：和为 22 的路径有：[5,4,11,2], [5,8,4,5], [4,11,7]
+
 
 
 #### 第三十三剑式：二叉搜索树的第k大结点
@@ -9993,8 +10010,6 @@ class SortedStack {
 
 给定一个由**不同节点**组成的二叉搜索树 `root`，输出所有可能生成此树的数组。
 
-
-
 ```java
 /**
  * Definition for a binary tree node.
@@ -10050,3 +10065,354 @@ class Solution {
 }
 ```
 
+
+
+#### 第一百八十三剑式：检查子树
+
+检查子树。你有两棵非常大的二叉树：T1，有几万个节点；T2，有几万个节点。设计一个算法，判断 T2 是否为 T1 的子树。
+
+如果 T1 有这么一个节点 n，其子树与 T2 一模一样，则 T2 为 T1 的子树，也就是说，从节点 n 处把树砍断，得到的树与 T2 完全相同。
+
+注意：此题相对书上原题略有改动。
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    private boolean check(TreeNode t1,TreeNode t2){
+        if(t1 == null && t2 == null) return true;
+        if(t1 == null && t2 != null || t1 != null && t2 == null) return false;
+        return t1.val == t2.val && check(t1.left,t2.left) && check(t1.right,t2.right); 
+    }
+    public boolean checkSubTree(TreeNode t1, TreeNode t2) {
+        if(t2 == null) return true;
+        if(t1 == null) return false;
+        return check(t1,t2) || checkSubTree(t1.left,t2) || checkSubTree(t1.right,t2);
+    }
+}
+```
+
+
+
+#### 第一百八十四剑式：插入
+
+给定两个整型数字 N 与 M，以及表示比特位置的 i 与 j（i <= j，且从 0 位开始计算）。
+
+编写一种方法，使 M 对应的二进制数字插入 N 对应的二进制数字的第 i ~ j 位区域，不足之处用 0 补齐。具体插入过程如图所示。
+
+![img](https://pic.leetcode-cn.com/1610104070-NuLVQi-05.01.gif)
+
+题目保证从 `i` 位到 `j` 位足以容纳 `M`， 例如： `M = 10011`，则 `i～j` 区域至少可容纳 5 位。
+
+题目解析：xq
+
+```
+例 N = 1011 1111, M = 101, i = 2, j = 4
+     (1<<(j-i+1))-1)<<i = 0001 1100 
+取反后
+     1110 0011
+对N于运算
+     1011 1111 & 1110 0011 = 1010 0011
+M左移动i位
+    101 << i = 0001 0100
+最后M|N
+    0001 0100 | 1010 0011 = 1011 0111 = 183
+```
+
+```java
+class Solution {
+    public int insertBits(int N, int M, int i, int j) {
+        int mask = (((1 << (j - i + 1))- 1) << i);
+        mask = ~mask;
+        N = N & mask;
+        return (M << i) | N;
+    }
+}
+```
+
+
+
+
+
+#### 第一百八十五剑式：魔术索引
+
+魔术索引。 在数组A[0...n-1]中，有所谓的魔术索引，满足条件A[i] = i。给定一个有序整数数组，编写一种方法找出魔术索引，若有的话，在数组A中找出一个魔术索引，如果没有，则返回-1。若有多个魔术索引，返回索引值最小的一个。
+
+```
+示例1:
+ 输入：nums = [0, 2, 3, 4, 5]
+ 输出：0
+ 说明: 0下标的元素为0
+```
+
+方法：分治
+
+左边能找到就优先左边，然后就检查当前mid是否满足，不满足再检查右半边是否存在。
+
+```java
+class Solution {
+    private int check(int [] nums,int l,int r){
+        if(l > r) return -1;
+        int left = l, right = r;
+        int mid = left + ((right - left) >> 1);
+        int leftAnswer = check(nums,left,mid-1);
+        if(leftAnswer != -1){
+            return leftAnswer;
+        }else if(nums[mid] == mid){
+            return mid;
+        }
+        return check(nums,mid+1,right);
+    }
+    public int findMagicIndex(int[] nums) {
+        return check(nums,0,nums.length-1);
+    }
+}
+```
+
+
+
+
+
+#### 第一百八十六剑式：递归乘法
+
+递归乘法。 写一个递归函数，不使用 * 运算符， 实现两个正整数的相乘。可以使用加号、减号、位移，但要吝啬一些。
+
+```java
+// 位运算
+class Solution {
+    public int multiply(int A, int B) {
+        int ans = 0;
+        while(A != 0){
+            if((A & 1) != 0) ans += B;
+            A >>= 1;
+            B <<= 1;
+        }
+        return ans;
+    }
+}
+```
+
+
+
+
+
+#### 第一百八十七剑式：有重复字符串的组合排列
+
+有重复字符串的排列组合。编写一种方法，计算某字符串的所有排列组合。
+
+**示例1:**
+
+```
+ 输入：S = "qqe"
+ 输出：["eqq","qeq","qqe"]
+```
+
+```java
+class Solution {
+    int n;
+    List<String> ans = new ArrayList<>();
+    StringBuilder sb = new StringBuilder();
+    boolean [] used;
+    private void dfs(char [] s,int idx){
+        if(idx == n){
+            ans.add(sb.toString());
+            return ;
+        }
+        for(int i = 0;i < n;i++){
+            if(used[i]) continue;
+            if(i > 0 && !used[i-1] && s[i] == s[i-1]) continue;
+            sb.append(s[i]);
+            used[i] = true;
+            dfs(s,idx + 1);
+            used[i] = false;
+            sb.deleteCharAt(sb.length() - 1);
+        }
+    }
+    public String[] permutation(String s) {
+        char [] str = s.toCharArray();
+        Arrays.sort(str);
+        n = str.length;
+        used = new boolean[n];
+        dfs(str,0);
+        
+        int size = ans.size();
+        String [] res = new String[size];
+        for(int i = 0;i < size;i++){
+            res[i] = ans.get(i);
+        }
+        return res;
+    }
+}
+```
+
+#### 第一百八十八剑式：变位词组
+
+编写一种方法，对字符串数组进行排序，将所有变位词组合在一起。变位词是指字母相同，但排列不同的字符串。
+
+**注意：**本题相对原题稍作修改
+
+```
+输入: ["eat", "tea", "tan", "ate", "nat", "bat"],
+输出:
+[
+  ["ate","eat","tea"],
+  ["nat","tan"],
+  ["bat"]
+]
+```
+
+将每个出现次数大于 0 的字母和出现次数按顺序拼接成字符串，作为哈希表的键 
+
+```java
+class Solution {
+    public List<List<String>> groupAnagrams(String[] strs) {
+        Map<String, List<String>> map = new HashMap<String, List<String>>();
+        for (String str : strs) {
+            int[] counts = new int[26];
+            int length = str.length();
+            for (int i = 0; i < length; i++) {
+                counts[str.charAt(i) - 'a']++;
+            }
+            // 将每个出现次数大于 0 的字母和出现次数按顺序拼接成字符串，作为哈希表的键
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < 26; i++) {
+                if (counts[i] != 0) {
+                    sb.append((char) ('a' + i));
+                    sb.append(counts[i]);
+                }
+            }
+            String key = sb.toString();
+            List<String> list = map.getOrDefault(key, new ArrayList<String>());
+            list.add(str);
+            map.put(key, list);
+        }
+        return new ArrayList<List<String>>(map.values());
+    }
+}
+```
+
+方法2:质数分解唯一性
+
+使用 static 代码块（确保只会发生一次）打表最小的 26 个质数（任意 26 个都可以，使用小的，乘积溢出风险低一点），这 26 个质数分别对应了 26 个字母。
+
+对于一个「变位词」而言，其对应的质数乘积必然相同。
+
+```java
+class Solution {
+    static int[] nums = new int[26]; 
+    static {
+        for (int i = 2, idx = 0; idx != 26; i++) {
+            boolean ok = true;
+            for (int j = 2; j <= i / j; j++) {
+                if (i % j == 0) {
+                    ok = false;
+                    break;
+                } 
+            }
+            if (ok) nums[idx++] = i;
+        }
+    }
+    public List<List<String>> groupAnagrams(String[] ss) {
+        List<List<String>> ans = new ArrayList<>();
+        Map<Long, List<String>> map = new HashMap<>();
+        for (String s : ss) {
+            long cur = 1;
+            for (char c : s.toCharArray()) {
+                cur *= nums[c - 'a'];
+            }
+            List<String> list = map.getOrDefault(cur, new ArrayList<>());
+            list.add(s);
+            map.put(cur, list);
+        }
+        for (long key : map.keySet()) ans.add(map.get(key));
+        return ans;
+    }
+}
+```
+
+#### 第一百八十九剑式：峰和谷
+
+在一个整数数组中，“峰”是大于或等于相邻整数的元素，相应地，“谷”是小于或等于相邻整数的元素。例如，在数组{5, 8, 4, 2, 3, 4, 6}中，{8, 6}是峰， {5, 2}是谷。现在给定一个整数数组，将该数组按峰与谷的交替顺序排序。
+
+```
+示例:
+输入: [5, 3, 1, 2, 3]
+输出: [5, 1, 3, 2, 3]
+```
+
+贪心：通过比较当前元素和前一个元素
+
+- 如果当前位置应该是山峰，并且当前元素小于前面的元素，则和前面的元素交换。交换后不影响前面的是山谷，因为交换前当前位置更小。
+- 如果当前位置应该是山谷，并且当前元素大于前面的元素，则和前面的元素交换。
+
+```java
+class Solution {
+    private void swap(int [] nums,int i,int j){
+        int t = nums[i];
+        nums[i] = nums[j];
+        nums[j] = t;
+    }
+    public void wiggleSort(int[] nums) {
+        // 贪心
+        int n = nums.length;
+        for(int i = 1;i < n;i++){
+            if(i % 2 == 0){
+                // 当前应该是峰，如果前面比自己大，交换，由于nums[i] < nums[i-1]，交换后不会影响前面的谷
+                if(nums[i] > nums[i-1]) swap(nums,i,i-1);
+            }else{
+                if(nums[i] < nums[i-1]) swap(nums,i,i-1);
+            }
+        }
+    }
+}
+```
+
+
+
+#### 第一百九十剑式：最小差
+
+给定两个整数数组`a`和`b`，计算具有最小差绝对值的一对数值（每个数组中取一个值），并返回该对数值的差
+
+```
+示例：
+输入：{1, 3, 15, 11, 2}, {23, 127, 235, 19, 8}
+输出：3，即数值对(11, 8)
+```
+
+现排序，然后初始化两个指针分别指向数组起始位置，依次比较两个元素差的绝对值和当前的最优值（初始化为inf），然后比较两个数组的元素值，将较小值的指针后移一位（因为如果后移较大的只会拉开两者之间的差距）
+
+```java
+class Solution {
+    public int smallestDifference(int[] a, int[] b) {
+        int n = a.length;
+        int m = b.length;
+        int p1 = 0,p2 = 0;
+        long ans = Long.MAX_VALUE;
+        Arrays.sort(a);
+        Arrays.sort(b);
+        
+        while(p1 < n && p2 < m){
+            ans = Math.min(ans,Math.abs((long)a[p1] - (long)b[p2]));
+            if(a[p1] == b[p2]){ // 最小值为 0 直接返回
+                break;
+            }else if(a[p1] < b[p2]){
+                    p1++;
+            }else{
+                    p2++;
+            }
+        }
+        return (int)ans;
+    }
+}
+```
+
+> 给你 k 个有序的非空数组，让你从每个数组中分别挑一个，使得二者差的绝对值最小。
+>
+> 用 k 个堆来进行上述类似操作
