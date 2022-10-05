@@ -9269,7 +9269,7 @@ public class Solution {
 
 
 
-继续...
+
 
 ####  第一百七十剑式：消失的两个数字
 
@@ -9382,6 +9382,47 @@ public:
     }
 };
 ```
+
+相关题目：消失的数字
+
+数组`nums`包含从`0`到`n`的所有整数，但其中缺了一个。请编写代码找出那个缺失的整数。你有办法在O(n)时间内完成吗？
+
+方法1：哈希表
+
+遍历数组，然后将元素存入哈希表。然后判断0～n是否在哈希表中，不存在则即为消失的数字
+
+方法2：位运算
+
+```java
+class Solution {
+    public int missingNumber(int[] nums) {
+        int n = nums.length;
+        int xorsum = 0;
+        for(int i = 0;i <= n;i++){
+            xorsum = xorsum ^ i;
+        }
+        for(int v : nums){
+            xorsum = xorsum ^ v;
+        }
+        return xorsum;
+    }
+}
+```
+
+方法3：数学
+
+```java
+class Solution {
+    public int missingNumber(int[] nums) {
+        int n = nums.length;
+        int sum = n * (n + 1) / 2;
+        int sum2 = Arrays.stream(nums).sum();
+        return sum - sum2;
+    }
+}
+```
+
+
 
 
 
@@ -10416,3 +10457,358 @@ class Solution {
 > 给你 k 个有序的非空数组，让你从每个数组中分别挑一个，使得二者差的绝对值最小。
 >
 > 用 k 个堆来进行上述类似操作
+
+
+
+#### 第一百九十一剑式：部分排序
+
+给定一个整数数组，编写一个函数，找出索引m和n，只要将索引区间[m,n]的元素排好序，整个数组就是有序的。注意：n-m尽量最小，也就是说，找出符合条件的最短序列。函数返回值为[m,n]，若不存在这样的m和n（例如整个数组是有序的），请返回[-1,-1]。
+
+```
+示例：
+输入： [1,2,4,7,10,11,7,12,6,7,16,18,19]
+输出： [3,9]
+```
+
+![image-20221004192553013](/Users/ywh/Library/Application Support/typora-user-images/image-20221004192553013.png)
+
+```java
+class Solution {
+    public int[] subSort(int[] array) {
+        int n = array.length;
+        int l = -1,r = -1;
+        int max = Integer.MIN_VALUE, min = Integer.MAX_VALUE;
+        // 寻找右边界，如果当前值小于中间区域的最大值，那么该元素也属于中间区域
+        for(int i = 0;i < n;i++){
+            if(array[i] < max) r = i;
+            else max = array[i];
+        }
+        // 寻找左边界，如果当前元素大于中间区域的最小值，那么该元素也属于中间区域
+        for(int i = n-1;i >= 0;i--){
+            if(array[i] > min) l = i;
+            else min = array[i];
+        }
+        return new int[] {l,r};
+    }
+}
+```
+
+
+
+#### 第一百九十二剑式：交换和
+
+给定两个整数数组，请交换一对数值（每个数组中取一个数值），使得两个数组所有元素的和相等。
+
+返回一个数组，第一个元素是第一个数组中要交换的元素，第二个元素是第二个数组中要交换的元素。若有多个答案，返回任意一个均可。若无满足条件的数值，返回空数组。
+
+```
+示例:
+输入: array1 = [4, 1, 2, 1, 1, 2], array2 = [3, 6, 3, 3]
+输出: [1, 3]
+```
+
+![image-20221004213157302](/Users/ywh/Library/Application Support/typora-user-images/image-20221004213157302.png)
+
+```java
+class Solution {
+    public int[] findSwapValues(int[] array1, int[] array2) {
+        int SA = Arrays.stream(array1).sum();
+        Set<Integer> set = new HashSet<>();
+        int SB = 0;
+        for(int i = 0;i < array2.length;i++){
+            SB += array2[i];
+            set.add(array2[i]);
+        }
+        int diff = SA - SB;
+        if(diff % 2 != 0) return new int[0];
+        diff /= 2;
+        int n = array1.length;
+        for(int i = 0;i < n;i++){
+            if(set.contains(array1[i] - diff)) return new int[]{array1[i],array1[i] - diff};
+        }
+        return new int[0];
+    }
+}
+```
+
+
+
+
+
+#### 第一百九十三剑式：字母与数字
+
+给定一个放有字母和数字的数组，找到最长的子数组，且包含的字母和数字的个数相同。
+
+返回该子数组，若存在多个最长子数组，返回左端点下标值最小的子数组。若不存在这样的数组，返回一个空数组。
+
+```
+输入: ["A","1","B","C","D","2","3","4","E","5","F","G","6","7","H","I","J","K","L","M"]
+
+输出: ["A","1","B","C","D","2","3","4","E","5","F","G","6","7"]
+```
+
+方法1:前缀和
+
+遇到字母+1，遇到数字-1，然后记录前缀和，针对当前的前缀和，如果之前出现过相同的前缀和，则更新答案。
+
+![image-20221005140959128](/Users/ywh/Library/Application Support/typora-user-images/image-20221005140959128.png)
+
+```java
+class Solution {
+    public String[] findLongestSubarray(String[] array) {
+        int n = array.length;
+        int preSum = 0;
+        Map<Integer,Integer> map = new HashMap<>();
+        map.put(0,-1); // 初始化
+        int l = -1,r = -1;
+        int maxlen = 0;
+        for(int i = 0;i < n;i++){
+            if(array[i].charAt(0) >= '0' && array[i].charAt(0) <= '9'){
+                preSum -= 1;
+            }else{
+                preSum += 1;
+            }
+            Integer firstIdx = map.get(preSum);
+            if(firstIdx == null) map.put(preSum,i);
+            else if(i - firstIdx > maxlen){
+                maxlen = i - firstIdx;
+                l = firstIdx;
+                r = i;
+            }
+        }
+        if(r - l == n){
+            return array;
+        }
+        String [] ans = new String[r - l];
+        for(int i = l + 1;i <= r;i++){
+            ans[i-l - 1] = array[i];
+        }
+        return ans;
+    }
+}
+```
+
+
+
+#### 第一百九十四剑式：马戏团人塔
+
+有个马戏团正在设计叠罗汉的表演节目，一个人要站在另一人的肩膀上。出于实际和美观的考虑，在上面的人要比下面的人矮一点且轻一点。已知马戏团每个人的身高和体重，请编写代码计算叠罗汉最多能叠几个人。
+
+```
+示例：
+输入：height = [65,70,56,75,60,68] weight = [100,150,90,190,95,110]
+输出：6
+解释：从上往下数，叠罗汉最多能叠 6 层：(56,90), (60,95), (65,100), (68,110), (70,150), (75,190)
+```
+
+方法：最长上升子序列优化（贪心） + 二分
+
+先按照 height 升序排序，同时 height 相同的人按照 weight 降序排序。
+
+一个升序，一个降序的是与我们的解决方法相关（我们在排序之后，直接查找体重的最长递增子序列就能得到答案），如： height = [3, 2, 2, 3, 1, 6]，weight = [7,3,5,6,2,10]。两个都升序的排序结果是 height = [1, 2, 2, 3, 3, 6]，weight = [2,3,5,6,7,10]，直接查找体重的最长递增子序列结果是 66，可以看到，同一身高内部可能存在体重的递增。因此，会被加入结果。而使用身高升序，体重降序，排序结果为height = [1, 2, 2, 3, 3, 6]，weight = [2,5,3,7,6,10]，可以看到体重的最长递增子序列结果是 4。
+
+```java
+class person{
+    int height,weight;
+    public person(int height,int weight){
+        this.height = height;
+        this.weight = weight;
+    }
+}
+class Solution {
+    private int binsearch(int [] nums,int r,int target){
+        int l = 0;
+        while(l < r){
+            int mid = l + ((r - l) >> 1);
+            if(nums[mid] >= target){
+                r = mid;
+            }else{
+                l = mid + 1;
+            }
+        }
+        return l;
+    }
+    public int bestSeqAtIndex(int[] height, int[] weight) {
+        int n = height.length;
+        person [] persons = new person[n];
+        for(int i = 0;i < n;i++){
+            persons[i] = new person(height[i],weight[i]);
+        }
+        Arrays.sort(persons,(person a,person b)->{
+            if(a.height == b.height) return b.weight - a.weight;
+            return a.height - b.height;
+        });
+        int [] dp = new int[n+1];
+        dp[0] = Integer.MIN_VALUE;
+        int idx = 0;
+        for(person p : persons){
+            if(p.weight > dp[idx]){
+                dp[++idx] = p.weight;
+            }else{
+                int t = binsearch(dp,idx,p.weight);
+                dp[t] = p.weight;
+            }
+        }
+        return idx;
+    }
+}
+```
+
+
+
+#### 第一百九十五剑式：恢复空格
+
+哦，不！你不小心把一个长篇文章中的空格、标点都删掉了，并且大写也弄成了小写。像句子"I reset the computer. It still didn’t boot!"已经变成了"iresetthecomputeritstilldidntboot"。在处理标点符号和大小写之前，你得先把它断成词语。当然了，你有一本厚厚的词典dictionary，不过，有些词没在词典里。假设文章用sentence表示，设计一个算法，把文章断开，要求未识别的字符最少，返回未识别的字符数。
+
+注意：本题相对原题稍作改动，只需返回未识别的字符数
+
+```
+输入：
+dictionary = ["looked","just","like","her","brother"]
+sentence = "jesslookedjustliketimherbrother"
+输出： 7
+解释： 断句后为"jess looked just like tim her brother"，共7个未识别字符。
+```
+
+题目解析：动态规划 + 前缀树
+
+定义 dp[i] 表示 前i个字符中未被识别的数量。如果sentence字串[j-1,..,i-1]在dictionary中，则可以进行状态转移dp[i] = dp[j-1]，如果不存在任何一个，则 dp[i] = d[i-1] + 1，对上述所有可能取 min 即为 dp[i]的结果。
+
+这里判断sentence的子串[j-1,...,i-1]是否在dictionary中则可以利用前缀树来判断。
+
+```java
+class trie{
+    trie [] children;
+    boolean isEnd;
+    
+    public trie(){
+        this.children = new trie[26];
+        isEnd = false;
+    }
+
+    public void insert(String word){
+        trie node = this;
+        int n = word.length();
+        for(int i = n-1;i >= 0;i--){
+            int index = word.charAt(i) - 'a';
+            if(node.children[index] == null){
+                node.children[index] = new trie();
+            }
+            node = node.children[index];
+        }
+        node.isEnd = true;
+    }
+}
+
+class Solution {
+    public int respace(String[] dictionary, String sentence) {
+        int n = dictionary.length;
+        trie tree = new trie();
+        for(int i = 0;i < n;i++){
+            tree.insert(dictionary[i]);
+        }
+        // dp[i] 表示 前i个字符中未被识别的字符数
+        int m = sentence.length();
+        int [] dp = new int[m+1];
+        Arrays.fill(dp,Integer.MAX_VALUE);
+        dp[0] = 0;
+        for(int i = 1;i <= m;i++){ // 分别对应第 i-1 个字符
+            dp[i] = dp[i-1] + 1; // 默认初始状态不能被识别
+            trie t = tree;
+            for(int j = i-1;j >= 0;j--){
+                if(t.children[sentence.charAt(j) - 'a'] == null){
+                    break;
+                }else if(t.children[sentence.charAt(j) - 'a'].isEnd){
+                    dp[i] = Math.min(dp[i],dp[j]);
+                }
+                if(dp[i] == 0) break;
+                t = t.children[sentence.charAt(j) - 'a'];
+            }
+        }
+        return dp[m];
+    }
+}
+```
+
+#### 第一百九十五剑式：最小k个数
+
+设计一个算法，找出数组中最小的k个数。以任意顺序返回这k个数均可。
+
+```
+示例：
+输入： arr = [1,3,5,7,2,4,6,8], k = 4
+输出： [1,2,3,4]
+```
+
+方法1：大顶堆
+
+```java
+class Solution {
+    public int[] smallestK(int[] arr, int k) {
+        if(k == 0) return new int[0];
+        PriorityQueue<Integer> pq = new PriorityQueue<>((a,b)->b-a);
+        for(int i = 0;i < k;i++){
+            pq.offer(arr[i]);
+        }
+        int n = arr.length;
+        for(int i = k;i < n;i++){
+            if(arr[i] < pq.peek()){
+                pq.poll();
+                pq.offer(arr[i]);
+            }
+        }
+        int [] ans = new int[k];
+        for(int i = k-1;i >= 0;i--){
+            ans[i] = pq.poll();
+        }
+        return ans;
+    }
+}
+```
+
+方法2：基于快排思想
+
+我们知道快排每次都会将小于等于基准值的值放到左边，将大于基准值的值放到右边。
+
+因此我们可以通过判断基准点的下标 idx 与 k 的关系来确定过程是否结束：
+
+- idx < k：基准点左侧不足 k 个，递归处理右边，让基准点下标右移；
+- idx > k：基准点左侧超过 k 个，递归处理左边，让基准点下标左移；
+- idx = k：基准点左侧恰好 k 个，输出基准点左侧元素。
+
+```java
+class Solution {
+    int k;
+    public int[] smallestK(int[] arr, int _k) {
+        k = _k;
+        int n = arr.length;
+        int[] ans = new int[k];
+        if (k == 0) return ans;
+        qsort(arr, 0, n - 1);
+        for (int i = 0; i < k; i++) ans[i] = arr[i];
+        return ans;
+    }
+    void qsort(int[] arr, int l, int r) {
+        if (l >= r) return ;
+        int i = l, j = r;
+        int ridx = new Random().nextInt(r - l + 1) + l;
+        swap(arr, ridx, l);
+        int x = arr[l];
+        while (i < j) {
+            while (i < j && arr[j] >= x) j--;
+            while (i < j && arr[i] <= x) i++;
+            swap(arr, i, j);
+        }
+        swap(arr, i, l);
+        // 集中答疑：因为题解是使用「基准点左侧」来进行描述（不包含基准点的意思），所以这里用的 k（写成 k - 1 也可以滴
+        if (i > k) qsort(arr, l, i - 1);
+        if (i < k) qsort(arr, i + 1, r);
+    }
+    void swap(int[] arr, int l, int r) {
+        int tmp = arr[l];
+        arr[l] = arr[r];
+        arr[r] = tmp;
+    }
+}
+```
+
