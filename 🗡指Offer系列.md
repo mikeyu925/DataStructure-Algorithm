@@ -10730,7 +10730,7 @@ class Solution {
 }
 ```
 
-#### 第一百九十五剑式：最小k个数
+#### 第一百九十六剑式：最小k个数
 
 设计一个算法，找出数组中最小的k个数。以任意顺序返回这k个数均可。
 
@@ -10808,6 +10808,223 @@ class Solution {
         int tmp = arr[l];
         arr[l] = arr[r];
         arr[r] = tmp;
+    }
+}
+```
+
+
+
+
+
+#### 第一百九十七剑式：多次搜索
+
+给定一个较长字符串big和一个包含较短字符串的数组smalls，设计一个方法，根据smalls中的每一个较短字符串，对big进行搜索。输出smalls中的字符串在big里出现的所有位置positions，其中positions[i]为smalls[i]出现的所有位置。
+
+```
+输入：
+big = "mississippi"
+smalls = ["is","ppi","hi","sis","i","ssippi"]
+输出： [[1,4],[8],[],[3],[1,4,7,10],[5]]
+```
+
+```java
+class trie{
+    trie [] children;
+    boolean isEnd; // 标记是否是单词结尾
+    int iD; // 如果是单词结尾，则标记在smalls中的索引下标
+    public trie(){
+        children = new trie[26];
+        isEnd = false;
+        iD = -1;
+    }
+    // 向前缀树插入一个单词
+    public void insert(String word,int id){
+        int n = word.length();
+        trie node = this;
+        for(int i = 0;i < n;i++){
+            int idx = word.charAt(i) - 'a';
+            if(node.children[idx] == null){
+                node.children[idx] = new trie();
+            }
+            node = node.children[idx];
+        }
+        // 标记结束以及索引
+        node.isEnd = true;
+        node.iD = id;
+    }
+}
+
+class Solution {
+    trie tree = new trie();
+    public int[][] multiSearch(String big, String[] smalls) {
+        List<List<Integer>> ans = new ArrayList<>();
+        int n = smalls.length;
+        int m = big.length(); // 长串的长度
+        // 初始化 ans
+        for(int i = 0;i < n;i++){
+            ans.add(new ArrayList<>());
+        }
+        // 初始化前缀树
+        for(int i = 0;i < n;i++){
+            tree.insert(smalls[i],i);
+        }
+        // 从start开始找单词
+        for(int start = 0;start < m;start++){
+            trie node = tree;
+            for(int i = start;i < m;i++){
+                int idx = big.charAt(i) - 'a';
+                if(node.children[idx] == null) break; // 如果当前前缀不在字典树中，则可以结束（因为不可能存在一个匹配的了）
+                if(node.children[idx].isEnd){ // 如果匹配到smalls中的一个单词
+                    int id = node.children[idx].iD; // 获得当前字符串的id
+                    ans.get(id).add(start); // 加入答案
+                }
+                node = node.children[idx];
+            }
+        }
+        // 构造答案
+        int [][] res = new int [n][];
+        for(int i = 0;i < n;i++){
+            int size = ans.get(i).size();
+            if(size == 0){
+                res[i] = new int[0];
+                continue;
+            }
+            res[i] = new int [size];
+            for(int j = 0;j < size;j++){
+                res[i][j] = ans.get(i).get(j);
+            }
+        }  
+        return res;
+    }
+}
+```
+
+
+
+#### 第一百九十八剑式：最短超串
+
+假设你有两个数组，一个长一个短，短的元素均不相同。找到长数组中包含短数组所有的元素的最短子数组，其出现顺序无关紧要。
+
+返回最短子数组的左端点和右端点，如有多个满足条件的子数组，返回左端点最小的一个。若不存在，返回空数组。
+
+```
+输入:
+big = [7,5,9,0,2,1,3,5,7,9,1,1,5,8,8,9,7]
+small = [1,5,9]
+输出: [7,10]
+```
+
+方法：滑动窗口
+
+```java
+class Solution {
+    Map<Integer,Integer> now = new HashMap<>();
+
+    public int[] shortestSeq(int[] big, int[] small) {
+        int n = big.length;
+        int m = small.length;
+        if(n < m) return new int [0];
+        // 加入所有small 元素
+        int diff = m;
+        for(int v : small){
+            now.put(v,now.getOrDefault(v,0) + 1);
+        }
+        for(int i = 0;i < m-1;i++){
+            if(now.get(big[i]) != null){
+                int cnt = now.get(big[i]);
+                now.put(big[i],cnt - 1);
+                if(cnt > 0)
+                    diff -= 1;
+            }
+        }
+        int l = 0,r = m-1;
+        int minlen = Integer.MAX_VALUE;
+        int ans_l = -1, ans_r = -1;
+        while(r < n){
+            if(now.get(big[r]) != null){
+                int cnt = now.get(big[r]);
+                now.put(big[r],cnt - 1);
+                if(cnt > 0)
+                    diff -= 1;
+            }
+            if(diff == 0){
+                while(diff == 0){
+                    if(now.get(big[l]) != null){
+                        int cnt = now.get(big[l]);
+                        now.put(big[l],cnt + 1);
+                        if(cnt >= 0)
+                            diff += 1;
+                    }
+                    l++;
+                }
+                if(r - l + 2 < minlen){
+                    minlen = r - l + 2;
+                    ans_l = l - 1;
+                    ans_r = r;
+                }
+            }
+            r++;
+        }
+        return ans_l == -1 ? new int[0] : new int []{ans_l,ans_r};
+    }
+}
+```
+
+#### 第一百九十九剑式：最大子矩阵
+
+给定一个正整数、负整数和 0 组成的 N × M 矩阵，编写代码找出元素总和最大的子矩阵。
+
+返回一个数组 [r1, c1, r2, c2]，其中 r1, c1 分别代表子矩阵左上角的行号和列号，r2, c2 分别代表右下角的行号和列号。若有多个满足条件的子矩阵，返回任意一个均可。
+
+注意：本题相对书上原题稍作改动
+
+```
+输入：
+[
+   [-1,0],
+   [0,-1]
+]
+输出：[0,1,0,1]
+解释：输入中标粗的元素即为输出所表示的矩阵
+```
+
+方法：动态规划 + 最大子数组和
+
+```java
+class Solution {
+    public int[] getMaxMatrix(int[][] matrix) {
+        int n = matrix.length;
+        int m = matrix[0].length;
+        int [] ans = new int[4];
+        int [] rowsum = new int[m];
+        int sx = -1,sy = -1; // 起始点坐标
+        int sum = 0; // 相当于dp 状态压缩后
+        int max_sum = Integer.MIN_VALUE;
+        // 从第几行开始
+        for(int start = 0;start < n;start++){
+            Arrays.fill(rowsum,0); // rowsum清零
+            for(int i = start;i < n;i++){
+                sum = 0;
+                for(int j = 0;j < m;j++){
+                    rowsum[j] += matrix[i][j];
+                    if(sum > 0){
+                        sum += rowsum[j];
+                    }else{
+                        sum = rowsum[j];
+                        sx = start;
+                        sy = j;
+                    }
+                    if(sum > max_sum){
+                        max_sum = sum;
+                        ans[0] = sx;
+                        ans[1] = sy;
+                        ans[2] = i;
+                        ans[3] = j;
+                    }
+                }
+            }
+        } 
+        return ans;
     }
 }
 ```
