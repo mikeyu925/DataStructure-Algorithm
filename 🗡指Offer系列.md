@@ -108,6 +108,8 @@ class MinStack {
 }
 ```
 
+
+
 #### 第三剑式：从尾到头打印链表
 
 > 题目来源：LeetCode 剑指 Offer 06
@@ -195,7 +197,7 @@ class Solution {
 
 ![img](🗡指Offer系列.assets/e1.png)
 
-题目解析：
+**题目解析**：
 
 因为是深拷贝，我们需要直到原来的链表中的每个结点对应着拷贝后的链表中的哪个结点。因此需要采用哈希表来进行映射。第一次遍历进行哈希表的初始化映射，第二次遍历来更新拷贝后的链表的指针指向。
 
@@ -344,7 +346,7 @@ class Solution {
 输出: 2
 ```
 
-题目解析：
+**题目解析**：
 
 采用看到有序+查找，就想到二分法。采用基本二分法套路找到目标值，然后再向两边扩散查找。
 
@@ -9776,7 +9778,7 @@ class Solution {
 
 当 n为奇数时，由于中心的位置经过旋转后位置不变，换一种划分的方式，以 5×5 的矩阵为例：
 
-![2.png](https://pic.leetcode-cn.com/1608308534-KjMVCn-2.png)
+<img src="https://pic.leetcode-cn.com/1608308534-KjMVCn-2.png" alt="2.png" style="zoom:50%;" />
 
 ```java
 class Solution {
@@ -11104,3 +11106,69 @@ class Solution {
     }
 }
 ```
+
+#### 四数之和
+
+给你一个由 n 个整数组成的数组 nums ，和一个目标值 target 。请你找出并返回满足下述全部条件且不重复的四元组 [nums[a], nums[b], nums[c], nums[d]] （若两个四元组元素一一对应，则认为两个四元组重复）：
+
+- 0 <= a, b, c, d < n
+- a、b、c 和 d 互不相同
+- nums[a] + nums[b] + nums[c] + nums[d] == target
+
+你可以按 任意顺序 返回答案 。
+
+```
+输入：nums = [1,0,-1,0,-2,2], target = 0
+输出：[[-2,-1,1,2],[-2,0,0,2],[-1,0,0,1]]
+```
+
+两层循环枚举前两个数，然后双指针找后两个数。
+
+可以增加一些剪枝策略：
+
+- 在确定第一个数之后，如果 $\textit{nums}[i]+\textit{nums}[i+1]+\textit{nums}[i+2]+\textit{nums}[i+3]>\textit{target}$，说明此时剩下的三个数无论取什么值，四数之和一定大于 $\textit{target}$，因此退出第一重循环；
+- 在确定第一个数之后，如果 $\textit{nums}[i]+\textit{nums}[n-3]+\textit{nums}[n-2]+\textit{nums}[n-1]<\textit{target}$，说明此时剩下的三个数无论取什么值，四数之和一定小于 $\textit{target}$，因此第一重循环直接进入下一轮，枚举 $\textit{nums}[i+1]$；
+- 在确定前两个数之后，如果 $\textit{nums}[i]+\textit{nums}[j]+\textit{nums}[j+1]+\textit{nums}[j+2]>\textit{target}$，说明此时剩下的两个数无论取什么值，四数之和一定大于 $\textit{target}$，因此退出第二重循环；
+- 在确定前两个数之后，如果 $\textit{nums}[i]+\textit{nums}[j]+\textit{nums}[n-2]+\textit{nums}[n-1]<\textit{target}$，说明此时剩下的两个数无论取什么值，四数之和一定小于 $\textit{target}$，因此第二重循环直接进入下一轮，枚举 $\textit{nums}[j+1]$。
+
+```java
+class Solution {
+    public List<List<Integer>> fourSum(int[] nums, int target) {
+        List<List<Integer>> ans = new ArrayList<>();
+        int n = nums.length;
+        if(n < 4) return ans;
+        Arrays.sort(nums);
+        for(int i = 0;i < n - 3;i++){
+            if(i > 0 && nums[i] == nums[i-1]) continue;
+            if((long)nums[i] + nums[i+1] + nums[i+2] + nums[i+3] > target) break;
+            if((long)nums[i] + nums[n-1] + nums[n-2] + nums[n-3] < target) continue;
+            for(int j = i + 1;j < n-2;j++){
+                if(j > i + 1 && nums[j] == nums[j-1]) continue;
+                if((long)nums[i] + nums[j] + nums[j+1] + nums[j+2] > target) break;
+                if((long)nums[i] + nums[j] + nums[n-1] + nums[n-2] < target) continue;
+                int l = j + 1, r = n - 1;
+                int v = target - nums[i] - nums[j];
+                while(l < r){
+                    if(nums[l] + nums[r] == v){
+                        ans.add(Arrays.asList(nums[i],nums[j],nums[l],nums[r]));
+                        while (l < r && nums[l] == nums[l + 1]) {
+                            l++;
+                        }
+                        l++;
+                        while (l < r && nums[r] == nums[r - 1]) {
+                            r--;
+                        }
+                        r--;
+                    }else if(nums[l] + nums[r] > v){
+                        r --;
+                    }else{
+                        l ++ ;
+                    }
+                }
+            }
+        }
+        return ans;   
+    }
+}
+```
+
