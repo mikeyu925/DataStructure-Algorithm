@@ -11107,7 +11107,7 @@ class Solution {
 }
 ```
 
-#### 四数之和
+#### 第二百剑式：四数之和
 
 给你一个由 n 个整数组成的数组 nums ，和一个目标值 target 。请你找出并返回满足下述全部条件且不重复的四元组 [nums[a], nums[b], nums[c], nums[d]] （若两个四元组元素一一对应，则认为两个四元组重复）：
 
@@ -11172,3 +11172,190 @@ class Solution {
 }
 ```
 
+
+
+
+
+#### 第二百零一剑式：最小操作次数使元素相等II
+
+给你一个长度为 `n` 的整数数组 `nums` ，返回使所有数组元素相等需要的最小操作数。
+
+在一次操作中，你可以使数组中的一个元素加 `1` 或者减 `1` 。
+
+```
+输入：nums = [1,2,3]
+输出：2
+解释：
+只需要两次操作（每次操作指南使一个元素加 1 或减 1）：
+[1,2,3]  =>  [2,2,3]  =>  [2,2,2]
+
+输入：nums = [1,10,2,9]
+输出：16
+```
+
+**题目解析**：
+
+方法一：中位数贪心+排序
+
+先假定数组长度 n 是偶数。我们将数组 nums 从小到大进行排序，然后将数组进行首尾配对，从而划分为多个数对，并将这些数对组成区间：
+$$
+[nums_{0},nums_{n-1}],[nums_{1},nums_{n-2}],...,[nums_{n/2 -1},nums_{n/2}]
+$$
+当 xx 同时位于以上区间内时，所需的移动数最少，总移动数为:
+$$
+\sum_{i=0}^{\frac{n}{2} - 1} (\textit{nums}_{n-1-i} - \textit{nums}_i)
+$$
+
+> 证明：对于一个区间，只有当某个x是在该区间内的，才会使得区间边界值都操作位x的次数最少
+
+在上述区间中，后一个区间是前一个区间的子集，因此只要
+$$
+x \in [\textit{nums}_{\frac{n}{2} - 1}, \textit{nums}_{\frac{n}{2}}]
+$$
+就满足要求。当 n 为奇数时，我们将排序后的数组中间的元素
+$$
+\textit{nums}_{\lfloor \frac{n}{2} \rfloor}
+$$
+当成区间 
+$$
+[\textit{nums}_{\lfloor \frac{n}{2} \rfloor}, \textit{nums}_{\lfloor \frac{n}{2} \rfloor}]
+$$
+看待，则
+$$
+x \in [\textit{nums}_{\lfloor \frac{n}{2} \rfloor}, \textit{nums}_{\lfloor \frac{n}{2} \rfloor}]
+$$
+即 
+$$
+x = \textit{nums}_{\lfloor \frac{n}{2} \rfloor}
+$$
+时，所需的移动数最少。
+
+综上所述，所有元素都变成 $\textit{nums}_{\lfloor \frac{n}{2} \rfloor}$时，所需的移动数最少。
+
+```java
+class Solution {
+    public int minMoves2(int[] nums) {
+        Arrays.sort(nums);
+        int n = nums.length, ret = 0, x = nums[n / 2];
+        for (int i = 0; i < n; i++) {
+            ret += Math.abs(nums[i] - x);
+        }
+        return ret;
+    }
+}
+```
+
+方法二：快速选择
+
+时间复杂度O(n)
+
+![image-20221023193946618](/Users/ywh/Documents/leetcode/DataStructure-Algorithm/🗡指Offer系列.assets/image-20221023193946618.png)
+
+```java
+class Solution {
+    Random random = new Random();
+    public void swap(int [] nums,int i,int j){
+        int t = nums[i];
+        nums[i] = nums[j];
+        nums[j] = t;
+    }
+    // 基于快速排序 快速查找nums中第n/2大的元素
+    public int quickSelect(int left,int right,int [] nums,int index){
+        if(left >= right) return nums[left];
+        int randidx = random.nextInt(right - left + 1) + left;
+        int x = nums[randidx], i = left - 1,j = right;
+        swap(nums,randidx,right);
+        while(i < j){
+            do i++;while(i <= right && nums[i] < x);
+            do j--;while(j >= left &&  nums[j] > x);
+            if(i < j){
+                swap(nums,i,j);
+            }
+        }
+        swap(nums,i,right);
+        if(i == index) return nums[i];
+        else if(i < index){
+            return quickSelect(i+1,right,nums,index);
+        }else{
+            return quickSelect(left,i-1,nums,index);
+        }
+    }
+    public int minMoves2(int[] nums) {
+        int n = nums.length;
+        int x = quickSelect(0,n-1,nums,n/2);
+        int ans = 0;
+        for (int i = 0; i < n; ++i) {
+            ans += Math.abs(nums[i] - x);
+        }
+        return ans;
+    }
+}
+```
+
+> 相关延伸：
+>
+> 给你两个下标从 0 开始的数组 nums 和 cost ，分别包含 n 个 正 整数。
+>
+> 你可以执行下面操作 任意 次：
+>
+> 将 nums 中 任意 元素增加或者减小 1 。
+> 对第 i 个元素执行一次操作的开销是 cost[i] 。
+>
+> 请你返回使 nums 中所有元素 相等 的 最少 总开销。
+>
+> 输入：nums = [1,3,5,2], cost = [2,3,1,14]
+> 输出：8
+> 解释：我们可以执行以下操作使所有元素变为 2 ：
+> - 增加第 0 个元素 1 次，开销为 2 。
+> - 减小第 1 个元素 1 次，开销为 3 。
+> - 减小第 2 个元素 3 次，开销为 1 + 1 + 1 = 3 。
+> 总开销为 2 + 3 + 3 = 8 。
+> 这是最小开销。
+>
+> **题目解析**：
+>
+> 把 cost[i]理解成 nums[i] 的出现次数。
+>
+> 代码实现时，将nums 和 cost 打包排序，然后不断累加 cost[i]，首次累加到 
+> $$
+> \ge\dfrac{\textit{sumCost}}{2}
+> $$
+> 时就找到了中位数。
+>
+> 由于 sumCost 可能是奇数，所以要上取整。
+>
+> ```python
+> class Solution {
+>     public long minCost(int[] nums, int[] cost) {
+>         int n = nums.length;
+>         int [][] pkgs = new int[n][2];
+>         long sum = 0;
+>         for(int i = 0;i < n;i++){
+>             pkgs[i][0] = nums[i];
+>             pkgs[i][1] = cost[i];
+>             sum += cost[i];
+>         }
+>         long mid = (sum + 1) / 2;  // 向上取整
+>         Arrays.sort(pkgs,new Comparator<int []>(){
+>             @Override
+>             public int compare(int []a,int [] b){
+>                 return a[0] - b[0];
+>             }
+>         });
+>         int x = -1;
+>         long now = 0;
+>         for(int i = 0;i < n;i++){
+>             now += pkgs[i][1];
+>             if(now >= mid){
+>                 x = pkgs[i][0];
+>                 break;
+>             }
+>         }
+>         long ans = 0;
+>         for(int i = 0;i < n;i++){
+>             ans += (Math.abs(nums[i] - x) * (long)cost[i]);
+>         }
+>         return ans;
+>     }
+> }
+> ```
