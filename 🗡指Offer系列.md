@@ -11359,3 +11359,91 @@ class Solution {
 >     }
 > }
 > ```
+
+#### 第二百零二剑式：分割数组
+
+给定一个数组 nums ，将其划分为两个连续子数组 left 和 right， 使得：
+
+- left 中的每个元素都小于或等于 right 中的每个元素。
+- left 和 right 都是非空的。
+- left 的长度要尽可能小。
+
+在完成这样的分组后返回 left 的 长度 。
+
+用例可以保证存在这样的划分方法。
+
+```
+输入：nums = [5,0,3,8,6]
+输出：3
+解释：left = [5,0,3]，right = [8,6]
+```
+
+**题目解析**：
+
+题目意思就是找一个划分点，使得划分点左边的元素最大值 小于等于 划分点右边元素的最小值。
+
+可以先利用一个辅助数组`mins[i]`表示`nums[i:n-1]`的最小值。逆序遍历一遍nums即可获得mins
+
+然后正序遍历nums，并记录当前的最大值，遇到第一个nums[i]符合当前max <= mins[i+1] 则表明找到了该划分点。
+
+时间复杂度O(n) 空间复杂度O(n)
+
+```java
+class Solution {
+    // 题目等价于找一个切分点，使得左半区间的最大值 <= 右半区间的最小值
+    public int partitionDisjoint(int[] nums) {
+        int n = nums.length;
+        int [] mins = new int[n]; // mins[i] 表示 nums[i:n-1]的最小值 （相当于求右半区间的最小值）
+        mins[n-1] = nums[n-1];
+        for(int i = n-2;i >= 0;i--){
+            mins[i] = Math.min(nums[i],mins[i+1]);
+        }
+        int leftmax = nums[0];
+        for(int i = 0;i < n-1;i++){
+            leftmax = Math.max(leftmax,nums[i]);
+            if(leftmax <= mins[i+1]){
+                return i+1;
+            }
+        }  
+        return -1;
+    }
+}
+```
+
+**优化**：
+
+预先规定了一个 left 的划分，其最大值为 maxLeft，划分位置为 leftPos，表示 nums[0,leftPos] 都属于 \textit{left}left。如果 leftPos 右侧所有元素都大于等于它，那么该划分方案是合法的。
+
+但如果我们找到 nums[i]，其中 i >leftPos，并且 nums[i]<maxLeft，那么意味着 leftPos 作为划分位置是非法的，需要更新 leftPos=i，以及 maxLeft。
+
+因此，我们首先初始化 maxLeft=nums[0]，leftPos=0，然后在 `[1,n-2]` 范围内从小到大遍历 i，过程中维护一个变量 curMax，它的值是 
+$$
+\max\limits_{0}^{i}\textit{nums}[i] 
+$$
+
+此时如果有 nums[i]<maxLeft，就按照上述方法更新。最终遍历结束时，答案就是 leftPos+1。
+
+```java
+class Solution {
+    public int partitionDisjoint(int[] nums) {
+        int n = nums.length;
+        int curmax = nums[0];
+        int leftmax = nums[0],leftpos = 0;
+        for(int i = 1;i < n-1;i++){
+            curmax = Math.max(curmax,nums[i]);
+            if(nums[i] < leftmax){ // 当前位置划分不正确，应该划分为左半边
+                leftmax = curmax;
+                leftpos = i;
+            }
+        }
+        return leftpos + 1;
+    }
+}
+```
+
+
+
+
+
+
+
