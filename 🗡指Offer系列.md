@@ -3374,9 +3374,66 @@ class Solution {
 }
 ```
 
+```go
+// go 实现
+package main
+
+/**
+ * 代码中的类名、方法名、参数名已经指定，请勿修改，直接返回方法规定的值即可
+ * 
+ * @param data int整型一维数组 
+ * @return int整型
+*/
+var cnt int = 0
+const mod int = 1e9+7
+func mergeSort(nums []int,l,r int ) {
+    if l >= r{
+        return 
+    }
+    mid := l + ((r - l) >> 1)
+    mergeSort(nums,l,mid)
+    mergeSort(nums,mid+1,r)
+    
+    tmp := make([]int,r-l+1)
+    idx := 0
+    pl,pr := l,mid+1
+    for ;pl <= mid && pr <= r;{
+        if nums[pl] < nums[pr]{
+            tmp[idx] = nums[pl]
+            idx++
+            pl++
+        }else{
+            cnt =  (mid - pl + 1 + cnt) % mod
+            tmp[idx] = nums[pr]
+            idx++
+            pr++
+        }
+    }
+    for pl <= mid {
+		tmp[idx] = nums[pl]
+		idx++
+		pl++
+	}
+	for pr <= r {
+		tmp[idx] = nums[pr]
+		idx++
+		pr++
+	}
+    for i := l;i <= r;i++{
+        nums[i] = tmp[i-l]
+    }
+}
+
+func InversePairs( data []int ) int {
+    n := len(data)
+    mergeSort(data,0,n-1)
+    return cnt
+}
+```
+
 附一张归并排序的图：
 
-![meger_sort.png](🗡指Offer系列.assets/1651123691-dEdJgZ-meger_sort.png)
+<img src="./🗡指Offer系列.assets/image-20210623223031128.png" alt="image-20210623223031128" style="zoom:50%;" />
 
 > **延申拓展**：计算右侧小于当前元素的个数
 >
