@@ -2223,6 +2223,14 @@ class Solution {
 
 > 题目来源：LeetCode 剑指 Offer  55-II
 
+输入一棵节点数为 n 二叉树，判断该二叉树是否是平衡二叉树。
+
+在这里，我们只需要考虑其平衡性，不需要考虑其是不是排序二叉树
+
+**平衡二叉树**（Balanced Binary Tree），具有以下性质：它是一棵空树或它的左右两个子树的高度差的绝对值不超过1，并且左右两个子树都是一棵平衡二叉树。
+
+**题目解析**：
+
 方法1:自顶向下 时间复杂度O(n^2) 空间复杂度O(n)
 
 定义函数 height，用于计算二叉树中的任意一个节点 p 的高度：
@@ -2251,7 +2259,33 @@ public boolean isBalanced(TreeNode root) {
 }
 ```
 
-方法2：由于是自顶向下递归，因此对于同一个节点，函数height 会被重复调用，导致时间复杂度较高。如果使用自底向上的做法，则对于每个节点，函数 height 只会被调用一次。 
+由于是自顶向下递归，因此对于同一个节点，函数height 会被重复调用，导致时间复杂度较高。我们可以使用一个哈希表来存储每个节点的高度
+
+```cpp
+// cpp
+class Solution {
+public:
+    map<TreeNode*, int> hs;
+    int depth(TreeNode *root) {
+        if (!root) return 0;
+        if (hs.find(root) != hs.end()) return hs[root];
+        int ldep = depth(root->left);
+        int rdep = depth(root->right);
+        return hs[root] = max(ldep, rdep) + 1;
+    }
+    bool judge(TreeNode *root) {
+        if (!root) return true;
+        return abs(hs[root->left] - hs[root->right]) <= 1 && 
+        judge(root->left) && judge(root->right);
+    }
+    bool IsBalanced_Solution(TreeNode* root) {
+        depth(root);
+        return judge(root);
+    }
+};
+```
+
+方法2：如果使用自底向上的做法，则对于每个节点，函数 height 只会被调用一次。 
 
 **自底向上递归的做法类似于后序遍历**，对于当前遍历到的节点，先递归地判断其左右子树是否平衡，再判断以当前节点为根的子树是否平衡。如果一棵子树是平衡的，则返回其高度（高度一定是非负整数），否则返回 −1。如果存在一棵子树不平衡，则整个二叉树一定不平衡。
 
@@ -2280,6 +2314,48 @@ class Solution {
     public boolean isBalanced(TreeNode root) {
         return height(root) >= 0;
     }
+}
+```
+
+```go
+// nc go版本
+package main
+import . "nc_tools"
+
+
+func max(a,b int) int{
+    if a>=b{
+        return a
+    }
+    return b
+}
+
+func abs(a int)int{
+    if a < 0{
+        return -a
+    }
+    return a
+}
+
+func height(root * TreeNode) int{
+    if root == nil{
+        return 0
+    }
+    leftHeight := height(root.Left)
+    if leftHeight == -1{
+        return -1
+    }
+    rightHeight := height(root.Right)
+    if rightHeight == -1{
+        return -1
+    }
+    if abs(rightHeight-leftHeight) > 1{
+        return -1
+    }
+    return max(leftHeight,rightHeight) + 1
+}
+func IsBalanced_Solution( root *TreeNode ) bool {
+    return height(root) >= 0
 }
 ```
 
@@ -11575,6 +11651,50 @@ func mergeTrees(t1,t2 * TreeNode) * TreeNode {
     t1.Right = mergeTrees(t1.Right,t2.Right)
     t1.Val += t2.Val
     return t1
+}
+```
+
+
+
+#### 第二百零四剑式：判断是不是完全二叉树
+
+给定一个二叉树，确定他是否是一个完全二叉树。
+
+完全二叉树的定义：若二叉树的深度为 h，除第 h 层外，其它各层的结点数都达到最大个数，第 h 层所有的叶子结点都连续集中在最左边，这就是完全二叉树。（第 h 层可能包含 [1~2h] 个节点）
+
+![img](./🗡指Offer系列.assets/3FDF585A954EFF629B41FD21BA20B0C9.png)
+
+```
+输入：
+{1,2,3,4,5,6}
+返回值：
+true
+```
+
+```go
+// go版本
+func isCompleteTree( root *TreeNode ) bool {
+    if root == nil{
+        return true
+    }
+    flag := false
+    queue := [] *TreeNode{root}
+    for len(queue) > 0{
+        tmp := [] *TreeNode{}
+        for _, node := range queue{
+            if node == nil{
+                flag = true
+                continue
+            }
+            if flag{
+                return false
+            }
+            tmp = append(tmp,node.Left)
+            tmp = append(tmp,node.Right)
+        }
+        queue = tmp
+    }
+    return true
 }
 ```
 
