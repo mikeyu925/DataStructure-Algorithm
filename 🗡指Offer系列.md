@@ -1954,6 +1954,52 @@ class Solution {
 }
 ```
 
+```go
+// nc go版本
+package main
+import . "nc_tools"
+/*
+ * type TreeNode struct {
+ *   Val int
+ *   Left *TreeNode
+ *   Right *TreeNode
+ * }
+ */
+
+/**
+ * 
+ * @param pRootOfTree TreeNode类 
+ * @return TreeNode类
+*/
+
+var preRoot * TreeNode
+
+func Convert( root *TreeNode ) *TreeNode {
+    if root == nil{
+        return nil
+    }
+    p := root
+    for p.Left != nil{
+        p = p.Left
+    }
+    dfs(root)
+    return p
+}
+
+func dfs(root * TreeNode){
+    if root == nil{
+        return 
+    }
+    dfs(root.Left)
+    root.Left = preRoot
+    if preRoot != nil{
+        preRoot.Right = root
+    }
+    preRoot = root
+    dfs(root.Right)
+}
+```
+
 
 
 #### 第三十五剑式：把数组排成最小的数
@@ -11504,7 +11550,31 @@ class Solution {
 
 
 
+#### 第二百零三剑式：合并二叉树
 
+已知两颗二叉树，将它们合并成一颗二叉树。合并规则是：都存在的结点，就将结点值加起来，否则空的位置就由另一个树的结点来代替。
 
+<img src="./🗡指Offer系列.assets/9E290CFD3730B9B08A5CEFF25799608F.png" alt="img" style="zoom:50%;" />
 
+<img src="./🗡指Offer系列.assets/DD0A63560E770A8510049C5182E6E622.png" alt="img" style="zoom:50%;" />
+
+合并后：
+
+<img src="./🗡指Offer系列.assets/9CB750F8909D5985C0D01D8B71AD58BA.png" alt="img" style="zoom:50%;" />
+
+```go
+// go 版本
+func mergeTrees(t1,t2 * TreeNode) * TreeNode {
+    if t1 == nil {
+        return t2
+    }else if t2 == nil{
+        return t1
+    }
+  	// 先合并左右子树
+    t1.Left = mergeTrees(t1.Left,t2.Left)
+    t1.Right = mergeTrees(t1.Right,t2.Right)
+    t1.Val += t2.Val
+    return t1
+}
+```
 
