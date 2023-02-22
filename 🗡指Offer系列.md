@@ -2040,6 +2040,52 @@ class Solution {
 }
 ```
 
+类似的题：最大数
+
+给定一组非负整数 `nums`，重新排列每个数的顺序（每个数不可拆分）使之组成一个最大的整数。
+
+**注意：**输出结果可能非常大，所以你需要返回一个字符串而不是整数。
+
+```
+输入：nums = [3,30,34,5,9]
+输出："9534330"
+```
+
+题目解析：
+
+```go
+func largestNumber(nums []int) string {
+	sort.Slice(nums, func(i, j int) bool {
+		a, b := strconv.Itoa(nums[i]), strconv.Itoa(nums[j])
+		var bufa bytes.Buffer
+		bufa.WriteString(a)
+		bufa.WriteString(b)
+		sa := bufa.String()
+
+		var bufb bytes.Buffer
+		bufb.WriteString(b)
+		bufb.WriteString(a)
+		sb := bufb.String()
+
+		if strings.Compare(sa, sb) > 0 {
+			return true
+		} else {
+			return false
+		}
+	})
+
+    if nums[0] == 0{
+        return "0"
+    }
+
+	ans := []byte{}
+	for _, v := range nums {
+		ans = append(ans, strconv.Itoa(v)...)
+	}
+	return string(ans)
+}
+```
+
 
 
 #### 第三十六剑式：扑克牌中的顺子
@@ -2685,45 +2731,17 @@ class Solution {
 }
 ```
 
+
+
+
+
 #### 第四十八剑式：数组中数字出现的次数
 
 > 题目来源：LeetCode 剑指 Offer  56-I
 
 一个整型数组 `nums` 里除两个数字之外，其他数字都出现了两次。请写程序找出这两个只出现一次的数字。要求时间复杂度是O(n)，空间复杂度是O(1)。
 
-**解题思路**：
-
-方法1：
-
-排序+遍历
-
-```java
-class Solution {
-    public int[] singleNumbers(int[] nums) {
-        int [] ans = new int[2];
-        Arrays.sort(nums);
-        int cnt = 0;
-        for(int i = 0;i < nums.length;i++){
-            if(i == 0 || i == nums.length-1){
-                if(i == 0 && nums[i] != nums[i+1]){
-                    ans[cnt++] = nums[i];
-                }else if (i == nums.length-1 && nums[i] != nums[i-1]){
-                    ans[cnt++] = nums[i];
-                }
-                
-            }else{
-                if(nums[i] != nums[i-1] && nums[i] != nums[i+1]){
-                    ans[cnt++] = nums[i];
-                }
-            }
-            if (cnt == 2) break;
-        }
-        return  ans;
-    }
-}
-```
-
-方法2：
+**解题思路**： 
 
 分组异或  比较巧，没想出来，看了Leetcode题解后，表示真是巧妙！
 
@@ -2756,13 +2774,15 @@ class Solution {
 class Solution {
     public int[] singleNumbers(int[] nums) {
         int ret = 0;
-        for(int n:nums){
+        for(int n:nums){ // 求所有数的异或值，得到的也就是 两个唯一只出现一次的两个数异或值
             ret ^= n;
         }
+      	// 找到第一个为1的位置
         int div = 1;
         while((div & ret) == 0){
             div <<= 1;
         }
+      	// 根据该位的状态进行划分
         int a = 0,b = 0;
         for(int n:nums){
             if((n & div) == 0){
@@ -2807,6 +2827,10 @@ class Solution {
     }
 }
 ```
+
+
+
+
 
 #### 第五十剑式：剪绳子
 
@@ -2876,47 +2900,24 @@ class Solution {
 
 
 
-相关题目：剪绳子II
-
-
-
-
-
-
-
 #### 第五十一剑式：和为s的连续正数序列
 
 > 题目来源：LeetCode 剑指 Offer  57-II
 
-输入一个正整数 target ，输出所有和为 target 的连续正整数序列（至少含有两个数）。
+输入一个正整数 target ，输出所有和为 target 的**连续正整数序列**（至少含有两个数）。
 
 序列内的数字由小到大排列，不同序列按照首个数字从小到大排列。
 
-**暴力枚举**
-
-```java
-class Solution {
-    public int[][] findContinuousSequence(int target) {
-        List<int[]> ans = new ArrayList<>();
-        for(int i = 1; i <= target/2;i++){
-            int sum = 0;
-            int j;
-            for(j = i; sum < target;j++){
-                sum += j;
-            }
-            if (sum == target) {
-                int[] tmp = new int[j-i];
-                for(int k = i;k <j;k++){
-                    tmp[k-i] = k;
-                }
-                ans.add(tmp);
-            }
-
-        }
-        return ans.toArray(new int[ans.size()][]);
-    }
-}
 ```
+输入：target = 9
+输出：[[2,3,4],[4,5]]
+```
+
+**题目解析**：滑动窗口
+
+
+
+
 
 #### 第五十二剑式：顺时针打印矩阵
 
@@ -3035,6 +3036,10 @@ class Solution {
 }
 ```
 
+
+
+
+
 #### 第五十四剑式：把字符串转化为整数
 
 > 题目来源：LeetCode 剑指 Offer 67
@@ -3096,7 +3101,7 @@ class Solution {
 
 
 
-#### 第五十五剑式：把字符串转化为整数
+# 第五十五剑式：把字符串转化为整数
 
 > 题目来源：LeetCode 剑指 Offer 59-I
 
@@ -3807,19 +3812,6 @@ class Solution {
 }
 ```
 
-方法二：
-
-取巧法，仅仅适用于二进制字符串转整数不会溢出的情况
-
-```java
-class Solution {
-     public String addBinary(String a, String b) {
-        int sum = Integer.valueOf(a,2) + Integer.valueOf(b,2);
-        return Integer.toBinaryString(sum);
-    }
-}
-```
-
 
 
 
@@ -4300,9 +4292,9 @@ class Solution {
 [null, 8, 11, 12]
 ```
 
-题目解析：
+**题目解析**：
 
-
+二维前缀和
 
 ```java
 class NumMatrix {
@@ -4349,7 +4341,7 @@ class NumMatrix {
 
 
 
-#### 第七十七剑式：字符串中的变位词
+## 第七十七剑式：字符串中的变位词
 
 > 题目来源：LeetCode 剑指 Offer II 014
 >
@@ -4389,6 +4381,10 @@ class Solution {
 }
 ```
 
+
+
+
+
 #### 第七十八剑式：字符串中的所有变位词
 
 > 题目来源：LeetCode 剑指 Offer II 015
@@ -4427,6 +4423,10 @@ class Solution {
     }
 }
 ```
+
+
+
+
 
 #### 第七十九剑式：不含重复字符的最长子字符串
 
@@ -4469,6 +4469,10 @@ class Solution {
 }
 ```
 
+
+
+
+
 #### 第八十剑式：有效的回文
 
 > 题目来源：LeetCode 剑指 Offer II 018
@@ -4481,28 +4485,7 @@ class Solution {
 
 **题目解析**：
 
-我直接调用了反转函数来处理比较方便但是耗时，其实这道题用双指针做会快很多。
-
-方法1：字符串反转 + String.equals()
-
-```java
-class Solution {
-    public boolean isPalindrome(String s) {
-        StringBuilder sb = new StringBuilder();
-        s = s.toLowerCase();
-        for (int i = 0;i < s.length();i++){
-            if ((s.charAt(i) >= 'a' && s.charAt(i) <= 'z') || (s.charAt(i) >= '0' && s.charAt(i) <= '9')){
-                sb.append(s.charAt(i));
-            }
-        }
-        System.out.println(sb.toString());
-        System.out.println(sb.reverse().toString());
-        return sb.toString().equals(sb.reverse().toString());
-    }
-}
-```
-
-方法2：双指针
+双指针
 
 ```java
 class Solution {
@@ -4538,7 +4521,7 @@ class Solution {
 
 给定一个非空字符串 `s`，请判断如果 **最多** 从字符串中删除一个字符能否得到一个回文字符串。
 
-题目解析：
+**题目解析**：
 
 当遇到不相等的字符==> 跳过左字符比较剩余字符 或者 跳过右字符比较剩余字符
 
@@ -4584,7 +4567,7 @@ class Solution {
 解释：三个回文子串: "a", "b", "c"
 ```
 
-题目解析：
+**题目解析**：
 
 枚举每一个可能的回文中心，然后用两个指针分别向左右两边拓展，当两个指针指向的元素相同的时候就拓展，否则停止拓展。
 
@@ -11290,6 +11273,12 @@ class Solution {
 }
 ```
 
+
+
+
+
+
+
 #### 第二百剑式：四数之和
 
 给你一个由 n 个整数组成的数组 nums ，和一个目标值 target 。请你找出并返回满足下述全部条件且不重复的四元组 [nums[a], nums[b], nums[c], nums[d]] （若两个四元组元素一一对应，则认为两个四元组重复）：
@@ -11305,7 +11294,7 @@ class Solution {
 输出：[[-2,-1,1,2],[-2,0,0,2],[-1,0,0,1]]
 ```
 
-两层循环枚举前两个数，然后双指针找后两个数。
+**两层循环枚举前两个数，然后双指针找后两个数。**
 
 可以增加一些剪枝策略：
 
@@ -11563,7 +11552,7 @@ class Solution {
 
 **题目解析**：
 
-题目意思就是找一个划分点，使得划分点左边的元素最大值 小于等于 划分点右边元素的最小值。
+题目意思就是找一个划分点，**使得划分点左边的元素最大值 小于等于 划分点右边元素的最小值。**
 
 可以先利用一个辅助数组`mins[i]`表示`nums[i:n-1]`的最小值。逆序遍历一遍nums即可获得mins
 
@@ -11677,16 +11666,18 @@ func isCompleteTree( root *TreeNode ) bool {
     if root == nil{
         return true
     }
-    flag := false
+    flag := false // 标志位
     queue := [] *TreeNode{root}
     for len(queue) > 0{
-        tmp := [] *TreeNode{}
+        tmp := [] *TreeNode{} // 临时队列存储
         for _, node := range queue{
-            if node == nil{
+          	
+            if node == nil{  // 第一次出现nil
                 flag = true
                 continue
             }
-            if flag{
+          
+            if flag { // 已经出现了一次nil，又出现了nil
                 return false
             }
             tmp = append(tmp,node.Left)
